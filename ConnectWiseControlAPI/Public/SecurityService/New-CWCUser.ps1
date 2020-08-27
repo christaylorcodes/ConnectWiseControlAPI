@@ -18,8 +18,8 @@
         'XmlMembershipProvider',
         $null,
         $UserName,
-        $Password,
-        $Password,
+        [System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($Password)),
+        [System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($Password)),
         $OTP,
         $DisplayName,
         '',
@@ -28,7 +28,6 @@
         $ForcePassChange
     )
     Write-Verbose $Body
-
 
     $WebRequestArguments = @{
         Uri = $URI

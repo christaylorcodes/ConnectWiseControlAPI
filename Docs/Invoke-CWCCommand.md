@@ -14,7 +14,7 @@ Will issue a command against a given machine and return the results.
 
 ```
 Invoke-CWCCommand [-GUID] <Guid> [[-Command] <String>] [[-TimeOut] <Int32>] [-PowerShell] [[-Group] <String>]
- [<CommonParameters>]
+ [-NoWait] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -111,6 +111,21 @@ Aliases:
 Required: False
 Position: 6
 Default value: All Machines
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -NoWait
+{{ Fill NoWait Description }}
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

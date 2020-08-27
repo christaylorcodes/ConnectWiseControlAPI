@@ -6,7 +6,8 @@ function Invoke-CWCCommand {
         [string]$Command,
         [int]$TimeOut = 10000,
         [switch]$PowerShell,
-        [string]$Group = 'All Machines'
+        [string]$Group = 'All Machines',
+        [switch]$NoWait
     )
 
     $URI = "https://$($script:CWCServerConnection.Server)/Services/PageService.ashx/AddEventToSessions"
@@ -31,6 +32,7 @@ function Invoke-CWCCommand {
         Method = 'Post'
     }
     $null = Invoke-CWCWebRequest -Arguments $WebRequestArguments
+    if ($NoWait) { return }
 
     # Get Session
     $URI = "https://$($script:CWCServerConnection.Server)/Services/PageService.ashx/GetSessionDetails"
