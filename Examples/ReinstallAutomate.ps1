@@ -23,7 +23,7 @@ $Reinstall = @{
     # Lets give this command some time to complete
     TimeOut = 120000
     # The command we want to issue to reinstall Automate
-    Command = 'iwr -UseBasicParsing "https://bit.ly/ltposh" | iex; Restart-LTService'
+    Command = 'iwr -UseBasicParsing "https://bit.ly/ltposh" | iex; Redo-LTService'
     # Tell Control we are pushing a PowerShell command
     PowerShell = $true
 }
