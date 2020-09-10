@@ -4,13 +4,14 @@ function Update-CWCCustomProperty {
         [Parameter(Mandatory=$True)]
         [guid]$GUID,
         [Parameter(Mandatory=$True)]
-        [string]$NewName,
-        [string]$Group = 'All Machines'
+        [int]$Property,
+        [string]$Value,
+        [string[]]$Group = 'All Machines'
     )
 
-    $URI = "https://$($script:CWCServerConnection.Server)/Services/PageService.ashx/UpdateSessionName"
+    $URI = "https://$($script:CWCServerConnection.Server)/Services/PageService.ashx/UpdateSessionCustomPropertyValue"
 
-    $Body = ConvertTo-Json @($Group,$GUID,$NewName)
+    $Body = ConvertTo-Json @($Group,$GUID,$Property,$Value)
     Write-Verbose $Body
 
     $WebRequestArguments = @{

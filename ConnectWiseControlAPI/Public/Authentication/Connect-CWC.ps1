@@ -13,7 +13,7 @@ function Connect-CWC {
         return
     }
 
-    $Server = ($Server -replace("http.*:\/\/",'') -split '/')[0]
+    $Server = $Server -replace("http.*:\/\/",'')
 
     $encodedCredentials = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes("$($Credentials.UserName):$($Credentials.GetNetworkCredential().Password)"))
     $Headers = @{

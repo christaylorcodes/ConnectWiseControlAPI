@@ -23,10 +23,10 @@ Used by the module to invoke requests and handle errors
 
 ### Example 1
 ```powershell
-PS C:\> {{ Add example code here }}
+PS C:\> Invoke-CWCWebRequest -Arguments $Args
 ```
 
-{{ Add example description here }}
+Passes a set of arguments to the web request handler.
 
 ## PARAMETERS
 

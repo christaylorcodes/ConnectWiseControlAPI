@@ -22,8 +22,8 @@ Returns the date the machine last connected to the control server.
 ## EXAMPLES
 
 ### EXAMPLE 1
-```
-Get-CWCLastContact -Server $Server -GUID $GUID -User $User -Password $Password
+```powershell
+Get-CWCLastContact -GUID $GUID
 ```
 
 Will return the last contact of the machine with that GUID.

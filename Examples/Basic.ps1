@@ -1,5 +1,5 @@
 # Your Control server URL
-$Server = 'https://control.domain.com'
+$Server = 'control.domain.com'
 
 # Get Control credentials
 $Credentials = Get-Credential

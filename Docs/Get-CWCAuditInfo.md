@@ -24,15 +24,15 @@ You can search the audit logs and apply some filters.
 
 ### Example 1
 ```powershell
-PS C:\> {{ Add example code here }}
+PS C:\> Get-CWCAuditInfo -StartDate $(Get-Date).AddDays(-1) -EndDate $(Get-Date) -SessionName 'Computer1'
 ```
 
-{{ Add example description here }}
+Get the audit logs for Computer1 for the last day.
 
 ## PARAMETERS
 
 ### -EndDate
-{{ Fill EndDate Description }}
+End date for the date range to search for logs.
 
 ```yaml
 Type: DateTime
@@ -47,7 +47,7 @@ Accept wildcard characters: False
 ```
 
 ### -EventTypes
-{{ Fill EventTypes Description }}
+The [event type](https://docs.connectwise.com/ConnectWise_Control_Documentation/Developers/Session_events) you want to search for.
 
 ```yaml
 Type: Int32[]
@@ -62,7 +62,7 @@ Accept wildcard characters: False
 ```
 
 ### -SessionName
-{{ Fill SessionName Description }}
+Name of the session to search for logs
 
 ```yaml
 Type: String
@@ -77,7 +77,7 @@ Accept wildcard characters: False
 ```
 
 ### -StartDate
-{{ Fill StartDate Description }}
+Start date for the date range to search for logs.
 
 ```yaml
 Type: DateTime

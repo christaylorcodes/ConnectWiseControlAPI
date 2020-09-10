@@ -23,15 +23,15 @@ Will generate an MFA code to use with user creation.
 
 ### Example 1
 ```powershell
-PS C:\> {{ Add example code here }}
+PS C:\> New-CWCMFA -DisplayName 'My Control Server' -UserAccount 'CTaylor'
 ```
 
-{{ Add example description here }}
+Creates an MFA OTP code and QR URL with the provided information.
 
 ## PARAMETERS
 
 ### -DisplayName
-{{ Fill DisplayName Description }}
+Name you want to display in OTP app.
 
 ```yaml
 Type: Object
@@ -46,7 +46,7 @@ Accept wildcard characters: False
 ```
 
 ### -UserAccount
-{{ Fill UserAccount Description }}
+User account to display in OTP app.
 
 ```yaml
 Type: Object

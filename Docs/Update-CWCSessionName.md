@@ -23,8 +23,8 @@ Updates the name of a session on the control server.
 ## EXAMPLES
 
 ### EXAMPLE 1
-```
-Update-CWCSessionName -Server $Server -GUID $GUID -User $User -Password $Password -NewName 'Session1'
+```powershell
+Update-CWCSessionName -GUID $GUID -NewName 'Session1'
 ```
 
 Will rename the session to Session1
@@ -68,7 +68,7 @@ Accept wildcard characters: False
 ```
 
 ### -Group
-{{ Fill Group Description }}
+Group to look for the session in.
 
 ```yaml
 Type: String

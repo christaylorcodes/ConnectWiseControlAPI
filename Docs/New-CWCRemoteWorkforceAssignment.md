@@ -23,14 +23,14 @@ Uses the remote workforce extension to assign a user to machines
 ## EXAMPLES
 
 ### EXAMPLE 1
-```
-
+```powershell
+PS C:\> New-CWCRemoteWorkforceAssignment -GUID $GUID -Username 'CTaylor' -DisplayName 'Chris Taylor'
 ```
 
 ## PARAMETERS
 
 ### -GUID
-{{ Fill GUID Description }}
+GUID of the session you want to assign the user access to.
 
 ```yaml
 Type: Guid[]
@@ -45,7 +45,7 @@ Accept wildcard characters: False
 ```
 
 ### -Username
-{{ Fill Username Description }}
+Username of the account you want to assign remote workforce access to.
 
 ```yaml
 Type: String
@@ -60,7 +60,7 @@ Accept wildcard characters: False
 ```
 
 ### -DisplayName
-{{ Fill DisplayName Description }}
+Name that is displayed when user is connected to a session.
 
 ```yaml
 Type: String
@@ -112,6 +112,12 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## OUTPUTS
 
 ## NOTES
-Version:        1.1 Author:         Chris Taylor Creation Date:  10/25/2018 Purpose/Change: Initial script development
+Version:        1.1
+
+Author:         Chris Taylor
+
+Creation Date:  10/25/2018
+
+Purpose/Change: Initial script development
 
 ## RELATED LINKS

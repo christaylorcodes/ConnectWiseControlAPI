@@ -8,7 +8,7 @@ schema: 2.0.0
 # Connect-CWC
 
 ## SYNOPSIS
-{{ Fill in the Synopsis }}
+Initializes the connection parameters for the module.
 
 ## SYNTAX
 
@@ -17,21 +17,21 @@ Connect-CWC [-Server] <String> [-Credentials] <PSCredential> [-Force] [<CommonPa
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Initializes the connection parameters used by other commands in the module.
 
 ## EXAMPLES
 
 ### Example 1
 ```powershell
-PS C:\> {{ Add example code here }}
+PS C:\> Connect-CWC -Server 'control.christaylor.codes' -Credentials $Credentials -Force
 ```
 
-{{ Add example description here }}
+Sets connection information used by the module and overwrites any previously set information.
 
 ## PARAMETERS
 
 ### -Credentials
-{{ Fill Credentials Description }}
+Credentials used to authenticate with the control server.
 
 ```yaml
 Type: PSCredential
@@ -46,7 +46,7 @@ Accept wildcard characters: False
 ```
 
 ### -Force
-{{ Fill Force Description }}
+Used to overwrite any information already loaded in the session.
 
 ```yaml
 Type: SwitchParameter
@@ -61,7 +61,7 @@ Accept wildcard characters: False
 ```
 
 ### -Server
-{{ Fill Server Description }}
+The URL to your control server.
 
 ```yaml
 Type: String

@@ -23,7 +23,7 @@ Will issue a wake command to a given access or support session.
 
 ### EXAMPLE 1
 ```
-End-CWWake -Server $Server -GUID $GUID -User $User -Password $Password
+End-CWWake -GUID $GUID
 ```
 
 Will issue a wake command to a given session.

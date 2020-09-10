@@ -22,8 +22,8 @@ Will end a given access or support session.
 ## EXAMPLES
 
 ### EXAMPLE 1
-```
-Remove-CWCAccessSession -Server $Server -GUID $GUID -User $User -Password $Password
+```powershell
+Remove-CWCAccessSession -GUID $GUID
 ```
 
 Will remove the given access session

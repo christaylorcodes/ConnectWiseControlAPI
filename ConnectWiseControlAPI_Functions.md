@@ -1,8 +1,8 @@
 ---
 Module Name: ConnectWiseControlAPI
 Module Guid: f94fa996-0f01-4c5c-9cd9-3227728ebacb
-Download Help Link: {{ Update Download Link }}
-Help Version: {{ Please enter version of help manually (X.X.X.X) format }}
+Download Help Link: https://github.com/christaylorcodes/ConnectWiseControlAPI/blob/master/ConnectWiseControlAPI_Functions.md
+Help Version: 0.1.2.0
 Locale: en-US
 ---
 
@@ -11,48 +11,48 @@ Locale: en-US
 This module wraps the web API into PowerShell functions.
 
 ## ConnectWiseControlAPI Cmdlets
-### [Add-CWCRemoteWorkforceRequiredRole](Add-CWCRemoteWorkforceRequiredRole.md)
+### [Add-CWCRemoteWorkforceRequiredRole](Docs/Add-CWCRemoteWorkforceRequiredRole.md)
 Create a new Remote Workforce security role
 
-### [Connect-CWC](Connect-CWC.md)
-{{ Fill in the Synopsis }}
+### [Connect-CWC](Docs/Connect-CWC.md)
+Initializes the connection parameters for the module.
 
-### [Get-CWCAuditInfo](Get-CWCAuditInfo.md)
+### [Get-CWCAuditInfo](Docs/Get-CWCAuditInfo.md)
 Used to search the audit logs.
 
-### [Get-CWCLastContact](Get-CWCLastContact.md)
+### [Get-CWCLastContact](Docs/Get-CWCLastContact.md)
 Returns the date the machine last connected to the control server.
 
-### [Get-CWCSecurityConfigurationInfo](Get-CWCSecurityConfigurationInfo.md)
+### [Get-CWCSecurityConfigurationInfo](Docs/Get-CWCSecurityConfigurationInfo.md)
 Will return security configuration information.
 
-### [Get-CWCSession](Get-CWCSession.md)
+### [Get-CWCSession](Docs/Get-CWCSession.md)
 Will return a list of sessions.
 
-### [Get-CWCSessionDetail](Get-CWCSessionDetail.md)
+### [Get-CWCSessionDetail](Docs/Get-CWCSessionDetail.md)
 Will return information about a session.
 
-### [Invoke-CWCCommand](Invoke-CWCCommand.md)
+### [Invoke-CWCCommand](Docs/Invoke-CWCCommand.md)
 Will issue a command against a given machine and return the results.
 
-### [Invoke-CWCWake](Invoke-CWCWake.md)
+### [Invoke-CWCWake](Docs/Invoke-CWCWake.md)
 Will issue a wake command to a given session.
 
-### [New-CWCMFA](New-CWCMFA.md)
+### [New-CWCMFA](Docs/New-CWCMFA.md)
 Will generate an MFA code to use with user creation.
 
-### [New-CWCRemoteWorkforceAssignment](New-CWCRemoteWorkforceAssignment.md)
+### [New-CWCRemoteWorkforceAssignment](Docs/New-CWCRemoteWorkforceAssignment.md)
 Assign a user to machines.
 
-### [New-CWCUser](New-CWCUser.md)
+### [New-CWCUser](Docs/New-CWCUser.md)
 Creates a user.
 
-### [Remove-CWCSession](Remove-CWCSession.md)
+### [Remove-CWCSession](Docs/Remove-CWCSession.md)
 Will end a given session.
 
-### [Update-CWCCustomProperty](Update-CWCCustomProperty.md)
-Updated the custom .
+### [Update-CWCCustomProperty](Docs/Update-CWCCustomProperty.md)
+Will update a custom property for a session.
 
-### [Update-CWCSessionName](Update-CWCSessionName.md)
+### [Update-CWCSessionName](Docs/Update-CWCSessionName.md)
 Updates the name of a session.
 

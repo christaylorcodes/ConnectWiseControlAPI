@@ -23,10 +23,10 @@ Sometimes Remote Workforce doesn't create the required security role. This will 
 
 ### Example 1
 ```powershell
-PS C:\> {{ Add example code here }}
+PS C:\> Add-CWCRemoteWorkforceRequiredRole
 ```
 
-{{ Add example description here }}
+Adds the Remote Workforce security role
 
 ## PARAMETERS
 

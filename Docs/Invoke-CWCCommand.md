@@ -23,15 +23,15 @@ Will issue a command against a given machine and return the results.
 ## EXAMPLES
 
 ### EXAMPLE 1
-```
-Invoke-CWCCommand -Server $Server -GUID $GUID -Credentials $Credentials -Command 'hostname'
+```powershell
+Invoke-CWCCommand -GUID $GUID -Command 'hostname'
 ```
 
 Will return the hostname of the machine.
 
 ### EXAMPLE 2
-```
-Invoke-CWCCommand -Server $Server -GUID $GUID  -Credentials $Credentials -TimeOut 120000 -Command 'iwr -UseBasicParsing "https://bit.ly/ltposh" | iex; Restart-LTService' -PowerShell
+```powershell
+Invoke-CWCCommand -GUID $GUID  -TimeOut 120000 -Command 'iwr -UseBasicParsing "https://bit.ly/ltposh" | iex; Restart-LTService' -PowerShell
 ```
 
 Will restart the Automate agent on the target machine.
@@ -116,7 +116,7 @@ Accept wildcard characters: False
 ```
 
 ### -NoWait
-{{ Fill NoWait Description }}
+Will not wait for the output of the command.
 
 ```yaml
 Type: SwitchParameter
@@ -140,8 +140,11 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ### The output of the Command provided.
 ## NOTES
 Version:        1.0
+
 Author:         Chris Taylor
+
 Creation Date:  1/20/2016
+
 Purpose/Change: Initial script development
 
 ## RELATED LINKS

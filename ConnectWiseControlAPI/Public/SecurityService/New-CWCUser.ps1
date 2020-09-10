@@ -2,9 +2,7 @@
     [CmdletBinding(SupportsShouldProcess)]
     param(
         [Parameter(Mandatory=$True)]
-        [string]$UserName,
-        [Parameter(Mandatory=$True)]
-        [SecureString]$Password,
+        [pscredential]$Credentials,
         [string]$OTP,
         [string]$DisplayName,
         [string]$Email,
@@ -17,9 +15,9 @@
     $Body = ConvertTo-Json -Depth 10 @(
         'XmlMembershipProvider',
         $null,
-        $UserName,
-        [System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($Password)),
-        [System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($Password)),
+        $Credentials.UserName,
+        $Credentials.GetNetworkCredential().Password,
+        $Credentials.GetNetworkCredential().Password,
         $OTP,
         $DisplayName,
         '',

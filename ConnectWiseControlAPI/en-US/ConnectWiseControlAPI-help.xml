@@ -46,9 +46,9 @@
     <command:examples>
       <command:example>
         <maml:title>-------------------------- Example 1 --------------------------</maml:title>
-        <dev:code>PS C:\&gt; {{ Add example code here }}</dev:code>
+        <dev:code>PS C:\&gt; Add-CWCRemoteWorkforceRequiredRole</dev:code>
         <dev:remarks>
-          <maml:para>{{ Add example description here }}</maml:para>
+          <maml:para>Adds the Remote Workforce security role</maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -60,11 +60,11 @@
       <command:verb>Connect</command:verb>
       <command:noun>CWC</command:noun>
       <maml:description>
-        <maml:para>{{ Fill in the Synopsis }}</maml:para>
+        <maml:para>Initializes the connection parameters for the module.</maml:para>
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>{{ Fill in the Description }}</maml:para>
+      <maml:para>Initializes the connection parameters used by other commands in the module.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -72,7 +72,7 @@
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
           <maml:name>Server</maml:name>
           <maml:Description>
-            <maml:para>{{ Fill Server Description }}</maml:para>
+            <maml:para>The URL to your control server.</maml:para>
           </maml:Description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -84,7 +84,7 @@
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
           <maml:name>Credentials</maml:name>
           <maml:Description>
-            <maml:para>{{ Fill Credentials Description }}</maml:para>
+            <maml:para>Credentials used to authenticate with the control server.</maml:para>
           </maml:Description>
           <command:parameterValue required="true" variableLength="false">PSCredential</command:parameterValue>
           <dev:type>
@@ -96,7 +96,7 @@
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>Force</maml:name>
           <maml:Description>
-            <maml:para>{{ Fill Force Description }}</maml:para>
+            <maml:para>Used to overwrite any information already loaded in the session.</maml:para>
           </maml:Description>
           <dev:type>
             <maml:name>SwitchParameter</maml:name>
@@ -110,7 +110,7 @@
       <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
         <maml:name>Credentials</maml:name>
         <maml:Description>
-          <maml:para>{{ Fill Credentials Description }}</maml:para>
+          <maml:para>Credentials used to authenticate with the control server.</maml:para>
         </maml:Description>
         <command:parameterValue required="true" variableLength="false">PSCredential</command:parameterValue>
         <dev:type>
@@ -122,7 +122,7 @@
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>Force</maml:name>
         <maml:Description>
-          <maml:para>{{ Fill Force Description }}</maml:para>
+          <maml:para>Used to overwrite any information already loaded in the session.</maml:para>
         </maml:Description>
         <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
         <dev:type>
@@ -134,7 +134,7 @@
       <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
         <maml:name>Server</maml:name>
         <maml:Description>
-          <maml:para>{{ Fill Server Description }}</maml:para>
+          <maml:para>The URL to your control server.</maml:para>
         </maml:Description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -172,9 +172,9 @@
     <command:examples>
       <command:example>
         <maml:title>-------------------------- Example 1 --------------------------</maml:title>
-        <dev:code>PS C:\&gt; {{ Add example code here }}</dev:code>
+        <dev:code>PS C:\&gt; Connect-CWC -Server 'control.christaylor.codes' -Credentials $Credentials -Force</dev:code>
         <dev:remarks>
-          <maml:para>{{ Add example description here }}</maml:para>
+          <maml:para>Sets connection information used by the module and overwrites any previously set information.</maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -198,7 +198,7 @@
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
           <maml:name>StartDate</maml:name>
           <maml:Description>
-            <maml:para>{{ Fill StartDate Description }}</maml:para>
+            <maml:para>Start date for the date range to search for logs.</maml:para>
           </maml:Description>
           <command:parameterValue required="true" variableLength="false">DateTime</command:parameterValue>
           <dev:type>
@@ -210,7 +210,7 @@
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
           <maml:name>EndDate</maml:name>
           <maml:Description>
-            <maml:para>{{ Fill EndDate Description }}</maml:para>
+            <maml:para>End date for the date range to search for logs.</maml:para>
           </maml:Description>
           <command:parameterValue required="true" variableLength="false">DateTime</command:parameterValue>
           <dev:type>
@@ -222,7 +222,7 @@
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
           <maml:name>SessionName</maml:name>
           <maml:Description>
-            <maml:para>{{ Fill SessionName Description }}</maml:para>
+            <maml:para>Name of the session to search for logs</maml:para>
           </maml:Description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -234,7 +234,7 @@
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none">
           <maml:name>EventTypes</maml:name>
           <maml:Description>
-            <maml:para>{{ Fill EventTypes Description }}</maml:para>
+            <maml:para>The event type (https://docs.connectwise.com/ConnectWise_Control_Documentation/Developers/Session_events)you want to search for.</maml:para>
           </maml:Description>
           <command:parameterValue required="true" variableLength="false">Int32[]</command:parameterValue>
           <dev:type>
@@ -249,7 +249,7 @@
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
         <maml:name>EndDate</maml:name>
         <maml:Description>
-          <maml:para>{{ Fill EndDate Description }}</maml:para>
+          <maml:para>End date for the date range to search for logs.</maml:para>
         </maml:Description>
         <command:parameterValue required="true" variableLength="false">DateTime</command:parameterValue>
         <dev:type>
@@ -261,7 +261,7 @@
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none">
         <maml:name>EventTypes</maml:name>
         <maml:Description>
-          <maml:para>{{ Fill EventTypes Description }}</maml:para>
+          <maml:para>The event type (https://docs.connectwise.com/ConnectWise_Control_Documentation/Developers/Session_events)you want to search for.</maml:para>
         </maml:Description>
         <command:parameterValue required="true" variableLength="false">Int32[]</command:parameterValue>
         <dev:type>
@@ -273,7 +273,7 @@
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
         <maml:name>SessionName</maml:name>
         <maml:Description>
-          <maml:para>{{ Fill SessionName Description }}</maml:para>
+          <maml:para>Name of the session to search for logs</maml:para>
         </maml:Description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -285,7 +285,7 @@
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
         <maml:name>StartDate</maml:name>
         <maml:Description>
-          <maml:para>{{ Fill StartDate Description }}</maml:para>
+          <maml:para>Start date for the date range to search for logs.</maml:para>
         </maml:Description>
         <command:parameterValue required="true" variableLength="false">DateTime</command:parameterValue>
         <dev:type>
@@ -323,9 +323,9 @@
     <command:examples>
       <command:example>
         <maml:title>-------------------------- Example 1 --------------------------</maml:title>
-        <dev:code>PS C:\&gt; {{ Add example code here }}</dev:code>
+        <dev:code>PS C:\&gt; Get-CWCAuditInfo -StartDate $(Get-Date).AddDays(-1) -EndDate $(Get-Date) -SessionName 'Computer1'</dev:code>
         <dev:remarks>
-          <maml:para>{{ Add example description here }}</maml:para>
+          <maml:para>Get the audit logs for Computer1 for the last day.</maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -467,7 +467,7 @@
     <command:examples>
       <command:example>
         <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
-        <dev:code>Get-CWCLastContact -Server $Server -GUID $GUID -User $User -Password $Password</dev:code>
+        <dev:code>Get-CWCLastContact -GUID $GUID</dev:code>
         <dev:remarks>
           <maml:para>Will return the last contact of the machine with that GUID.</maml:para>
         </dev:remarks>
@@ -645,7 +645,7 @@
     <command:examples>
       <command:example>
         <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
-        <dev:code>Get-CWCAccessSessions -Server $Server -User $User -Password $Password -Search "server1" -Limit 10</dev:code>
+        <dev:code>Get-CWCAccessSessions -Search "server1" -Limit 10</dev:code>
         <dev:remarks>
           <maml:para>Will return the first 10 access sessions that match 'server1'.</maml:para>
         </dev:remarks>
@@ -739,7 +739,7 @@
     <command:examples>
       <command:example>
         <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
-        <dev:code>Get-CWCAccessSessions -Server $Server -User $User -Password $Password -Search "server1" -Limit 10</dev:code>
+        <dev:code>Get-CWCAccessSessions -Search "server1" -Limit 10</dev:code>
         <dev:remarks>
           <maml:para>Will return the first 10 access sessions that match 'server1'.</maml:para>
         </dev:remarks>
@@ -824,7 +824,7 @@
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>NoWait</maml:name>
           <maml:Description>
-            <maml:para>{{ Fill NoWait Description }}</maml:para>
+            <maml:para>Will not wait for the output of the command.</maml:para>
           </maml:Description>
           <dev:type>
             <maml:name>SwitchParameter</maml:name>
@@ -898,7 +898,7 @@
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>NoWait</maml:name>
         <maml:Description>
-          <maml:para>{{ Fill NoWait Description }}</maml:para>
+          <maml:para>Will not wait for the output of the command.</maml:para>
         </maml:Description>
         <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
         <dev:type>
@@ -921,20 +921,23 @@
     </command:returnValues>
     <maml:alertSet>
       <maml:alert>
-        <maml:para>Version:        1.0 Author:         Chris Taylor Creation Date:  1/20/2016 Purpose/Change: Initial script development</maml:para>
+        <maml:para>Version:        1.0</maml:para>
+        <maml:para>Author:         Chris Taylor</maml:para>
+        <maml:para>Creation Date:  1/20/2016</maml:para>
+        <maml:para>Purpose/Change: Initial script development</maml:para>
       </maml:alert>
     </maml:alertSet>
     <command:examples>
       <command:example>
         <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
-        <dev:code>Invoke-CWCCommand -Server $Server -GUID $GUID -Credentials $Credentials -Command 'hostname'</dev:code>
+        <dev:code>Invoke-CWCCommand -GUID $GUID -Command 'hostname'</dev:code>
         <dev:remarks>
           <maml:para>Will return the hostname of the machine.</maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
         <maml:title>-------------------------- EXAMPLE 2 --------------------------</maml:title>
-        <dev:code>Invoke-CWCCommand -Server $Server -GUID $GUID  -Credentials $Credentials -TimeOut 120000 -Command 'iwr -UseBasicParsing "https://bit.ly/ltposh" | iex; Restart-LTService' -PowerShell</dev:code>
+        <dev:code>Invoke-CWCCommand -GUID $GUID  -TimeOut 120000 -Command 'iwr -UseBasicParsing "https://bit.ly/ltposh" | iex; Restart-LTService' -PowerShell</dev:code>
         <dev:remarks>
           <maml:para>Will restart the Automate agent on the target machine.</maml:para>
         </dev:remarks>
@@ -1019,7 +1022,7 @@
     <command:examples>
       <command:example>
         <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
-        <dev:code>End-CWWake -Server $Server -GUID $GUID -User $User -Password $Password</dev:code>
+        <dev:code>End-CWWake -GUID $GUID</dev:code>
         <dev:remarks>
           <maml:para>Will issue a wake command to a given session.</maml:para>
         </dev:remarks>
@@ -1045,7 +1048,7 @@
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>DisplayName</maml:name>
           <maml:Description>
-            <maml:para>{{ Fill DisplayName Description }}</maml:para>
+            <maml:para>Name you want to display in OTP app.</maml:para>
           </maml:Description>
           <command:parameterValue required="true" variableLength="false">Object</command:parameterValue>
           <dev:type>
@@ -1057,7 +1060,7 @@
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>UserAccount</maml:name>
           <maml:Description>
-            <maml:para>{{ Fill UserAccount Description }}</maml:para>
+            <maml:para>User account to display in OTP app.</maml:para>
           </maml:Description>
           <command:parameterValue required="true" variableLength="false">Object</command:parameterValue>
           <dev:type>
@@ -1094,7 +1097,7 @@
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>DisplayName</maml:name>
         <maml:Description>
-          <maml:para>{{ Fill DisplayName Description }}</maml:para>
+          <maml:para>Name you want to display in OTP app.</maml:para>
         </maml:Description>
         <command:parameterValue required="true" variableLength="false">Object</command:parameterValue>
         <dev:type>
@@ -1106,7 +1109,7 @@
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>UserAccount</maml:name>
         <maml:Description>
-          <maml:para>{{ Fill UserAccount Description }}</maml:para>
+          <maml:para>User account to display in OTP app.</maml:para>
         </maml:Description>
         <command:parameterValue required="true" variableLength="false">Object</command:parameterValue>
         <dev:type>
@@ -1168,9 +1171,9 @@
     <command:examples>
       <command:example>
         <maml:title>-------------------------- Example 1 --------------------------</maml:title>
-        <dev:code>PS C:\&gt; {{ Add example code here }}</dev:code>
+        <dev:code>PS C:\&gt; New-CWCMFA -DisplayName 'My Control Server' -UserAccount 'CTaylor'</dev:code>
         <dev:remarks>
-          <maml:para>{{ Add example description here }}</maml:para>
+          <maml:para>Creates an MFA OTP code and QR URL with the provided information.</maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -1194,7 +1197,7 @@
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>GUID</maml:name>
           <maml:Description>
-            <maml:para>{{ Fill GUID Description }}</maml:para>
+            <maml:para>GUID of the session you want to assign the user access to.</maml:para>
           </maml:Description>
           <command:parameterValue required="true" variableLength="false">Guid[]</command:parameterValue>
           <dev:type>
@@ -1206,7 +1209,7 @@
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>Username</maml:name>
           <maml:Description>
-            <maml:para>{{ Fill Username Description }}</maml:para>
+            <maml:para>Username of the account you want to assign remote workforce access to.</maml:para>
           </maml:Description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -1218,7 +1221,7 @@
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>DisplayName</maml:name>
           <maml:Description>
-            <maml:para>{{ Fill DisplayName Description }}</maml:para>
+            <maml:para>Name that is displayed when user is connected to a session.</maml:para>
           </maml:Description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -1255,7 +1258,7 @@
       <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>GUID</maml:name>
         <maml:Description>
-          <maml:para>{{ Fill GUID Description }}</maml:para>
+          <maml:para>GUID of the session you want to assign the user access to.</maml:para>
         </maml:Description>
         <command:parameterValue required="true" variableLength="false">Guid[]</command:parameterValue>
         <dev:type>
@@ -1267,7 +1270,7 @@
       <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>Username</maml:name>
         <maml:Description>
-          <maml:para>{{ Fill Username Description }}</maml:para>
+          <maml:para>Username of the account you want to assign remote workforce access to.</maml:para>
         </maml:Description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -1279,7 +1282,7 @@
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>DisplayName</maml:name>
         <maml:Description>
-          <maml:para>{{ Fill DisplayName Description }}</maml:para>
+          <maml:para>Name that is displayed when user is connected to a session.</maml:para>
         </maml:Description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -1317,13 +1320,16 @@
     <command:returnValues />
     <maml:alertSet>
       <maml:alert>
-        <maml:para>Version:        1.1 Author:         Chris Taylor Creation Date:  10/25/2018 Purpose/Change: Initial script development</maml:para>
+        <maml:para>Version:        1.1</maml:para>
+        <maml:para>Author:         Chris Taylor</maml:para>
+        <maml:para>Creation Date:  10/25/2018</maml:para>
+        <maml:para>Purpose/Change: Initial script development</maml:para>
       </maml:alert>
     </maml:alertSet>
     <command:examples>
       <command:example>
         <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
-        <dev:code></dev:code>
+        <dev:code>PS C:\&gt; New-CWCRemoteWorkforceAssignment -GUID $GUID -Username 'CTaylor' -DisplayName 'Chris Taylor'</dev:code>
         <dev:remarks>
           <maml:para></maml:para>
         </dev:remarks>
@@ -1346,34 +1352,10 @@
     <command:syntax>
       <command:syntaxItem>
         <maml:name>New-CWCUser</maml:name>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-          <maml:name>UserName</maml:name>
-          <maml:Description>
-            <maml:para>Username of the new user</maml:para>
-          </maml:Description>
-          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
-          <dev:type>
-            <maml:name>String</maml:name>
-            <maml:uri />
-          </dev:type>
-          <dev:defaultValue>None</dev:defaultValue>
-        </command:parameter>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-          <maml:name>Password</maml:name>
-          <maml:Description>
-            <maml:para>Password of the new user</maml:para>
-          </maml:Description>
-          <command:parameterValue required="true" variableLength="false">SecureString</command:parameterValue>
-          <dev:type>
-            <maml:name>SecureString</maml:name>
-            <maml:uri />
-          </dev:type>
-          <dev:defaultValue>None</dev:defaultValue>
-        </command:parameter>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>OTP</maml:name>
           <maml:Description>
-            <maml:para>{{ Fill OTP Description }}</maml:para>
+            <maml:para>The OTP key used for MFA. Can be generated with `New-CWCMFA`</maml:para>
           </maml:Description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -1452,37 +1434,25 @@
           </dev:type>
           <dev:defaultValue>False</dev:defaultValue>
         </command:parameter>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Credentials</maml:name>
+          <maml:Description>
+            <maml:para>PSCredential object for the new user you want to create.</maml:para>
+          </maml:Description>
+          <command:parameterValue required="true" variableLength="false">PSCredential</command:parameterValue>
+          <dev:type>
+            <maml:name>PSCredential</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
       </command:syntaxItem>
     </command:syntax>
     <command:parameters>
-      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-        <maml:name>UserName</maml:name>
-        <maml:Description>
-          <maml:para>Username of the new user</maml:para>
-        </maml:Description>
-        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
-        <dev:type>
-          <maml:name>String</maml:name>
-          <maml:uri />
-        </dev:type>
-        <dev:defaultValue>None</dev:defaultValue>
-      </command:parameter>
-      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-        <maml:name>Password</maml:name>
-        <maml:Description>
-          <maml:para>Password of the new user</maml:para>
-        </maml:Description>
-        <command:parameterValue required="true" variableLength="false">SecureString</command:parameterValue>
-        <dev:type>
-          <maml:name>SecureString</maml:name>
-          <maml:uri />
-        </dev:type>
-        <dev:defaultValue>None</dev:defaultValue>
-      </command:parameter>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>OTP</maml:name>
         <maml:Description>
-          <maml:para>{{ Fill OTP Description }}</maml:para>
+          <maml:para>The OTP key used for MFA. Can be generated with `New-CWCMFA`</maml:para>
         </maml:Description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -1563,6 +1533,18 @@
         </dev:type>
         <dev:defaultValue>False</dev:defaultValue>
       </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>Credentials</maml:name>
+        <maml:Description>
+          <maml:para>PSCredential object for the new user you want to create.</maml:para>
+        </maml:Description>
+        <command:parameterValue required="true" variableLength="false">PSCredential</command:parameterValue>
+        <dev:type>
+          <maml:name>PSCredential</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
     </command:parameters>
     <command:inputTypes />
     <command:returnValues />
@@ -1574,7 +1556,15 @@
     <command:examples>
       <command:example>
         <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
-        <dev:code></dev:code>
+        <dev:code>$NewUserParams = @{
+    Credentials = $PSCredentials
+    OTP = $(New-CWCMFA).OTP
+    DisplayName = 'Chris Taylor'
+    Email = 'dont@bug.me'
+    SecurityGroups = 'MySecurityGroup'
+    ForcePassChange = $true
+}
+New-CWCUser @NewUserParams</dev:code>
         <dev:remarks>
           <maml:para></maml:para>
         </dev:remarks>
@@ -1705,7 +1695,7 @@
     <command:examples>
       <command:example>
         <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
-        <dev:code>Remove-CWCAccessSession -Server $Server -GUID $GUID -User $User -Password $Password</dev:code>
+        <dev:code>Remove-CWCAccessSession -GUID $GUID</dev:code>
         <dev:remarks>
           <maml:para>Will remove the given access session</maml:para>
         </dev:remarks>
@@ -1719,11 +1709,11 @@
       <command:verb>Update</command:verb>
       <command:noun>CWCCustomProperty</command:noun>
       <maml:description>
-        <maml:para>Updated the custom .</maml:para>
+        <maml:para>Will update a custom property for a session.</maml:para>
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>Updates the name of a session on the control server.</maml:para>
+      <maml:para>Will update a custom property for a session.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -1741,26 +1731,14 @@
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-          <maml:name>NewName</maml:name>
-          <maml:Description>
-            <maml:para>The new name for the session.</maml:para>
-          </maml:Description>
-          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
-          <dev:type>
-            <maml:name>String</maml:name>
-            <maml:uri />
-          </dev:type>
-          <dev:defaultValue>None</dev:defaultValue>
-        </command:parameter>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>Group</maml:name>
           <maml:Description>
-            <maml:para>{{ Fill Group Description }}</maml:para>
+            <maml:para>Look for the session in these groups.</maml:para>
           </maml:Description>
-          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
           <dev:type>
-            <maml:name>String</maml:name>
+            <maml:name>String[]</maml:name>
             <maml:uri />
           </dev:type>
           <dev:defaultValue>All Machines</dev:defaultValue>
@@ -1787,6 +1765,30 @@
           </dev:type>
           <dev:defaultValue>False</dev:defaultValue>
         </command:parameter>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Property</maml:name>
+          <maml:Description>
+            <maml:para>The property number of the property you want to change.</maml:para>
+          </maml:Description>
+          <command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
+          <dev:type>
+            <maml:name>Int32</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Value</maml:name>
+          <maml:Description>
+            <maml:para>The value you want to set the property to.</maml:para>
+          </maml:Description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
       </command:syntaxItem>
     </command:syntax>
     <command:parameters>
@@ -1803,26 +1805,14 @@
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-        <maml:name>NewName</maml:name>
-        <maml:Description>
-          <maml:para>The new name for the session.</maml:para>
-        </maml:Description>
-        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
-        <dev:type>
-          <maml:name>String</maml:name>
-          <maml:uri />
-        </dev:type>
-        <dev:defaultValue>None</dev:defaultValue>
-      </command:parameter>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>Group</maml:name>
         <maml:Description>
-          <maml:para>{{ Fill Group Description }}</maml:para>
+          <maml:para>Look for the session in these groups.</maml:para>
         </maml:Description>
-        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
         <dev:type>
-          <maml:name>String</maml:name>
+          <maml:name>String[]</maml:name>
           <maml:uri />
         </dev:type>
         <dev:defaultValue>All Machines</dev:defaultValue>
@@ -1851,20 +1841,47 @@
         </dev:type>
         <dev:defaultValue>False</dev:defaultValue>
       </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>Property</maml:name>
+        <maml:Description>
+          <maml:para>The property number of the property you want to change.</maml:para>
+        </maml:Description>
+        <command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
+        <dev:type>
+          <maml:name>Int32</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>Value</maml:name>
+        <maml:Description>
+          <maml:para>The value you want to set the property to.</maml:para>
+        </maml:Description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
     </command:parameters>
     <command:inputTypes />
     <command:returnValues />
     <maml:alertSet>
       <maml:alert>
-        <maml:para>Version:        1.1 Author:         Chris Taylor Creation Date:  10/25/2018 Purpose/Change: Initial script development</maml:para>
+        <maml:para>Version:        1.1</maml:para>
+        <maml:para>Author:         Chris Taylor</maml:para>
+        <maml:para>Creation Date:  10/25/2018</maml:para>
+        <maml:para>Purpose/Change: Initial script development</maml:para>
       </maml:alert>
     </maml:alertSet>
     <command:examples>
       <command:example>
         <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
-        <dev:code>Update-CWCSessionName -Server $Server -GUID $GUID -User $User -Password $Password -NewName 'Session1'</dev:code>
+        <dev:code>Update-CWCCustomProperty -GUID $GUID -Property 2 -Value 'New Department'</dev:code>
         <dev:remarks>
-          <maml:para>Will rename the session to Session1</maml:para>
+          <maml:para>Will update the sessions department to 'New Department'</maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -1913,7 +1930,7 @@
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>Group</maml:name>
           <maml:Description>
-            <maml:para>{{ Fill Group Description }}</maml:para>
+            <maml:para>Group to look for the session in.</maml:para>
           </maml:Description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -1975,7 +1992,7 @@
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>Group</maml:name>
         <maml:Description>
-          <maml:para>{{ Fill Group Description }}</maml:para>
+          <maml:para>Group to look for the session in.</maml:para>
         </maml:Description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -2019,7 +2036,7 @@
     <command:examples>
       <command:example>
         <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
-        <dev:code>Update-CWCSessionName -Server $Server -GUID $GUID -User $User -Password $Password -NewName 'Session1'</dev:code>
+        <dev:code>Update-CWCSessionName -GUID $GUID -NewName 'Session1'</dev:code>
         <dev:remarks>
           <maml:para>Will rename the session to Session1</maml:para>
         </dev:remarks>

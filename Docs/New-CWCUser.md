@@ -13,9 +13,8 @@ Creates a user.
 ## SYNTAX
 
 ```
-New-CWCUser -UserName <String> -Password <SecureString> [-OTP <String>] [-DisplayName <String>]
- [-Email <String>] [-SecurityGroups <String[]>] [-ForcePassChange <Boolean>] [-WhatIf] [-Confirm]
- [<CommonParameters>]
+New-CWCUser -Credentials <PSCredential> [-OTP <String>] [-DisplayName <String>] [-Email <String>]
+ [-SecurityGroups <String[]>] [-ForcePassChange <Boolean>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -24,44 +23,22 @@ Creates a new local user.
 ## EXAMPLES
 
 ### EXAMPLE 1
-```
-
+```powershell
+$NewUserParams = @{
+    Credentials = $PSCredentials
+    OTP = $(New-CWCMFA).OTP
+    DisplayName = 'Chris Taylor'
+    Email = 'dont@bug.me'
+    SecurityGroups = 'MySecurityGroup'
+    ForcePassChange = $true
+}
+New-CWCUser @NewUserParams
 ```
 
 ## PARAMETERS
 
-### -UserName
-Username of the new user
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Password
-Password of the new user
-
-```yaml
-Type: SecureString
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -OTP
-{{ Fill OTP Description }}
+The OTP key used for MFA. Can be generated with `New-CWCMFA`
 
 ```yaml
 Type: String
@@ -159,6 +136,21 @@ Parameter Sets: (All)
 Aliases: wi
 
 Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Credentials
+PSCredential object for the new user you want to create.
+
+```yaml
+Type: PSCredential
+Parameter Sets: (All)
+Aliases:
+
+Required: True
 Position: Named
 Default value: None
 Accept pipeline input: False

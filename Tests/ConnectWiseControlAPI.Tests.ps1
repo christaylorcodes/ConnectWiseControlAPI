@@ -8,7 +8,7 @@ $PSVersion = $PSVersionTable.PSVersion.Major
 Import-Module $PSScriptRoot\..\ConnectWiseControlAPI\$($ModuleName).psm1 -Force
 
 #Integration test example
-Describe 'Basic Pester Tests' {
+Describe "Basic Pester Tests for PS version $PSVersion" {
     It 'Do you need to write tests?' {
       $true | Should -Be $true
     }

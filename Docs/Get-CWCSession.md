@@ -23,7 +23,7 @@ Allows you to search for access or service sessions.
 
 ### EXAMPLE 1
 ```
-Get-CWCAccessSessions -Server $Server -User $User -Password $Password -Search "server1" -Limit 10
+Get-CWCAccessSessions -Search "server1" -Limit 10
 ```
 
 Will return the first 10 access sessions that match 'server1'.
