@@ -25,7 +25,6 @@
         $SecurityGroups,
         $ForcePassChange
     )
-    Write-Verbose $Body
 
     $WebRequestArguments = @{
         Uri = $URI

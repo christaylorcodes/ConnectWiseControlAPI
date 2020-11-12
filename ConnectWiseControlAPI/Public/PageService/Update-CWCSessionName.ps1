@@ -11,7 +11,6 @@ function Update-CWCSessionName {
     $URI = "https://$($script:CWCServerConnection.Server)/Services/PageService.ashx/UpdateSessionName"
 
     $Body = ConvertTo-Json @($Group,$GUID,$NewName)
-    Write-Verbose $Body
 
     $WebRequestArguments = @{
         Uri = $URI

@@ -13,7 +13,7 @@ function Remove-CWCSession {
     switch($Type){
         'Support'   {$Group = 'All Sessions'}
         'Access'    {$Group = 'All Machines'}
-        default     {Write-Error "Unknown Type, $Type";return}
+        default     {return Write-Error "Unknown Type, $Type"}
     }
 
     $SessionEventType = 21
@@ -23,7 +23,6 @@ function Remove-CWCSession {
     else {
         $Body = ConvertTo-Json @(@($Group),$GUID,$SessionEventType,'')
     }
-    Write-Verbose $Body
 
     $WebRequestArguments = @{
         Uri = $URI

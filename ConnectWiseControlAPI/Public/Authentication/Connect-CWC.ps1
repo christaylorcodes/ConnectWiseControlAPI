@@ -19,6 +19,7 @@ function Connect-CWC {
     $Headers = @{
         'authorization' = "Basic $encodedCredentials"
         'content-type' = "application/json; charset=utf-8"
+        'origin' = "https://$Server"
     }
 
     $script:CWCServerConnection = @{
@@ -26,9 +27,5 @@ function Connect-CWC {
         Headers = $Headers
     }
 
-    $script:CWCServerConnection = @{
-        Server = $Server
-        Headers = $Headers
-    }
     Write-Verbose '$CWCServerConnection, variable initialized.'
 }

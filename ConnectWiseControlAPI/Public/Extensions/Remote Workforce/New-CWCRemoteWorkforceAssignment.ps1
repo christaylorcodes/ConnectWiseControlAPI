@@ -14,7 +14,6 @@ function New-CWCRemoteWorkforceAssignment {
         $GUID,
         "UserName:$($Username),UserDisplayName:$($DisplayName)"
     )
-    Write-Verbose $Body
 
     $WebRequestArguments = @{
         Uri = $URI
