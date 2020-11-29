@@ -12,9 +12,12 @@ Import-Module 'ConnectWiseControlAPI'
 Connect-CWC -Server $Server -Credentials $Credentials
 
 # Find this machine in Control
-$Computer = Get-CWCSessions -Type Access -Search $env:COMPUTERNAME -Limit 1
+$Computer = Get-CWCSession -Type Access -Search $env:COMPUTERNAME -Limit 1
 
-if(!$Computer) {return "Computer not found"}
+if (!$Computer)
+{
+  return "Computer not found"
+}
 
 # We now have some basic information about this session
 $Computer
