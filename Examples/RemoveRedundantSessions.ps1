@@ -1,6 +1,8 @@
 <#
     This script searches for multiple access sessions for the same machine,
     and removes all but the last connected one.
+    This only looks at the session name for uniqueness. If you have multiple machines with the same name this will not work as expected.
+    You will need to get session details to further determine uniqueness.
 #>
 
 # Your Control server URL
