@@ -6,9 +6,9 @@ function Invoke-CWCWebRequest {
     )
 
     # Check that we have cached connection info
-    if(!$script:CWCServerConnection){
+    if (!$script:CWCServerConnection) {
         $ErrorMessage = @()
-        $ErrorMessage += "Not connected to a Manage server."
+        $ErrorMessage += "Not connected to a Control server."
         $ErrorMessage += '--> $CWCServerConnection variable not found.'
         $ErrorMessage += "----> Run 'Connect-CWC' to initialize the connection before issuing other CWC cmdlets."
         return Write-Error ($ErrorMessage | Out-String)
@@ -17,22 +17,27 @@ function Invoke-CWCWebRequest {
     # Issue request
     try {
         Write-Debug "Arguments: $($Arguments | ConvertTo-Json)"
-        $Result = Invoke-WebRequest @Arguments -Headers $script:CWCServerConnection.Headers -UseBasicParsing
+        if ($cookieAuth) {
+            $Result = Invoke-WebRequest @Arguments -Headers $script:CWCServerConnection.Headers -UseBasicParsing  -WebSession $script:CWCServerConnection.session 
+        }
+        else {
+            $Result = Invoke-WebRequest @Arguments -Headers $script:CWCServerConnection.Headers -UseBasicParsing            
+        }
     }
     catch {
         # Start error message
         $ErrorMessage = @()
 
-        if($_.Exception.Response){
+        if ($_.Exception.Response) {
             # Read exception response
             $ErrorStream = $_.Exception.Response.GetResponseStream()
             $Reader = New-Object System.IO.StreamReader($ErrorStream)
             $script:ErrBody = $Reader.ReadToEnd() | ConvertFrom-Json
 
-            if($ErrBody.code){
+            if ($ErrBody.code) {
                 $ErrorMessage += "An exception has been thrown."
                 $ErrorMessage += "--> $($ErrBody.code)"
-                if($ErrBody.code -eq 'Unauthorized'){
+                if ($ErrBody.code -eq 'Unauthorized') {
                     $ErrorMessage += "-----> $($ErrBody.message)"
                     $ErrorMessage += "-----> Use 'Disconnect-CWC' or 'Connect-CWC -Force' to set new authentication."
                 }
@@ -40,7 +45,8 @@ function Invoke-CWCWebRequest {
                     $ErrorMessage += "-----> $($ErrBody.code): $($ErrBody.message)"
                     $ErrorMessage += "-----> ^ Error has not been documented please report. ^"
                 }
-            } elseif ($_.Exception.message) {
+            }
+            elseif ($_.Exception.message) {
                 $ErrorMessage += "An exception has been thrown."
                 $ErrorMessage += "--> $($_.Exception.message)"
             }
@@ -51,12 +57,12 @@ function Invoke-CWCWebRequest {
             $script:ErrDetails = $_.ErrorDetails
             $ErrorMessage += "--> $($ErrDetails.code)"
             $ErrorMessage += "--> $($ErrDetails.message)"
-            if($ErrDetails.errors.message){
+            if ($ErrDetails.errors.message) {
                 $ErrorMessage += "-----> $($ErrDetails.errors.message)"
             }
         }
 
-        if ($ErrorMessage.Length -lt 1){ $ErrorMessage = $_ }
+        if ($ErrorMessage.Length -lt 1) { $ErrorMessage = $_ }
         else { $ErrorMessage += $_.ScriptStackTrace }
 
         return Write-Error ($ErrorMessage | out-string)
