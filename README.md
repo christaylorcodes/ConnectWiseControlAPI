@@ -2,7 +2,7 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/8aa3633cda3d41d5baa5e9f595b8124f)](https://www.codacy.com/manual/christaylorcodes/ConnectWiseControlAPI?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=christaylorcodes/ConnectWiseControlAPI&amp;utm_campaign=Badge_Grade)
 [![Gallery](https://img.shields.io/powershellgallery/v/ConnectWiseControlAPI?label=PS%20Gallery&logo=powershell&logoColor=white)](https://www.powershellgallery.com/packages/ConnectWiseControlAPI)
 
-![ConnectWiseControlLogo](https://www.connectwise.com/-/media/logos/company/product/control/control-horiz-master.ashx)
+![ConnectWiseControlLogo](https://www.connectwise.com/globalassets/media/logos/company/product/control/control-horiz-master.png)
 
 
 ## This is a PowerShell wrapper for ConnectWise Control
@@ -11,10 +11,15 @@ This module makes it easy to leverage PowerShell to automate tasks in Control an
 
 > `Install-Module 'ConnectWiseControlAPI'`
 
-
 See [ConnectWiseControlAPI_Functions](ConnectWiseControlAPI_Functions.md) for a list of commands available in this module.
 
 Checkout the [Examples](https://github.com/christaylorcodes/ConnectWiseControlAPI/tree/master/Examples) folder to see other ways to use the module.
+
+## Requirements
+
+This module requires an account without MFA. Use a complex username and password.
+
+This module requires your Control server to use https
 
 ## [Contributing](CONTRIBUTING.md)
 

@@ -8,7 +8,7 @@ function Invoke-CWCWebRequest {
     # Check that we have cached connection info
     if(!$script:CWCServerConnection){
         $ErrorMessage = @()
-        $ErrorMessage += "Not connected to a Manage server."
+        $ErrorMessage += "Not connected to a Control server."
         $ErrorMessage += '--> $CWCServerConnection variable not found.'
         $ErrorMessage += "----> Run 'Connect-CWC' to initialize the connection before issuing other CWC cmdlets."
         return Write-Error ($ErrorMessage | Out-String)

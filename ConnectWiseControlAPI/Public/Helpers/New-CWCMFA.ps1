@@ -4,8 +4,8 @@ function New-CWCMFA {
         $DisplayName = 'CW Control',
         $UserAccount
     )
-    $Possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
-    $Key = ""
+    $Possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'
+    $Key = ''
     while ($Key.Length -lt 16) {
         $Key += $Possible.ToCharArray() | Get-Random
     }

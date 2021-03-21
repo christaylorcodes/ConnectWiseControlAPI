@@ -11,7 +11,7 @@ $Server = 'control.domain.com'
 # Get Control credentials
 $Credentials = Get-Credential
 
-# Set Groupname to Search in
+# Set GroupName to Search in
 $GroupName = 'All Machines'
 
 # Activate Confirmation
