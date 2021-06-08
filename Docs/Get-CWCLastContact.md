@@ -32,7 +32,7 @@ Will return the last contact of the machine with that GUID.
 
 ### -GUID
 The GUID/SessionID for the machine you wish to connect to.
-You can retrieve session info with the 'Get-CWCSessions' commandlet
+You can retrieve session info with the 'Get-CWCSessions' cmdlets
 
 On Windows clients, the launch parameters are located in the registry at:
   HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\ScreenConnect Client (xxxxxxxxxxxxxxxx)\ImagePath
@@ -112,6 +112,6 @@ Creation Date:  1/20/2016
 Purpose/Change: Initial script development
 
 Update Date:  8/24/2018
-Purpose/Change: Fix Timespan Seconds duration
+Purpose/Change: Fix TimeSpan Seconds duration
 
 ## RELATED LINKS

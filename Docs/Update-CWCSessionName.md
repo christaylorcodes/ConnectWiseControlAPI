@@ -33,7 +33,7 @@ Will rename the session to Session1
 
 ### -GUID
 The GUID/SessionID for the machine you wish to connect to.
-You can retrieve session info with the 'Get-CWCSessions' commandlet
+You can retrieve session info with the 'Get-CWCSessions' cmdlets
 
 On Windows clients, the launch parameters are located in the registry at:
     HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\ScreenConnect Client (xxxxxxxxxxxxxxxx)\ImagePath

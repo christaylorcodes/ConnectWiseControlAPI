@@ -40,7 +40,7 @@ Will restart the Automate agent on the target machine.
 
 ### -GUID
 The GUID identifier for the machine you wish to connect to.
-You can retrieve session info with the 'Get-CWCSessions' commandlet
+You can retrieve session info with the 'Get-CWCSessions' cmdlets
 
 ```yaml
 Type: Guid

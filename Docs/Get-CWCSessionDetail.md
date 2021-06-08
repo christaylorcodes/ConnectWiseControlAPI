@@ -17,16 +17,16 @@ Get-CWCSessionDetail [-Group <String>] -GUID <Guid> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Dispays more information about a session.
+Displays more information about a session.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Get-CWCSessionDetail -Group 'All Sessions' -GUID $Session
+Get-CWCSessionDetail -Group 'All Sessions' -GUID $Session.SessionID
 ```
 
-Will return the first 10 access sessions that match 'server1'.
+Will return details of the requested session.
 
 ## PARAMETERS
 
@@ -46,7 +46,7 @@ Accept wildcard characters: False
 ```
 
 ### -GUID
-GUID of the machine to retreive session details.
+GUID of the machine to retrieve session details.
 
 ```yaml
 Type: Guid
