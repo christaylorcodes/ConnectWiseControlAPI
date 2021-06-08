@@ -1,60 +1,60 @@
 ---
-external help file: ConnectWiseControlAPI-help.xml
-Module Name: ConnectWiseControlAPI
+external help file:
+Module Name:
 online version:
 schema: 2.0.0
 ---
 
-# Get-CWCSessionDetail
+# Join-Url
 
 ## SYNOPSIS
-Will return information about a session.
+{{ Fill in the Synopsis }}
 
 ## SYNTAX
 
 ```
-Get-CWCSessionDetail [-Group <String>] -GUID <Guid> [<CommonParameters>]
+Join-Url [-Path] <String> [-ChildPath] <String> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Dispays more information about a session.
+{{ Fill in the Description }}
 
 ## EXAMPLES
 
-### EXAMPLE 1
-```
-Get-CWCSessionDetail -Group 'All Sessions' -GUID $Session
+### Example 1
+```powershell
+PS C:\> {{ Add example code here }}
 ```
 
-Will return the first 10 access sessions that match 'server1'.
+{{ Add example description here }}
 
 ## PARAMETERS
 
-### -Group
-Name of session group to use.
+### -ChildPath
+{{ Fill ChildPath Description }}
 
 ```yaml
 Type: String
 Parameter Sets: (All)
 Aliases:
 
-Required: False
-Position: Named
-Default value: All Machines
+Required: True
+Position: 1
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -GUID
-GUID of the machine to retreive session details.
+### -Path
+{{ Fill Path Description }}
 
 ```yaml
-Type: Guid
+Type: String
 Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: Named
+Position: 0
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -65,13 +65,11 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
+### None
+
 ## OUTPUTS
 
-### ConnectWise Control session objects
+### System.Object
 ## NOTES
-Version:        1.0
-Author:         Chris Taylor
-Creation Date:  1/15/2019
-Purpose/Change: Initial script development
 
 ## RELATED LINKS

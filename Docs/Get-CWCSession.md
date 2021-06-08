@@ -17,13 +17,13 @@ Get-CWCSession -Type <Object> [-Group <String>] [-Search <String>] [-Limit <Int3
 ```
 
 ## DESCRIPTION
-Allows you to search for access or service sessions.
+Allows you to search for access, service or meeting sessions.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Get-CWCAccessSessions -Search "server1" -Limit 10
+Get-CWCAccessSessions -Type 'Access' -Search 'server1' -Limit 10
 ```
 
 Will return the first 10 access sessions that match 'server1'.
@@ -31,7 +31,7 @@ Will return the first 10 access sessions that match 'server1'.
 ## PARAMETERS
 
 ### -Type
-The type of session Support/Access
+The type of session Support/Access/Meeting
 
 ```yaml
 Type: Object

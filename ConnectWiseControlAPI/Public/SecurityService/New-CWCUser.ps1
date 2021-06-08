@@ -10,10 +10,10 @@
         [boolean]$ForcePassChange = $true
     )
 
-    $URI = "https://$($script:CWCServerConnection.Server)/Services/SecurityService.ashx/SaveUser"
+    $Endpoint = 'Services/SecurityService.ashx/SaveUser'
 
     $Body = ConvertTo-Json -Depth 10 @(
-        'XmlMembershipProvider',
+        'InternalMembershipProvider',
         $null,
         $Credentials.UserName,
         $Credentials.GetNetworkCredential().Password,
@@ -27,7 +27,7 @@
     )
 
     $WebRequestArguments = @{
-        Uri = $URI
+        Endpoint = $Endpoint
         Body = $Body
         Method = 'Post'
     }

@@ -8,28 +8,22 @@ function Invoke-CWCWake {
         [string]$Type
     )
 
-    $URI = "https://$($script:CWCServerConnection.Server)/Services/PageService.ashx/AddEventToSessions"
-
-    switch($Type){
-        'Support'   {$Group = 'All Sessions'}
-        'Access'    {$Group = 'All Machines'}
-        default     {Write-Error "Unknown Type, $Type";return}
-    }
+    $Endpoint = 'Services/PageService.ashx/AddEventToSessions'
 
     $SessionEventType = 43
 
-    if($GUID.count -eq 1){
-        $Body = ConvertTo-Json @($Group,@($GUID),$SessionEventType,'')
+    switch($Type){
+        'Support' { $Group = 'All Sessions' }
+        'Access' { $Group = 'All Machines' }
+        default { return Write-Error "Unknown Type, $Type" }
     }
-    else {
-        $Body = ConvertTo-Json @($Group,$GUID,$SessionEventType,'')
-    }
-    Write-Verbose $Body
 
+    $Body = ConvertTo-Json @($Group,@($GUID),$SessionEventType,'')
+    Write-Verbose $Body
 
     # Issue command
     $WebRequestArguments = @{
-        Uri = $URI
+        Endpoint = $Endpoint
         Body = $Body
         Method = 'Post'
     }

@@ -19,10 +19,10 @@ function Get-CWCLastContact {
     $Body = ConvertTo-Json @(@($Group),$GUID)
     Write-Verbose $Body
 
-    $URI = "https://$($script:CWCServerConnection.Server)/Services/PageService.ashx/GetSessionDetails"
+    $Endpoint = 'Services/PageService.ashx/GetSessionDetails'
     try {
         $WebRequestArguments = @{
-            Uri = $URI
+            Endpoint = $Endpoint
             Body = $Body
             Method = 'Post'
         }

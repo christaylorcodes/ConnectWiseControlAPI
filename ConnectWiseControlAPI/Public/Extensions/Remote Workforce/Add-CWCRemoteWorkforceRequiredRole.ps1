@@ -2,7 +2,7 @@ function Add-CWCRemoteWorkforceRequiredRole {
     [CmdletBinding()]
     param()
 
-    $URI = "https://$($script:CWCServerConnection.Server)/Services/SecurityService.ashx/SaveRole"
+    $Endpoint = 'Services/SecurityService.ashx/SaveRole'
 
     $SessionGroups = @('My Assigned Machines')
     $RoleName = 'Remote Workforce'
@@ -38,7 +38,7 @@ function Add-CWCRemoteWorkforceRequiredRole {
     Write-Verbose $Body
 
     $WebRequestArguments = @{
-        Uri = $URI
+        Endpoint = $Endpoint
         Body = $Body
         Method = 'Post'
     }

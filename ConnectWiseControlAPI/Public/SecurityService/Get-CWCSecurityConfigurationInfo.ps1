@@ -2,10 +2,10 @@ function Get-CWCSecurityConfigurationInfo {
     [CmdletBinding()]
     param ()
 
-    $URI = "https://$($script:CWCServerConnection.Server)/Services/SecurityService.ashx/GetSecurityConfigurationInfo"
+    $Endpoint = 'Services/SecurityService.ashx/GetSecurityConfigurationInfo'
 
     $WebRequestArguments = @{
-        Uri = $URI
+        Endpoint = $Endpoint
         Method = 'Post'
     }
     Invoke-CWCWebRequest -Arguments $WebRequestArguments

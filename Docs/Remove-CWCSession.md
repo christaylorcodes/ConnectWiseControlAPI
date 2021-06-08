@@ -13,7 +13,7 @@ Will end a given session.
 ## SYNTAX
 
 ```
-Remove-CWCSession -GUID <Guid[]> -Type <Object> [-WhatIf] [-Confirm] [<CommonParameters>]
+Remove-CWCSession -GUID <Guid[]> -Group <String> [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -36,21 +36,6 @@ Accepts an array of GUIDs.
 
 ```yaml
 Type: Guid[]
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Type
-The type of session Support/Meeting/Access
-
-```yaml
-Type: Object
 Parameter Sets: (All)
 Aliases:
 
@@ -85,6 +70,21 @@ Parameter Sets: (All)
 Aliases: wi
 
 Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Group
+{{ Fill Group Description }}
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: True
 Position: Named
 Default value: None
 Accept pipeline input: False

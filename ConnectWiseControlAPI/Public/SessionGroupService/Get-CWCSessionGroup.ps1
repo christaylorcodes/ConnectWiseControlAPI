@@ -1,16 +1,13 @@
-function Get-CWCSessionGroup
-{
+function Get-CWCSessionGroup {
   [CmdletBinding()]
-  param (
-  )
+  param ()
 
-  $URI = "https://$($script:CWCServerConnection.Server)/Services/SessionGroupService.ashx/session-groups"
+  $Endpoint = 'Services/SessionGroupService.ashx/session-groups'
 
   $WebRequestArguments = @{
-    Uri    = $URI
+    Endpoint = $Endpoint
     Method = 'Get'
   }
 
-  $Data = Invoke-CWCWebRequest -Arguments $WebRequestArguments
-  $Data
+  Invoke-CWCWebRequest -Arguments $WebRequestArguments
 }

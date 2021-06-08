@@ -14,11 +14,15 @@ function Invoke-CWCWebRequest {
         return Write-Error ($ErrorMessage | Out-String)
     }
 
+    $BaseURI = "https://$($script:CWCServerConnection.Server)"
+    $Arguments.URI = Join-Url $BaseURI $Arguments.Endpoint
+    $Arguments.remove('Endpoint')
+    $Arguments.Headers = $script:CWCServerConnection.Headers
+    $Arguments.UseBasicParsing = $true
+    Write-Debug "Arguments: $($Arguments | ConvertTo-Json)"
+
     # Issue request
-    try {
-        Write-Debug "Arguments: $($Arguments | ConvertTo-Json)"
-        $Result = Invoke-WebRequest @Arguments -Headers $script:CWCServerConnection.Headers -UseBasicParsing
-    }
+    try { $Result = Invoke-WebRequest @Arguments }
     catch {
         # Start error message
         $ErrorMessage = @()

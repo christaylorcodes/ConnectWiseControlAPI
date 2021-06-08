@@ -9,12 +9,12 @@ function Update-CWCCustomProperty {
         [string[]]$Group = 'All Machines'
     )
 
-    $URI = "https://$($script:CWCServerConnection.Server)/Services/PageService.ashx/UpdateSessionCustomPropertyValue"
+    $Endpoint = 'Services/PageService.ashx/UpdateSessionCustomPropertyValue'
 
     $Body = ConvertTo-Json @($Group,$GUID,$Property,$Value)
 
     $WebRequestArguments = @{
-        Uri = $URI
+        Endpoint = $Endpoint
         Body = $Body
         Method = 'Post'
     }

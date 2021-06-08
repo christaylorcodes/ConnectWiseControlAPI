@@ -8,25 +8,17 @@ function Remove-CWCSession
         [string]$Group
     )
 
-    $URI = "https://$($script:CWCServerConnection.Server)/Services/PageService.ashx/AddEventToSessions"
+    $Endpoint = 'Services/PageService.ashx/AddEventToSessions'
 
     $SessionEventType = 21
-    if ($GUID.count -eq 1)
-    {
-        $Body = ConvertTo-Json @(@($Group), @($GUID), $SessionEventType, '')
-    }
-    else
-    {
-        $Body = ConvertTo-Json @(@($Group), $GUID, $SessionEventType, '')
-    }
+    $Body = ConvertTo-Json @(@($Group), @($GUID), $SessionEventType, '')
 
     $WebRequestArguments = @{
-        Uri    = $URI
-        Body   = $Body
+        Endpoint = $Endpoint
+        Body = $Body
         Method = 'Post'
     }
-    if ($PSCmdlet.ShouldProcess($WebRequestArguments.Body, "Remove-CWCSession"))
-    {
+    if ($PSCmdlet.ShouldProcess($WebRequestArguments.Body, "Remove-CWCSession")){
         Invoke-CWCWebRequest -Arguments $WebRequestArguments
     }
 }

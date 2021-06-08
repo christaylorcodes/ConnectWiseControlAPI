@@ -10,7 +10,7 @@ function Invoke-CWCCommand {
         [switch]$NoWait
     )
 
-    $URI = "https://$($script:CWCServerConnection.Server)/Services/PageService.ashx/AddEventToSessions"
+    $Endpoint = 'Services/PageService.ashx/AddEventToSessions'
 
     $origin = New-Object -Type DateTime -ArgumentList 1970, 1, 1, 0, 0, 0, 0
     $SessionEventType = 44
@@ -27,7 +27,7 @@ function Invoke-CWCCommand {
 
     # Issue command
     $WebRequestArguments = @{
-        Uri = $URI
+        Endpoint = $Endpoint
         Body = $Body
         Method = 'Post'
     }
@@ -35,12 +35,12 @@ function Invoke-CWCCommand {
     if ($NoWait) { return }
 
     # Get Session
-    $URI = "https://$($script:CWCServerConnection.Server)/Services/PageService.ashx/GetSessionDetails"
+    $Endpoint = 'Services/PageService.ashx/GetSessionDetails'
     $Body = ConvertTo-Json @($Group,$GUID)
     Write-Verbose $Body
     try {
         $WebRequestArguments = @{
-            Uri = $URI
+            Endpoint = $Endpoint
             Body = $Body
             Method = 'Post'
         }
@@ -60,7 +60,7 @@ function Invoke-CWCCommand {
     while ($Looking) {
         try {
             $WebRequestArguments = @{
-                Uri = $URI
+                Endpoint = $Endpoint
                 Body = $Body
                 Method = 'Post'
             }

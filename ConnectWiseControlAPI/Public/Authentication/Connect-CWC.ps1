@@ -26,6 +26,14 @@ function Connect-CWC {
         Server = $Server
         Headers = $Headers
     }
-
-    Write-Verbose '$CWCServerConnection, variable initialized.'
+    Write-Verbose ($script:CWCServerConnection | Out-String)
+    try{
+        $null = Get-CWCSessionGroup -ErrorAction Stop
+        Write-Verbose '$CWCServerConnection, variable initialized.'
+    }
+    catch{
+        Remove-Variable CWCServerConnection -Scope script
+        Write-Verbose 'Authentication failed.'
+        Write-Error $_
+    }
 }

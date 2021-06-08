@@ -7,7 +7,7 @@ function Get-CWCAuditInfo {
         [int[]]$EventTypes
     )
 
-    $URI = "https://$($script:CWCServerConnection.Server)/Services/AuditService.ashx/QueryAuditLog"
+    $Endpoint = 'Services/AuditService.ashx/QueryAuditLog'
 
     $Body = ConvertTo-Json @(
         $(Get-Date $StartDate -Format "yyyy-MM-ddTHH:mm:ss.ffffZ"),
@@ -18,7 +18,7 @@ function Get-CWCAuditInfo {
     Write-Verbose $Body
 
     $WebRequestArguments = @{
-        Uri = $URI
+        Endpoint = $Endpoint
         Body = $Body
         Method = 'Post'
     }

@@ -32,6 +32,9 @@ Will return a list of sessions.
 ### [Get-CWCSessionDetail](Docs/Get-CWCSessionDetail.md)
 Will return information about a session.
 
+### [Get-CWCSessionGroup](Docs/Get-CWCSessionGroup.md)
+Returns details of all session groups.
+
 ### [Invoke-CWCCommand](Docs/Invoke-CWCCommand.md)
 Will issue a command against a given machine and return the results.
 
