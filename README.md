@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  <img src=".\Media\control-horiz-master.webp" alt="logo" height = 300 ></a>
+  <img src=".\Media\control-horiz-master.webp" alt="logo" width = 75% ></a>
   <br>
   ConnectWise Control API
   <br>
