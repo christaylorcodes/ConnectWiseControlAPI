@@ -5,112 +5,32 @@ online version:
 schema: 2.0.0
 ---
 
-# New-CWCUser
+# Update-CWCUser
 
 ## SYNOPSIS
-Creates a user.
+Update properties of an internal user.
 
 ## SYNTAX
 
 ```
-New-CWCUser -Credentials <PSCredential> [-OTP <String>] [-DisplayName <String>] -Email <String>
- [-SecurityGroups <String[]>] [-ForcePassChange <Boolean>] [-WhatIf] [-Confirm] [<CommonParameters>]
+Update-CWCUser [-UserToUpdate] <String> [-NewUserName <String>] [-Password <SecureString>] [[-OTP] <String>]
+ [[-DisplayName] <String>] [[-Email] <String>] [[-SecurityGroups] <String[]>] [[-ForcePassChange] <Boolean>]
+ [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Creates a new local user.
+Will update an internal user. Only the properties given will update.
 
 ## EXAMPLES
 
-### EXAMPLE 1
+### Example 1
 ```powershell
-$NewUserParams = @{
-    Credentials = $PSCredentials
-    OTP = $(New-CWCMFA).OTP
-    DisplayName = 'Chris Taylor'
-    Email = 'dont@bug.me'
-    SecurityGroups = 'MySecurityGroup'
-    ForcePassChange = $true
-}
-New-CWCUser @NewUserParams
+PS C:\> Update-CWCUser -UserToUpdate 'ctaylor' -Password $SecureString -ForcePassChange $True
 ```
+
+Updates the password for 'ctaylor' and forces a password change at next logon.
 
 ## PARAMETERS
-
-### -OTP
-The OTP key used for MFA. Can be generated with `New-CWCMFA`
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -DisplayName
-The display name of the new user
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Email
-Email address of the user
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -SecurityGroups
-An array of security groups the user is a part of
-
-```yaml
-Type: String[]
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -ForcePassChange
-Force the user to change their password at next login
-
-```yaml
-Type: Boolean
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: True
-Accept pipeline input: False
-Accept wildcard characters: False
-```
 
 ### -Confirm
 Prompts you for confirmation before running the cmdlet.
@@ -127,8 +47,99 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -DisplayName
+The wanted display name for the user.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Email
+The wanted email address for the user.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 4
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ForcePassChange
+Force the user to change their password at next logon.
+
+```yaml
+Type: Boolean
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 6
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -OTP
+The wanted MFA option for the user.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -SecurityGroups
+The wanted security groups the user should be a member of.
+
+```yaml
+Type: String[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 5
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -UserToUpdate
+The user account you want to update.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 0
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -WhatIf
-Shows what would happen if the cmdlet runs. The cmdlet is not run.
+Shows what would happen if the cmdlet runs.
+The cmdlet is not run.
 
 ```yaml
 Type: SwitchParameter
@@ -142,15 +153,30 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Credentials
-PSCredential object for the new user you want to create.
+### -NewUserName
+The new username of the user you are updating.
 
 ```yaml
-Type: PSCredential
+Type: String
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Password
+The wanted password of the user.
+
+```yaml
+Type: SecureString
+Parameter Sets: (All)
+Aliases:
+
+Required: False
 Position: Named
 Default value: None
 Accept pipeline input: False
@@ -162,12 +188,10 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
+### None
 ## OUTPUTS
 
+### System.Object
 ## NOTES
-Version:        1.1
-Author:         Chris Taylor
-Creation Date:  4/2/2020
-Purpose/Change: Initial script development
 
 ## RELATED LINKS

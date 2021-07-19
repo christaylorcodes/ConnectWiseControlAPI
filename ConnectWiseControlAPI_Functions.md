@@ -53,9 +53,15 @@ Creates a user.
 ### [Remove-CWCSession](Docs/Remove-CWCSession.md)
 Will end a given session.
 
+### [Remove-CWCUser](Docs/Remove-CWCUser.md)
+Removes an internal user.
+
 ### [Update-CWCCustomProperty](Docs/Update-CWCCustomProperty.md)
 Will update a custom property for a session.
 
 ### [Update-CWCSessionName](Docs/Update-CWCSessionName.md)
 Updates the name of a session.
+
+### [Update-CWCUser](Docs/Update-CWCUser.md)
+Update properties of an internal user.
 

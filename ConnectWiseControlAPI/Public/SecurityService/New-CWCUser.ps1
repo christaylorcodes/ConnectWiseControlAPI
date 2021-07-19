@@ -5,15 +5,16 @@
         [pscredential]$Credentials,
         [string]$OTP,
         [string]$DisplayName,
+        [Parameter(Mandatory=$True)]
         [string]$Email,
-        [string[]]$SecurityGroups,
+        [string[]]$SecurityGroups = @(),
         [boolean]$ForcePassChange = $true
     )
 
     $Endpoint = 'Services/SecurityService.ashx/SaveUser'
 
-    $Body = ConvertTo-Json -Depth 10 @(
-        'InternalMembershipProvider',
+    $Body = ConvertTo-Json @(
+        $script:InternalUserSource,
         $null,
         $Credentials.UserName,
         $Credentials.GetNetworkCredential().Password,

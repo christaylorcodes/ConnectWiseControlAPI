@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  <img src="https://www.connectwise.com/globalassets/media/logos/company/product/control/control-horiz-master.png" alt="logo" height = 300 ></a>
+  <img src=".\Media\control-horiz-master.png" alt="logo" height = 300 ></a>
   <br>
   ConnectWise Control API
   <br>

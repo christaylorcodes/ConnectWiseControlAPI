@@ -16,5 +16,7 @@ if([Net.SecurityProtocolType]::Tls) {
     [Net.ServicePointManager]::SecurityProtocol=[Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls
 }
 
+$script:InternalUserSource = 'InternalMembershipProvider'
+
 # Export Public functions ($Public.BaseName) for WIP modules
 Export-ModuleMember -Function $Public.Basename
