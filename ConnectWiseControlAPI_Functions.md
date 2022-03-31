@@ -18,7 +18,10 @@ Create a new Remote Workforce security role
 Initializes the connection parameters for the module.
 
 ### [Get-CWCAuditInfo](Docs/Get-CWCAuditInfo.md)
-Used to search the audit logs.
+Shows current audit settings
+
+### [Get-CWCAuditLog](Docs/Get-CWCAuditLog.md)
+Pull audit log information
 
 ### [Get-CWCLastContact](Docs/Get-CWCLastContact.md)
 Returns the date the machine last connected to the control server.

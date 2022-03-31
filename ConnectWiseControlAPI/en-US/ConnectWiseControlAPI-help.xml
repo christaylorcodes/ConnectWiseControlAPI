@@ -186,19 +186,73 @@
       <command:verb>Get</command:verb>
       <command:noun>CWCAuditInfo</command:noun>
       <maml:description>
-        <maml:para>Used to search the audit logs.</maml:para>
+        <maml:para>Shows current audit settings</maml:para>
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>You can search the audit logs and apply some filters.</maml:para>
+      <maml:para>Shows current audit settings</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
         <maml:name>Get-CWCAuditInfo</maml:name>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters />
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>None</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>System.Object</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
+    <maml:alertSet>
+      <maml:alert>
+        <maml:para></maml:para>
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
+        <dev:code>PS C:\&gt; Get-CWCAuditInfo</dev:code>
+        <dev:remarks>
+          <maml:para>Displays the current audit settings</maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks />
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
+      <command:name>Get-CWCAuditLog</command:name>
+      <command:verb>Get</command:verb>
+      <command:noun>CWCAuditLog</command:noun>
+      <maml:description>
+        <maml:para>Pull audit log information</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>Returns the same information as the audit search in web</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>Get-CWCAuditLog</maml:name>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
           <maml:name>StartDate</maml:name>
           <maml:description>
-            <maml:para>Start date for the date range to search for logs.</maml:para>
+            <maml:para>{{ Fill StartDate Description }}</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">DateTime</command:parameterValue>
           <dev:type>
@@ -210,7 +264,7 @@
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
           <maml:name>EndDate</maml:name>
           <maml:description>
-            <maml:para>End date for the date range to search for logs.</maml:para>
+            <maml:para>{{ Fill EndDate Description }}</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">DateTime</command:parameterValue>
           <dev:type>
@@ -222,7 +276,7 @@
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
           <maml:name>SessionName</maml:name>
           <maml:description>
-            <maml:para>Name of the session to search for logs</maml:para>
+            <maml:para>{{ Fill SessionName Description }}</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -234,7 +288,7 @@
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none">
           <maml:name>EventTypes</maml:name>
           <maml:description>
-            <maml:para>The event type (https://docs.connectwise.com/ConnectWise_Control_Documentation/Developers/Session_events)you want to search for.</maml:para>
+            <maml:para>{{ Fill EventTypes Description }}</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">Int32[]</command:parameterValue>
           <dev:type>
@@ -243,13 +297,36 @@
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="4" aliases="none">
+          <maml:name>SecurityTypes</maml:name>
+          <maml:description>
+            <maml:para>{{ Fill SecurityTypes Description }}</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Int32[]</command:parameterValue>
+          <dev:type>
+            <maml:name>Int32[]</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>IncludeSessionCaptures</maml:name>
+          <maml:description>
+            <maml:para>{{ Fill IncludeSessionCaptures Description }}</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
       </command:syntaxItem>
     </command:syntax>
     <command:parameters>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
         <maml:name>EndDate</maml:name>
         <maml:description>
-          <maml:para>End date for the date range to search for logs.</maml:para>
+          <maml:para>{{ Fill EndDate Description }}</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">DateTime</command:parameterValue>
         <dev:type>
@@ -261,7 +338,31 @@
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none">
         <maml:name>EventTypes</maml:name>
         <maml:description>
-          <maml:para>The event type (https://docs.connectwise.com/ConnectWise_Control_Documentation/Developers/Session_events)you want to search for.</maml:para>
+          <maml:para>{{ Fill EventTypes Description }}</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Int32[]</command:parameterValue>
+        <dev:type>
+          <maml:name>Int32[]</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>IncludeSessionCaptures</maml:name>
+        <maml:description>
+          <maml:para>{{ Fill IncludeSessionCaptures Description }}</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="4" aliases="none">
+        <maml:name>SecurityTypes</maml:name>
+        <maml:description>
+          <maml:para>{{ Fill SecurityTypes Description }}</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">Int32[]</command:parameterValue>
         <dev:type>
@@ -273,7 +374,7 @@
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
         <maml:name>SessionName</maml:name>
         <maml:description>
-          <maml:para>Name of the session to search for logs</maml:para>
+          <maml:para>{{ Fill SessionName Description }}</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -285,7 +386,7 @@
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
         <maml:name>StartDate</maml:name>
         <maml:description>
-          <maml:para>Start date for the date range to search for logs.</maml:para>
+          <maml:para>{{ Fill StartDate Description }}</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">DateTime</command:parameterValue>
         <dev:type>
@@ -323,7 +424,7 @@
     <command:examples>
       <command:example>
         <maml:title>-------------------------- Example 1 --------------------------</maml:title>
-        <dev:code>PS C:\&gt; Get-CWCAuditInfo -StartDate $(Get-Date).AddDays(-1) -EndDate $(Get-Date) -SessionName 'Computer1'</dev:code>
+        <dev:code>PS C:\&gt; Get-CWCAuditLog -StartDate $(Get-Date).AddDays(-1) -EndDate $(Get-Date) -SessionName 'Computer1'</dev:code>
         <dev:remarks>
           <maml:para>Get the audit logs for Computer1 for the last day.</maml:para>
         </dev:remarks>
