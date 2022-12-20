@@ -26,6 +26,9 @@ Pull audit log information
 ### [Get-CWCLastContact](Docs/Get-CWCLastContact.md)
 Returns the date the machine last connected to the control server.
 
+### [Get-CWCLauncURL](Docs/Get-CWCLauncURL.md)
+{{ Fill in the Synopsis }}
+
 ### [Get-CWCSecurityConfigurationInfo](Docs/Get-CWCSecurityConfigurationInfo.md)
 Will return security configuration information.
 
@@ -43,6 +46,9 @@ Will issue a command against a given machine and return the results.
 
 ### [Invoke-CWCWake](Docs/Invoke-CWCWake.md)
 Will issue a wake command to a given session.
+
+### [New-CWCAccessToken](Docs/New-CWCAccessToken.md)
+{{ Fill in the Synopsis }}
 
 ### [New-CWCMFA](Docs/New-CWCMFA.md)
 Will generate an MFA code to use with user creation.

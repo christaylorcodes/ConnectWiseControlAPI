@@ -1,4 +1,4 @@
-function Invoke-CWCWebRequest {
+﻿function Invoke-CWCWebRequest {
     [CmdletBinding()]
     param(
         $Arguments,
@@ -6,9 +6,9 @@ function Invoke-CWCWebRequest {
     )
 
     # Check that we have cached connection info
-    if(!$script:CWCServerConnection){
+    if (!$script:CWCServerConnection) {
         $ErrorMessage = @()
-        $ErrorMessage += "Not connected to a Control server."
+        $ErrorMessage += 'Not connected to a Control server.'
         $ErrorMessage += '--> $CWCServerConnection variable not found.'
         $ErrorMessage += "----> Run 'Connect-CWC' to initialize the connection before issuing other CWC cmdlets."
         return Write-Error ($ErrorMessage | Out-String)
@@ -27,43 +27,44 @@ function Invoke-CWCWebRequest {
         # Start error message
         $ErrorMessage = @()
 
-        if($_.Exception.Response){
+        if ($_.Exception.Response -and $PSVersionTable.PSVersion.Major -lt 6) {
             # Read exception response
             $ErrorStream = $_.Exception.Response.GetResponseStream()
             $Reader = New-Object System.IO.StreamReader($ErrorStream)
             $script:ErrBody = $Reader.ReadToEnd() | ConvertFrom-Json
 
-            if($ErrBody.code){
-                $ErrorMessage += "An exception has been thrown."
+            if ($ErrBody.code) {
+                $ErrorMessage += 'An exception has been thrown.'
                 $ErrorMessage += "--> $($ErrBody.code)"
-                if($ErrBody.code -eq 'Unauthorized'){
+                if ($ErrBody.code -eq 'Unauthorized') {
                     $ErrorMessage += "-----> $($ErrBody.message)"
                     $ErrorMessage += "-----> Use 'Disconnect-CWC' or 'Connect-CWC -Force' to set new authentication."
                 }
                 else {
                     $ErrorMessage += "-----> $($ErrBody.code): $($ErrBody.message)"
-                    $ErrorMessage += "-----> ^ Error has not been documented please report. ^"
+                    $ErrorMessage += '-----> ^ Error has not been documented please report. ^'
                 }
-            } elseif ($_.Exception.message) {
-                $ErrorMessage += "An exception has been thrown."
+            }
+            elseif ($_.Exception.message) {
+                $ErrorMessage += 'An exception has been thrown.'
                 $ErrorMessage += "--> $($_.Exception.message)"
             }
         }
 
         if ($_.ErrorDetails) {
-            $ErrorMessage += "An error has been thrown."
+            $ErrorMessage += 'An error has been thrown.'
             $script:ErrDetails = $_.ErrorDetails
             $ErrorMessage += "--> $($ErrDetails.code)"
             $ErrorMessage += "--> $($ErrDetails.message)"
-            if($ErrDetails.errors.message){
+            if ($ErrDetails.errors.message) {
                 $ErrorMessage += "-----> $($ErrDetails.errors.message)"
             }
         }
 
-        if ($ErrorMessage.Length -lt 1){ $ErrorMessage = $_ }
+        if ($ErrorMessage.Length -lt 1) { $ErrorMessage = $_ }
         else { $ErrorMessage += $_.ScriptStackTrace }
 
-        return Write-Error ($ErrorMessage | out-string)
+        return Write-Error ($ErrorMessage | Out-String)
     }
 
     # Not sure this will be hit with current iwr error handling
@@ -84,5 +85,14 @@ function Invoke-CWCWebRequest {
         return Write-Error "Max retries hit. Status: $($Result.StatusCode) $($Result.StatusDescription)"
     }
 
+    if ($script:CWCServerConnection -and $script:CWCServerConnection.Headers) {
+        $script:CWCServerConnection.Headers.'Set-Cookie' = $Result.Headers['Set-Cookie']
+        #$global:CWCServerConnection2 = $script:CWCServerConnection
+        #$global:HeadersTest = $Result.Headers
+    }
+
+    if ($Arguments.OutFile) {
+        return $Result
+    }
     return $Result.content | ConvertFrom-Json
 }

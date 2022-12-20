@@ -13,8 +13,8 @@ Will issue a command against a given machine and return the results.
 ## SYNTAX
 
 ```
-Invoke-CWCCommand [-GUID] <Guid> [[-Command] <String>] [[-TimeOut] <Int32>] [-PowerShell] [[-Group] <String>]
- [-NoWait] [<CommonParameters>]
+Invoke-CWCCommand [-GUID] <Guid> [[-Command] <String>] [[-TimeOut] <Int32>] [-MaxLength <Int32>] [-PowerShell]
+ [[-Group] <String>] [-NoWait] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -120,6 +120,21 @@ Will not wait for the output of the command.
 
 ```yaml
 Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -MaxLength
+{{ Fill MaxLength Description }}
+
+```yaml
+Type: Int32
 Parameter Sets: (All)
 Aliases:
 
