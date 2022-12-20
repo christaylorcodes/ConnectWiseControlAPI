@@ -30,8 +30,8 @@
 
         # Get connection events
         $LatestEvent = $GuestSessionEvents | Where-Object { 
-            $_.EventType -in (10, 11)
-            -and $_.ConnectionID -NotIn $GuestSessionConnections.ConnectionID
+            $_.EventType -in (10, 11) -and
+            $_.ConnectionID -NotIn $GuestSessionConnections.ConnectionID
         } | Sort-Object time | Select-Object -First 1
         if ($LatestEvent.EventType -eq 10) {
             # Currently connected
