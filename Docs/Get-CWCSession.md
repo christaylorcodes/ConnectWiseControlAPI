@@ -23,7 +23,7 @@ Allows you to search for access, service or meeting sessions.
 
 ### EXAMPLE 1
 ```
-Get-CWCAccessSessions -Type 'Access' -Search 'server1' -Limit 10
+Get-CWCSessions -Type 'Access' -Search 'server1' -Limit 10
 ```
 
 Will return the first 10 access sessions that match 'server1'.
