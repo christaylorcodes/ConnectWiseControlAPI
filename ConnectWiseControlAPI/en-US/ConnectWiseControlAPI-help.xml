@@ -871,7 +871,7 @@
     <command:examples>
       <command:example>
         <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
-        <dev:code>Get-CWCAccessSessions -Type 'Access' -Search 'server1' -Limit 10</dev:code>
+        <dev:code>Get-CWCSessions -Type 'Access' -Search 'server1' -Limit 10</dev:code>
         <dev:remarks>
           <maml:para>Will return the first 10 access sessions that match 'server1'.</maml:para>
         </dev:remarks>

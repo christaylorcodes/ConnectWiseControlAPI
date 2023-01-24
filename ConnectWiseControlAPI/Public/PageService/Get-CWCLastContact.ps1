@@ -29,7 +29,7 @@
     if ($GuestSessionEvents) {
 
         # Get connection events
-        $LatestEvent = $GuestSessionEvents | Where-Object { 
+        $LatestEvent = $GuestSessionEvents | Where-Object {
             $_.EventType -in (10, 11) -and
             $_.ConnectionID -NotIn $GuestSessionConnections.ConnectionID
         } | Sort-Object time | Select-Object -First 1
