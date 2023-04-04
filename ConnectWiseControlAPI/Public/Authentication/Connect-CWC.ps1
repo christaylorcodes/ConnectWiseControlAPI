@@ -32,7 +32,7 @@ function Connect-CWC {
         Write-Verbose 'Unable to find anti forgery token. Some commands may not work.' 
     }
     Write-Verbose "Result:"
-    Write-Verbose ($FrontPage.headers | FL)
+    Write-Verbose $FrontPage.headers
     $LoginResult = $FrontPage.headers.'X-Login-Result'
     $script:CWCServerConnection = @{
         Server = $Server
@@ -40,8 +40,11 @@ function Connect-CWC {
         Secret = $secret
     }
     if ($LoginResult) {
+        Remove-Variable CWCServerConnection -Scope script
         Throw ("Login failed: " + $LoginResult)
     } else {
+        Write-Verbose "Login Success. "
+        Write-Verbose $Script:CWCServerConnection
         Return $true
     }
 }
