@@ -14,7 +14,7 @@
         return Write-Error ($ErrorMessage | Out-String)
     }
     
-    $script:cwcserverconnection.Headers.'X-One-Time-Password' = $(Get-OTP -Secret $script:cwcserverconnection.Secret).Code
+    $script:cwcserverconnection.Headers.'X-One-Time-Password' = $(Get-OTP $script:cwcserverconnection.Secret).Code
     $BaseURI = "https://$($script:CWCServerConnection.Server)"
     $Arguments.URI = Join-Url $BaseURI $Arguments.Endpoint
     $Arguments.remove('Endpoint')

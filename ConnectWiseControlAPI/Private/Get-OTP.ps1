@@ -3,16 +3,13 @@ function Get-OTP {
     [CmdletBinding()]
     Param (
         # BASE32 encoded Secret e.g. 5WYYADYB5DK2BIOV
-        [Parameter(Mandatory=$true,
-                   ValueFromPipelineByPropertyName=$true,
-                   Position=0)]
-        [string]
-        $Secret,
+        [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true,Position=0)]
+        [securestring]$secureSecret,
 
         # OTP time window in seconds
         $TimeWindow = 30
     )
-
+    $secret = $secureSecret | ConvertFrom-SecureString -AsPlainText
     $Base32Charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'
     # Convert the secret from BASE32 to a byte array
     # via a BigInteger so we can use its bit-shifting support,
@@ -76,8 +73,7 @@ function Get-OTP {
     # pad to 6 digits with leading zero(s)
     # and put a space for nice readability
     $PIN = ($num % 1000000).ToString().PadLeft(6, '0')
-
-    [PSCustomObject]@{
+    Return [PSCustomObject] @{
         'code' = $PIN
         'timeout' = ($TimeWindow - ($epochTime % $TimeWindow))
     }

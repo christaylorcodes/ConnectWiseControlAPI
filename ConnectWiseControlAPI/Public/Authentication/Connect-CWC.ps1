@@ -5,7 +5,7 @@ function Connect-CWC {
         [string]$Server,
         [Parameter(Mandatory = $True)]
         [pscredential]$Credentials,
-        [string]$secret,
+        [securestring]$secret,
         [switch]$Force
     )
 
@@ -18,30 +18,30 @@ function Connect-CWC {
     $Headers = @{
         'authorization' = "Basic $EncodedCredentials"
         'content-type' = "application/json; charset=utf-8"
-        'X-One-Time-Password' = (Get-OTP $secret).code
         'origin' = "https://$Server"
     }
-
+    if ($secret) {
+        $Headers.'X-One-Time-Password' = (Get-OTP $secret -verbose).code
+    }
     $FrontPage = Invoke-WebRequest -Uri $Headers.origin -Headers $Headers -UseBasicParsing
     $Regex = [Regex]'(?<=antiForgeryToken":")(.*)(?=","isUserAdministrator)'
     $Match = $Regex.Match($FrontPage.content)
-    if($Match.Success){ $Headers.'x-anti-forgery-token' = $Match.Value.ToString() }
-    else{ Write-Verbose 'Unable to find anti forgery token. Some commands may not work.' }
-
+    if ($Match.Success) { 
+        $Headers.'x-anti-forgery-token' = $Match.Value.ToString() 
+    } else { 
+        Write-Verbose 'Unable to find anti forgery token. Some commands may not work.' 
+    }
+    Write-Verbose "Result:"
+    Write-Verbose ($FrontPage.headers | FL)
+    $LoginResult = $FrontPage.headers.'X-Login-Result'
     $script:CWCServerConnection = @{
         Server = $Server
         Headers = $Headers
         Secret = $secret
     }
-    Write-Verbose ($script:CWCServerConnection | Out-String)
-
-    try{
-        $null = Get-CWCSessionGroup -ErrorAction Stop
-        Write-Verbose '$CWCServerConnection, variable initialized.'
-    }
-    catch{
-        Remove-Variable CWCServerConnection -Scope script
-        Write-Verbose 'Authentication failed.'
-        Write-Error $_
+    if ($LoginResult) {
+        Throw ("Login failed: " + $LoginResult)
+    } else {
+        Return $true
     }
 }
