@@ -5,6 +5,7 @@ function Connect-CWC {
         [string]$Server,
         [Parameter(Mandatory = $True)]
         [pscredential]$Credentials,
+        [string]$secret,
         [switch]$Force
     )
 
@@ -12,12 +13,12 @@ function Connect-CWC {
         Write-Verbose "Using cached Authentication information."
         return
     }
-
     $Server = $Server -replace("http.*:\/\/",'')
     $EncodedCredentials = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes("$($Credentials.UserName):$($Credentials.GetNetworkCredential().Password)"))
     $Headers = @{
         'authorization' = "Basic $EncodedCredentials"
         'content-type' = "application/json; charset=utf-8"
+        'X-One-Time-Password' = (Get-OTP $secret).code
         'origin' = "https://$Server"
     }
 
@@ -30,6 +31,7 @@ function Connect-CWC {
     $script:CWCServerConnection = @{
         Server = $Server
         Headers = $Headers
+        Secret = $secret
     }
     Write-Verbose ($script:CWCServerConnection | Out-String)
 

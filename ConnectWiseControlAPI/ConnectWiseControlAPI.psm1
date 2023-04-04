@@ -17,6 +17,8 @@ if([Net.SecurityProtocolType]::Tls) {
 }
 
 $script:InternalUserSource = 'InternalMembershipProvider'
+$script:defaultGroup = 'All Machines by Company'
+$script:timeZoneOffset = New-Timespan -hours (((get-timezone).baseUtcOffset).hours + (Get-Date).IsDaylightSavingTime()) -minutes ((get-timezone).baseUtcOffset).minutes
 
 # Export Public functions ($Public.BaseName) for WIP modules
 Export-ModuleMember -Function $Public.Basename

@@ -1,7 +1,7 @@
 ﻿function New-CWCAccessToken {
 	[CmdletBinding()]
 	param (
-		[String[]]$Group = 'All Machines',
+		[String[]]$Group = $script:defaultGroup,
 		[Parameter(Mandatory = $True)]
 		[guid]$GUID
 	)
