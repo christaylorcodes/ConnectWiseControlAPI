@@ -35,10 +35,8 @@ This is a fork of ChrisTaylorCodes' CWC API module. I got tired of waiting for h
 
  The module can be installed by unzipping the master zip into one of your powershell modules folder, or by running the following one-liner:
 
-*** One Liner is untested at the moment ***
-
 ```powershell
-$ModuleName='ConnectWiseControlAPI';$parentFldr='ConnectWiseControlAPI-master';$u='https://github.com/Luke-Williams9/ConnectWiseControlAPI/archive/refs/heads/master.zip';If($IsWindows){$s=';'}else{$s=':'};$mp=($Env:PSModulePath.split($s) -like "$HOME*")[0];$td='.'+$ModuleName+'_temp';$tempdir=Join-Path '~' $td;$z=Join-Path $tempdir ($ModuleName + '.zip');New-Item -path '~' -name $td -type 'directory' -ErrorAction SilentlyContinue;Invoke-WebRequest -Uri $u -OutFile $z;Expand-Archive $z -DestinationPath $tempdir -Force;New-Item -path $mp -name $ModuleName -ItemType 'directory' -ErrorAction SilentlyContinue;Copy-Item (Join-Path $tempdir $parentFldr $moduleName) -Destination $mp -Force -Recurse;Get-Module -listAvailable $ModulePath
+$ModuleName='ConnectWiseControlAPI';$parentFldr='ConnectWiseControlAPI-master';$u='https://github.com/Luke-Williams9/ConnectWiseControlAPI/archive/refs/heads/master.zip';If($IsWindows){$s=';'}else{$s=':'};$mp=($Env:PSModulePath.split($s) -like "$HOME*")[0];$td='.'+$ModuleName+'_temp';$tempdir=Join-Path '~' $td;$z=Join-Path $tempdir ($ModuleName + '.zip');New-Item -path '~' -name $td -type 'directory' -ErrorAction SilentlyContinue;Invoke-WebRequest -Uri $u -OutFile $z;Expand-Archive $z -DestinationPath $tempdir -Force;New-Item -path $mp -name $ModuleName -ItemType 'directory' -ErrorAction SilentlyContinue;Copy-Item (Join-Path $tempdir $parentFldr $moduleName) -Destination $mp -Force -Recurse;Get-Module -listAvailable $ModuleName
 ```
 
 ## Requirements
@@ -46,4 +44,6 @@ $ModuleName='ConnectWiseControlAPI';$parentFldr='ConnectWiseControlAPI-master';$
 * Now supports MFA!
 
 * Requires your Control server to use https.
+
+<a href="https://github.com/Luke-Williams9/ConnectWiseControlAPI/blob/master/Examples/Connect_MFA.ps1">Connecting with MFA</a>
 
