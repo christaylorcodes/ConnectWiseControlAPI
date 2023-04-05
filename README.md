@@ -41,9 +41,9 @@ $ModuleName='ConnectWiseControlAPI';$parentFldr='ConnectWiseControlAPI-master';$
 
 ## Requirements
 
-* Now supports MFA!
+* Now supports MFA! - <a href="https://github.com/Luke-Williams9/ConnectWiseControlAPI/blob/master/Examples/Connect_MFA.ps1">Connecting with MFA</a>
 
 * Requires your Control server to use https.
 
-<a href="https://github.com/Luke-Williams9/ConnectWiseControlAPI/blob/master/Examples/Connect_MFA.ps1">Connecting with MFA</a>
+
 
