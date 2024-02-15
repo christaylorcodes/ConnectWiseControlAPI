@@ -4,12 +4,12 @@ function Get-CWCSession {
         [Parameter(Mandatory=$True)]
         [ValidateSet('Support','Access','Meeting')]
         $Type,
-        [string]$Group = 'All Machines',
+        [string]$Group = $script:defaultGroup,
         [string]$Search,
         [int]$Limit
     )
 
-    $Endpoint = 'Services/PageService.ashx/GetHostSessionInfo'
+    $Endpoint = 'Services/PageService.ashx/GetLiveData'
 
     switch($Type){
         'Support' { $Number = 0 }
@@ -18,7 +18,27 @@ function Get-CWCSession {
         default { return Write-Error "Unknown Type, $Type" }
     }
 
-    $Body = ConvertTo-Json @($Number,@($Group),$Search,$null,$Limit)
+    #$Body = ConvertTo-Json @($Number,@($Group),$Search,$null,$Limit)
+    Write-Debug $Group
+
+    $Body = @"
+[
+    {
+        `"HostSessionInfo`": {
+            `"sessionType`": 2,
+            `"sessionGroupPathParts`": [
+                `"$Group`"
+            ],
+            `"filter`": `"$Search`",
+            `"findSessionID`": null,
+            `"sessionLimit`": 1000
+        },
+        `"ActionCenterInfo`": {}
+    },
+    0
+]
+"@
+
     Write-Verbose $Body
 
     $WebRequestArguments = @{
@@ -28,5 +48,5 @@ function Get-CWCSession {
     }
 
     $Data =  Invoke-CWCWebRequest -Arguments $WebRequestArguments
-    $Data.sessions
+    $Data.ResponseInfoMap.HostSessionInfo.sessions
 }
