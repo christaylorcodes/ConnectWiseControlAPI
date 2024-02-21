@@ -6,7 +6,7 @@ function Update-CWCCustomProperty {
         [Parameter(Mandatory=$True)]
         [int]$Property,
         [string]$Value,
-        [string[]]$Group = 'All Machines'
+        [string[]]$Group = $script:defaultGroup
     )
 
     $Endpoint = 'Services/PageService.ashx/UpdateSessionCustomPropertyValue'

@@ -1,7 +1,7 @@
 function Get-CWCSessionDetail {
     [CmdletBinding()]
     param (
-        [string]$Group = 'All Machines',
+        [string]$Group = $script:defaultGroup,
         [Parameter(Mandatory=$True)]
         [guid]$GUID
     )

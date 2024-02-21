@@ -5,7 +5,7 @@ function Update-CWCSessionName {
         [guid]$GUID,
         [Parameter(Mandatory=$True)]
         [string]$NewName,
-        [string]$Group = 'All Machines'
+        [string]$Group = $script:defaultGroup
     )
 
     $Endpoint = 'Services/PageService.ashx/UpdateSessionName'
