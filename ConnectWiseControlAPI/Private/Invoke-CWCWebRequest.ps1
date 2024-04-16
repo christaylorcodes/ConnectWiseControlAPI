@@ -20,6 +20,7 @@
     $Arguments.Headers = $script:CWCServerConnection.Headers
     $Arguments.UseBasicParsing = $true
     Write-Debug "Arguments: $($Arguments | ConvertTo-Json)"
+    Write-Host "Arguments: $($Arguments | ConvertTo-Json)"
 
     # Issue request
     try { $Result = Invoke-WebRequest @Arguments }
