@@ -1,0 +1,179 @@
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04">
+  <Obj RefId="0">
+    <TN RefId="0">
+      <T>Microsoft.PowerShell.Commands.PSRepositoryItemInfo</T>
+      <T>System.Management.Automation.PSCustomObject</T>
+      <T>System.Object</T>
+    </TN>
+    <MS>
+      <S N="Name">ConnectWiseControlAPI</S>
+      <Version N="Version">0.3.5.0</Version>
+      <S N="Type">Module</S>
+      <S N="Description">PowerShell wrapper for ConnectWise Control web API</S>
+      <S N="Author">Chris Taylor</S>
+      <S N="CompanyName">ChrisTaylorCodes</S>
+      <S N="Copyright">(c) 2020 Chris Taylor. All rights reserved.</S>
+      <DT N="PublishedDate">2023-01-24T21:18:08-07:00</DT>
+      <Obj N="InstalledDate" RefId="1">
+        <DT>2023-03-27T19:14:57.804093-06:00</DT>
+        <MS>
+          <Obj N="DisplayHint" RefId="2">
+            <TN RefId="1">
+              <T>Microsoft.PowerShell.Commands.DisplayHintType</T>
+              <T>System.Enum</T>
+              <T>System.ValueType</T>
+              <T>System.Object</T>
+            </TN>
+            <ToString>DateTime</ToString>
+            <I32>2</I32>
+          </Obj>
+        </MS>
+      </Obj>
+      <Nil N="UpdatedDate" />
+      <URI N="LicenseUri">https://github.com/christaylorcodes/ConnectWiseControlAPI/blob/master/LICENSE</URI>
+      <URI N="ProjectUri">https://github.com/christaylorcodes/ConnectWiseControlAPI</URI>
+      <URI N="IconUri">https://raw.githubusercontent.com/christaylorcodes/ConnectWiseControlAPI/master/Media/control-logo.webp</URI>
+      <Obj N="Tags" RefId="3">
+        <TN RefId="2">
+          <T>System.Object[]</T>
+          <T>System.Array</T>
+          <T>System.Object</T>
+        </TN>
+        <LST>
+          <S>ChrisTaylorCodes</S>
+          <S>ConnectWise</S>
+          <S>Control</S>
+          <S>ScreenConnect</S>
+          <S>API</S>
+          <S>PSModule</S>
+        </LST>
+      </Obj>
+      <Obj N="Includes" RefId="4">
+        <TN RefId="3">
+          <T>System.Collections.Hashtable</T>
+          <T>System.Object</T>
+        </TN>
+        <DCT>
+          <En>
+            <S N="Key">Function</S>
+            <Obj N="Value" RefId="5">
+              <TNRef RefId="2" />
+              <LST>
+                <S>Get-CWCAuditInfo</S>
+                <S>Get-CWCAuditLog</S>
+                <S>Connect-CWC</S>
+                <S>Get-CWCLauncURL</S>
+                <S>Add-CWCRemoteWorkforceRequiredRole</S>
+                <S>New-CWCRemoteWorkforceAssignment</S>
+                <S>New-CWCMFA</S>
+                <S>Get-CWCLastContact</S>
+                <S>Get-CWCSession</S>
+                <S>Get-CWCSessionDetail</S>
+                <S>Invoke-CWCCommand</S>
+                <S>Invoke-CWCWake</S>
+                <S>New-CWCAccessToken</S>
+                <S>Remove-CWCSession</S>
+                <S>Update-CWCCustomProperty</S>
+                <S>Update-CWCSessionName</S>
+                <S>Get-CWCSecurityConfigurationInfo</S>
+                <S>New-CWCUser</S>
+                <S>Remove-CWCUser</S>
+                <S>Update-CWCUser</S>
+                <S>Get-CWCSessionGroup</S>
+              </LST>
+            </Obj>
+          </En>
+          <En>
+            <S N="Key">Command</S>
+            <Obj N="Value" RefId="6">
+              <TNRef RefId="2" />
+              <LST>
+                <S>Get-CWCAuditInfo</S>
+                <S>Get-CWCAuditLog</S>
+                <S>Connect-CWC</S>
+                <S>Get-CWCLauncURL</S>
+                <S>Add-CWCRemoteWorkforceRequiredRole</S>
+                <S>New-CWCRemoteWorkforceAssignment</S>
+                <S>New-CWCMFA</S>
+                <S>Get-CWCLastContact</S>
+                <S>Get-CWCSession</S>
+                <S>Get-CWCSessionDetail</S>
+                <S>Invoke-CWCCommand</S>
+                <S>Invoke-CWCWake</S>
+                <S>New-CWCAccessToken</S>
+                <S>Remove-CWCSession</S>
+                <S>Update-CWCCustomProperty</S>
+                <S>Update-CWCSessionName</S>
+                <S>Get-CWCSecurityConfigurationInfo</S>
+                <S>New-CWCUser</S>
+                <S>Remove-CWCUser</S>
+                <S>Update-CWCUser</S>
+                <S>Get-CWCSessionGroup</S>
+              </LST>
+            </Obj>
+          </En>
+          <En>
+            <S N="Key">Cmdlet</S>
+            <Obj N="Value" RefId="7">
+              <TNRef RefId="2" />
+              <LST />
+            </Obj>
+          </En>
+          <En>
+            <S N="Key">RoleCapability</S>
+            <Ref N="Value" RefId="7" />
+          </En>
+          <En>
+            <S N="Key">Workflow</S>
+            <Ref N="Value" RefId="7" />
+          </En>
+          <En>
+            <S N="Key">DscResource</S>
+            <Ref N="Value" RefId="7" />
+          </En>
+        </DCT>
+      </Obj>
+      <Nil N="PowerShellGetFormatVersion" />
+      <S N="ReleaseNotes">https://github.com/christaylorcodes/ConnectWiseControlAPI/releases</S>
+      <Obj N="Dependencies" RefId="8">
+        <TNRef RefId="2" />
+        <LST />
+      </Obj>
+      <S N="RepositorySourceLocation">https://www.powershellgallery.com/api/v2</S>
+      <S N="Repository">PSGallery</S>
+      <S N="PackageManagementProvider">NuGet</S>
+      <Obj N="AdditionalMetadata" RefId="9">
+        <TN RefId="4">
+          <T>System.Management.Automation.PSCustomObject</T>
+          <T>System.Object</T>
+        </TN>
+        <MS>
+          <S N="copyright">(c) 2020 Chris Taylor. All rights reserved.</S>
+          <S N="description">PowerShell wrapper for ConnectWise Control web API</S>
+          <S N="requireLicenseAcceptance">False</S>
+          <S N="releaseNotes">https://github.com/christaylorcodes/ConnectWiseControlAPI/releases</S>
+          <S N="isLatestVersion">True</S>
+          <S N="isAbsoluteLatestVersion">True</S>
+          <S N="versionDownloadCount">9631</S>
+          <S N="downloadCount">42733</S>
+          <S N="packageSize">27009</S>
+          <S N="published">2023-01-24 9:18:08 p.m. -07:00</S>
+          <S N="created">2023-01-24 9:18:08 p.m. -07:00</S>
+          <S N="lastUpdated">2023-03-28 1:13:08 a.m. -06:00</S>
+          <S N="tags">ChrisTaylorCodes ConnectWise Control ScreenConnect API PSModule PSFunction_Get-CWCAuditInfo PSCommand_Get-CWCAuditInfo PSFunction_Get-CWCAuditLog PSCommand_Get-CWCAuditLog PSFunction_Connect-CWC PSCommand_Connect-CWC PSFunction_Get-CWCLauncURL PSCommand_Get-CWCLauncURL PSFunction_Add-CWCRemoteWorkforceRequiredRole PSCommand_Add-CWCRemoteWorkforceRequiredRole PSFunction_New-CWCRemoteWorkforceAssignment PSCommand_New-CWCRemoteWorkforceAssignment PSFunction_New-CWCMFA PSCommand_New-CWCMFA PSFunction_Get-CWCLastContact PSCommand_Get-CWCLastContact PSFunction_Get-CWCSession PSCommand_Get-CWCSession PSFunction_Get-CWCSessionDetail PSCommand_Get-CWCSessionDetail PSFunction_Invoke-CWCCommand PSCommand_Invoke-CWCCommand PSFunction_Invoke-CWCWake PSCommand_Invoke-CWCWake PSFunction_New-CWCAccessToken PSCommand_New-CWCAccessToken PSFunction_Remove-CWCSession PSCommand_Remove-CWCSession PSFunction_Update-CWCCustomProperty PSCommand_Update-CWCCustomProperty PSFunction_Update-CWCSessionName PSCommand_Update-CWCSessionName PSFunction_Get-CWCSecurityConfigurationInfo PSCommand_Get-CWCSecurityConfigurationInfo PSFunction_New-CWCUser PSCommand_New-CWCUser PSFunction_Remove-CWCUser PSCommand_Remove-CWCUser PSFunction_Update-CWCUser PSCommand_Update-CWCUser PSFunction_Get-CWCSessionGroup PSCommand_Get-CWCSessionGroup PSIncludes_Function</S>
+          <S N="developmentDependency">False</S>
+          <S N="updated">2023-03-28T01:13:08Z</S>
+          <S N="NormalizedVersion">0.3.5</S>
+          <S N="Authors">Chris Taylor</S>
+          <S N="IsPrerelease">false</S>
+          <S N="ItemType">Module</S>
+          <S N="FileList">ConnectWiseControlAPI.nuspec|ConnectWiseControlAPI.Format.ps1xml|en-US\about_ConnectWiseControlAPI.help.txt|Public\AuditService\Get-CWCAuditInfo.ps1|Public\Extensions\Remote Workforce\Add-CWCRemoteWorkforceRequiredRole.ps1|Public\PageService\Get-CWCSession.ps1|Public\PageService\New-CWCAccessToken.ps1|Public\PageService\Update-CWCSessionName.ps1|Public\SecurityService\Remove-CWCUser.ps1|ConnectWiseControlAPI.psd1|en-US\ConnectWiseControlAPI-help.xml|Public\AuditService\Get-CWCAuditLog.ps1|Public\Extensions\Remote Workforce\New-CWCRemoteWorkforceAssignment.ps1|Public\PageService\Get-CWCSessionDetail.ps1|Public\PageService\Remove-CWCSession.ps1|Public\SecurityService\Get-CWCSecurityConfigurationInfo.ps1|Public\SecurityService\Update-CWCUser.ps1|ConnectWiseControlAPI.psm1|Private\Invoke-CWCWebRequest.ps1|Public\Authentication\Connect-CWC.ps1|Public\Helpers\New-CWCMFA.ps1|Public\PageService\Invoke-CWCCommand.ps1|Public\PageService\Update-CWCCustomProperty.ps1|Public\SecurityService\New-CWCUser.ps1|Public\SessionGroupService\Get-CWCSessionGroup.ps1|Private\Join-Url.ps1|Public\Extensions\Launcher\Get-CWCLauncURL.ps1|Public\PageService\Get-CWCLastContact.ps1|Public\PageService\Invoke-CWCWake.ps1</S>
+          <S N="GUID">f94fa996-0f01-4c5c-9cd9-3227728ebacb</S>
+          <S N="PowerShellVersion">3.0</S>
+          <S N="CompanyName">ChrisTaylorCodes</S>
+        </MS>
+      </Obj>
+      <S N="InstalledLocation">/home/api_operator/.local/share/powershell/Modules/ConnectWiseControlAPI/0.3.5.0</S>
+    </MS>
+  </Obj>
+</Objs>

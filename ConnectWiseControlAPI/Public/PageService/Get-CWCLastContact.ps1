@@ -8,7 +8,7 @@
         [parameter(ParameterSetName = 'Quiet')]
         [switch]$Quiet,
         [int]$Seconds,
-        [string]$Group = 'All Machines'
+        [string]$Group = $script:defaultGroup
     )
 
     # Time conversion

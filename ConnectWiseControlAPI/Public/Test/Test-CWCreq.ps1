@@ -1,4 +1,14 @@
-﻿function Invoke-CWCWebRequest {
+﻿<#
+
+Clone of Invoke-CWCWebrequest for testing
+
+COnnectwiseControl API reference
+https://docs.connectwise.com/ConnectWise_Control_Documentation/Developers
+
+https://docs.connectwise.com/ConnectWise_Control_Documentation/Developers/Session_Manager_API_Reference
+
+#>
+function Test-CWCreq {
     [CmdletBinding()]
     param(
         $Arguments,
@@ -14,7 +24,7 @@
         return Write-Error ($ErrorMessage | Out-String)
     }
     
-    $script:cwcserverconnection.Headers.'X-One-Time-Password' = $(Get-OTP $script:cwcserverconnection.Secret).Code
+    $script:CWCServerConnection.Headers.'X-One-Time-Password' = $(Get-OTP -Secret $script:cwcserverconnection.Secret).Code
     $BaseURI = "https://$($script:CWCServerConnection.Server)"
     $Arguments.URI = Join-Url $BaseURI $Arguments.Endpoint
     $Arguments.remove('Endpoint')
@@ -88,10 +98,10 @@
 
     if ($script:CWCServerConnection -and $script:CWCServerConnection.Headers) {
         $script:CWCServerConnection.Headers.'Set-Cookie' = $Result.Headers['Set-Cookie']
+        #$global:CWCServerConnection2 = $script:CWCServerConnection
+        #$global:HeadersTest = $Result.Headers
     }
 
-    if ($Arguments.OutFile) {
-        return $Result
-    }
-    return $Result.content | ConvertFrom-Json
+    #if ($Arguments.OutFile) { return $Result }
+    return $Result | ConvertFrom-Json
 }

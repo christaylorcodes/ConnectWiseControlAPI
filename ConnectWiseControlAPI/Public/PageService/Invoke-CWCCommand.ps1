@@ -7,7 +7,7 @@
         [int]$TimeOut = 10000,
         [int]$MaxLength = 10000,
         [switch]$PowerShell,
-        [string]$Group = 'All Machines',
+        [string]$Group = $script:defaultGroup,
         [switch]$NoWait
     )
 

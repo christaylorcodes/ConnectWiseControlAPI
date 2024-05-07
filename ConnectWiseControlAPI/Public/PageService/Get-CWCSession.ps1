@@ -4,7 +4,7 @@ function Get-CWCSession {
         [Parameter(Mandatory = $True)]
         [ValidateSet('Support', 'Access', 'Meeting')]
         $Type,
-        [string]$Group = 'All Machines',
+        [string]$Group = $script:defaultGroup,
         [string]$Search,
         [string]$FindSessionID,
         [int]$Limit
