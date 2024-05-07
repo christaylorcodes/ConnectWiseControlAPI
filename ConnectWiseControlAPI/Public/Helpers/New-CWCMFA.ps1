@@ -5,18 +5,15 @@ function New-CWCMFA {
         $UserAccount
     )
     $Possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'
-    $Key = ''
-    while ($Key.Length -lt 16) {
-        $Key += $Possible.ToCharArray() | Get-Random
-    }
+    $Key = (1..16 | ForEach-Object { $Possible.ToCharArray() | Get-Random }) -join ''
 
-    $otpauth = "otpauth://totp/$($DisplayName):$($UserAccount)?secret=$Key"
+    $otpauth = "otpauth://totp/$($DisplayName):$($UserAccount)?secret=$($Key)"
     Add-Type -AssemblyName System.Web
     $otpauthEncoded = [System.Web.HTTPUtility]::UrlEncode($otpauth)
-    $qrUrl = "https://chart.googleapis.com/chart?cht=qr&chs=300x300&chl=$($otpauthEncoded)&chld=H|0"
-    if ($PSCmdlet.ShouldProcess("New-CWCMFA")) {
+    $qrUrl = "https://quickchart.io/chart?cht=qr&chs=400x400&chl=$($otpauthEncoded)&chld=L"
+    if ($PSCmdlet.ShouldProcess('New-CWCMFA')) {
         [pscustomobject]@{
-            'QR' = $qrUrl
+            'QR'  = $qrUrl
             'OTP' = "ms:$Key"
         }
     }

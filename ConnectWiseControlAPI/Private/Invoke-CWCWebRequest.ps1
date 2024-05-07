@@ -87,8 +87,6 @@
 
     if ($script:CWCServerConnection -and $script:CWCServerConnection.Headers) {
         $script:CWCServerConnection.Headers.'Set-Cookie' = $Result.Headers['Set-Cookie']
-        #$global:CWCServerConnection2 = $script:CWCServerConnection
-        #$global:HeadersTest = $Result.Headers
     }
 
     if ($Arguments.OutFile) {
