@@ -69,7 +69,7 @@
     # NestedModules = @()
 
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-    FunctionsToExport = @('Get-CWCAuditInfo','Get-CWCAuditLog','Connect-CWC','Get-CWCLauncURL','Add-CWCRemoteWorkforceRequiredRole','New-CWCRemoteWorkforceAssignment','New-CWCMFA','Get-CWCLastContact','Get-CWCSession','Get-CWCSessionDetail','Invoke-CWCCommand','Invoke-CWCWake','New-CWCAccessToken','Remove-CWCSession','Update-CWCCustomProperty','Update-CWCSessionName','Get-CWCSecurityConfigurationInfo','New-CWCUser','Remove-CWCUser','Update-CWCUser','Get-CWCSessionGroup')
+    FunctionsToExport = @('Get-CWCAuditInfo','Get-CWCAuditLog','Connect-CWC','Get-CWCLauncURL','Add-CWCRemoteWorkforceRequiredRole','New-CWCRemoteWorkforceAssignment','New-CWCMFA','Get-CWCLastContact','Get-CWCSession','Get-CWCSessionDetail','Invoke-CWCCommand','Invoke-CWCWake','New-CWCAccessToken','Remove-CWCSession','Remove-CWCHostFromSession','Update-CWCCustomProperty','Update-CWCSessionName','Get-CWCSecurityConfigurationInfo','New-CWCUser','Remove-CWCUser','Update-CWCUser','Get-CWCSessionGroup')
 
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
     CmdletsToExport   = @()
