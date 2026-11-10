@@ -45,6 +45,11 @@ param(
     # failed login that counts toward the server's limits for the account.
     [switch]$MfaNegativeProbes,
 
+    # With -AllowWrites: test the unattended TOTP login (Connect-CWC -TotpSecret). Creates a temporary
+    # user with this role (it needs at least one permission, e.g. ViewSessionGroup) and a seed from
+    # New-CWCMFA, logs in, checks the cached reconnect and an expired login, then deletes the user.
+    [string]$TotpTestRole,
+
     # Only delete the notes earlier runs left on the test session, then exit.
     [switch]$CleanupOnly,
 
@@ -200,33 +205,32 @@ if ($LimitedCredential) {
 #endregion
 
 #region MFA login (#12)
+# Login cookies without their values: name, lifetime and flags only
+function Get-MfaCookieInfo {
+    $Connection = & $CWCModule { $script:CWCServerConnection }
+    @($Connection.WebSession.Cookies.GetCookies("https://$Server") | ForEach-Object {
+            [pscustomobject]@{
+                Name     = $_.Name
+                Session  = ($_.Expires -eq [datetime]::MinValue)
+                Expires  = if ($_.Expires -ne [datetime]::MinValue) { $_.Expires.ToUniversalTime().ToString('o') } else { $null }
+                Expired  = $_.Expired
+                Secure   = $_.Secure
+                HttpOnly = $_.HttpOnly
+            }
+        })
+}
+function Get-MfaConnectionInfo {
+    $Connection = & $CWCModule { $script:CWCServerConnection }
+    [pscustomobject]@{
+        AuthType      = $Connection.AuthType
+        HasAuthHeader = [bool]$Connection.Headers.authorization
+        HasToken      = [bool]$Connection.Headers.'x-anti-forgery-token'
+        HasPassword   = [bool]($Connection.Values | Where-Object { $_ -is [securestring] -or $_ -is [pscredential] })
+    }
+}
+
 if ($MfaUserName) {
     $MfaCredential = Get-Credential -UserName $MfaUserName -Message 'MFA account'
-    $MfaTotpSecret = Read-Host -AsSecureString -Prompt 'OPTIONAL: TOTP secret of the MFA account, for the unattended login test (Enter to skip)'
-
-    # Login cookies without their values: name, lifetime and flags only
-    function Get-MfaCookieInfo {
-        $Connection = & $CWCModule { $script:CWCServerConnection }
-        @($Connection.WebSession.Cookies.GetCookies("https://$Server") | ForEach-Object {
-                [pscustomobject]@{
-                    Name     = $_.Name
-                    Session  = ($_.Expires -eq [datetime]::MinValue)
-                    Expires  = if ($_.Expires -ne [datetime]::MinValue) { $_.Expires.ToUniversalTime().ToString('o') } else { $null }
-                    Expired  = $_.Expired
-                    Secure   = $_.Secure
-                    HttpOnly = $_.HttpOnly
-                }
-            })
-    }
-    function Get-MfaConnectionInfo {
-        $Connection = & $CWCModule { $script:CWCServerConnection }
-        [pscustomobject]@{
-            AuthType      = $Connection.AuthType
-            HasAuthHeader = [bool]$Connection.Headers.authorization
-            HasToken      = [bool]$Connection.Headers.'x-anti-forgery-token'
-            HasPassword   = [bool]($Connection.Values | Where-Object { $_ -is [securestring] -or $_ -is [pscredential] })
-        }
-    }
 
     # Raw failed logins, to record the result codes. Off by default: each one counts toward the server's
     # login limits for this account.
@@ -272,35 +276,68 @@ if ($MfaUserName) {
     if ($AllowWrites) {
         Invoke-Step 'Mfa.AddNote' { $null = Add-CWCSessionNote -GUID $TestSessionID -Group $Group -Note 'CWC smoke test note (MFA login)'; 'sent' }
     }
+}
 
-    # Unattended: Connect-CWC -TotpSecret, then a logged-out login must be noticed and replaced
-    if ($MfaTotpSecret.Length -gt 0) {
+# Unattended TOTP login with a temporary user whose seed this script creates (New-CWCMFA), then deletes.
+if ($TotpTestRole -and $AllowWrites) {
+    Disconnect-Test
+    Invoke-Step 'Totp.AdminConnect' { Connect-CWC -Server $Server -Credentials $AdminCredential -Force; 'connected' }
+    $TotpUserName = "cwc-smoke-totp-$([DateTime]::UtcNow.ToString('yyyyMMddHHmmss'))"
+    $TotpMfa = New-CWCMFA -DisplayName 'CWC smoke test' -UserAccount $TotpUserName -Confirm:$False
+    $TotpSeed = ConvertTo-SecureString $TotpMfa.OTP -AsPlainText -Force
+    # Random password the server should accept: mixed case, digit, symbol
+    $TotpPassword = ConvertTo-SecureString ("Sm0ke!" + [guid]::NewGuid().ToString('N')) -AsPlainText -Force
+    $TotpCredential = [pscredential]::new($TotpUserName, $TotpPassword)
+    $TotpMfa = $null
+
+    Invoke-Step 'Totp.CreateUser' {
+        $null = New-CWCUser -Credentials $TotpCredential -OTP (& $CWCModule { param($s) ConvertFrom-CWCSecureString $s } $TotpSeed) `
+            -DisplayName 'CWC smoke test (TOTP)' -Email 'cwc-smoke-totp@example.invalid' -SecurityGroups $TotpTestRole -ForcePassChange $False -Confirm:$False
+        [pscustomobject]@{ UserName = $TotpUserName; Role = $TotpTestRole }
+    }
+    if ($Results.Steps['Totp.CreateUser'].Ok) {
         Disconnect-Test
-        Invoke-Step 'Mfa.Totp.Connect' {
-            Connect-CWC -Server $Server -Credentials $MfaCredential -TotpSecret $MfaTotpSecret
+        Invoke-Step 'Totp.Connect' {
+            Connect-CWC -Server $Server -Credentials $TotpCredential -TotpSecret $TotpSeed
             Get-MfaConnectionInfo
         }
-    }
-    # The rest needs the TOTP login
-    if ($MfaTotpSecret.Length -gt 0 -and $Results.Steps['Mfa.Totp.Connect'].Ok) {
-        Invoke-Step 'Mfa.Totp.GetSession' { @(Get-CWCSession -Type Access -Group $Group -Limit 5).Count }
-        Invoke-Step 'Mfa.Totp.ExpiredLoginHint' {
-            # Log out on the server, as an expired login would behave
-            & $CWCModule { Invoke-CWCLogout -Connection $script:CWCServerConnection }
-            $Message = $null
-            try { $null = Get-CWCSession -Type Access -Group $Group -Limit 5 } catch { $Message = "$_" }
-            if (-not $Message) { throw 'Requests still worked after logout' }
-            [pscustomobject]@{ MentionsExpiredLogin = $Message -match 'MFA login has expired'; Message = $Message.Substring(0, [math]::Min(200, $Message.Length)) }
+        if ($Results.Steps['Totp.Connect'].Ok) {
+            Invoke-Step 'Totp.GetSession' { @(Get-CWCSession -Type Access -Group $Group -Limit 5).Count }
+            Invoke-Step 'Totp.CachedReconnect' {
+                $Before = & $CWCModule { $script:CWCServerConnection }
+                Connect-CWC -Server $Server -Credentials $TotpCredential -TotpSecret $TotpSeed
+                $After = & $CWCModule { $script:CWCServerConnection }
+                if (-not [object]::ReferenceEquals($Before, $After)) { throw 'Logged in again instead of reusing the cached login' }
+                'reused'
+            }
+            Invoke-Step 'Totp.ExpiredLoginHint' {
+                # Log out on the server, as an expired login would behave
+                & $CWCModule { Invoke-CWCLogout -Connection $script:CWCServerConnection }
+                $Message = $null
+                try { $null = Get-CWCSession -Type Access -Group $Group -Limit 5 } catch { $Message = "$_" }
+                if (-not $Message) { throw 'Requests still worked after logout' }
+                [pscustomobject]@{ MentionsExpiredLogin = $Message -match 'MFA login has expired'; Message = $Message.Substring(0, [math]::Min(200, $Message.Length)) }
+            }
+            Invoke-Step 'Totp.ReconnectAfterLogout' {
+                # Same 30-second step was just used: the module must wait for a fresh code
+                $Timer = [Diagnostics.Stopwatch]::StartNew()
+                $Before = & $CWCModule { $script:CWCServerConnection }
+                Connect-CWC -Server $Server -Credentials $TotpCredential -TotpSecret $TotpSeed
+                $After = & $CWCModule { $script:CWCServerConnection }
+                if ([object]::ReferenceEquals($Before, $After)) { throw 'Kept the logged-out login' }
+                [pscustomobject]@{ Sessions = @(Get-CWCSession -Type Access -Group $Group -Limit 5).Count; Seconds = [math]::Round($Timer.Elapsed.TotalSeconds, 1) }
+            }
         }
-        Invoke-Step 'Mfa.Totp.ReconnectAfterLogout' {
-            $Before = & $CWCModule { $script:CWCServerConnection }
-            Connect-CWC -Server $Server -Credentials $MfaCredential -TotpSecret $MfaTotpSecret
-            $After = & $CWCModule { $script:CWCServerConnection }
-            if ([object]::ReferenceEquals($Before, $After)) { throw 'Kept the logged-out login' }
-            @(Get-CWCSession -Type Access -Group $Group -Limit 5).Count
+
+        # Always delete the temporary user
+        Disconnect-Test
+        Invoke-Step 'Totp.RemoveUser' {
+            Connect-CWC -Server $Server -Credentials $AdminCredential -Force
+            $null = Remove-CWCUser -User $TotpUserName -Confirm:$False
+            'removed'
         }
     }
-    Remove-Variable -Name MfaTotpSecret -ErrorAction SilentlyContinue
+    Remove-Variable -Name TotpSeed, TotpPassword, TotpCredential -ErrorAction SilentlyContinue
 }
 #endregion
 

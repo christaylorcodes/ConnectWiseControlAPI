@@ -41,8 +41,8 @@ Planned as 0.5.0.0 (the module manifest already carries this version; 0.4.0.0 is
   `Add-CWCSessionNote`, `Send-CWCSessionMessage`, `Send-CWCToolboxItem`. On credentials connections the
   last three queue session events (AddedNote 32, QueuedMessage 45, QueuedTool 47) and take `-Group`
 - Live smoke test script `Tests/Live/Invoke-CWCLiveSmokeTest.ps1` (read-only by default; `-AllowWrites`
-  acts on one chosen test session and cleans up its notes; `-MfaUserName` tests the MFA login, optionally with a TOTP secret; `-MfaNegativeProbes` records the raw
-  failed-login codes)
+  acts on one chosen test session and cleans up its notes; `-MfaUserName` tests the MFA login; `-TotpTestRole` tests the TOTP login with a temporary user it
+  creates and deletes; `-MfaNegativeProbes` records the raw failed-login codes)
 - `Get-CWCRemoteWorkforceLaunchURL` (by `-GUID`, pipeline, or `-SessionName`), replacing `Get-CWCLauncURL`
 - `Get-CWCRemoteWorkforceSession` lists the calling user's assigned machines (`GetRemoteWorkforceSessions`)
 - `Initialize-CWCRemoteWorkforceSessionGroup` creates/repairs the extension's session group
