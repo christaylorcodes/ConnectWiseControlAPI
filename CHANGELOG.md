@@ -52,10 +52,12 @@ Planned as 0.5.0.0 (the module manifest already carries this version; 0.4.0.0 is
 - All API calls go through one internal helper that builds the endpoint and serializes arguments the same
   way everywhere (single items, empty lists and nested event entries)
 - HTTP 500 retries are limited to calls that are safe to repeat (reads, "set to value" updates). Before,
-  a 500 returned after the server had acted could queue a second command, wake, delete or user
+  a 500 returned after the server had acted could queue a second command, wake, delete or user. Retries
+  now wait 2, 4 and 8 seconds (3 retries); the old 2-32 ms waits gave a struggling server no time to
+  recover. A final 500 error now includes the server's error message
 - Session event type numbers are kept in one table, verified against a live server's web client
-- `Remove-CWCSession` prompts by default (`ConfirmImpact = 'High'`), confirms each session separately and
-  rejects an empty GUID
+- **Breaking:** `Remove-CWCSession` prompts by default (`ConfirmImpact = 'High'`), confirms each session
+  separately and rejects an empty GUID. Unattended scripts must add `-Confirm:$false`
 - `Connect-CWC` reports a failed login with its likely causes. Wrong credentials are not rejected with a
   401: the request runs as an anonymous user and fails with "Needs permission"
 - `Get-CWCLastContact` returns an error when no connection event is found, instead of the current time
@@ -80,7 +82,9 @@ Endpoint calls audited against the Control server's `Services/*.ashx` source:
 - Cookies set by the server were sent back as a `Set-Cookie` request header, so the server never received
   them; credentials connections now keep a web session (likely cause of "Invalid anti-forgery token", #22)
 - The anti-forgery token regex depended on JSON key order on the server's front page
-- On PS 6+, failed requests left auth headers on the request object kept in `$Error`; they are now stripped
+- Failed requests left auth headers on the request object kept in `$Error` (PS 5.1 and PS 6+); they are now stripped
+- `Invoke-CWCCommand` compares event times on the server's clock, so poll latency can no longer make it
+  skip a fast command's output or return a previous command's output
 - On PS 5.1, a non-JSON error body (IIS 401/404 page) threw while building the error and hid the real status
 - `Get-CWCLastContact -Quiet -Seconds` was off by the local UTC offset (mixed UTC and local DateTimes)
 - `Remove-CWCSession` packed multiple GUIDs into a single event entry; it now sends one entry per session

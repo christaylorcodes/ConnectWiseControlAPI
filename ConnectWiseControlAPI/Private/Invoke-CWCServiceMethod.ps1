@@ -66,8 +66,9 @@ function Invoke-CWCServiceMethod {
     if ($Sensitive) { Write-Verbose "POST $Endpoint (arguments redacted)" }
     else { Write-Verbose "POST $Endpoint $($WebRequestArguments.Body)" }
 
+    # 3 retries with 2, 4, 8 second waits
     $MaxRetry = 0
-    if ($Idempotent) { $MaxRetry = 5 }
+    if ($Idempotent) { $MaxRetry = 3 }
 
     Invoke-CWCWebRequest -Arguments $WebRequestArguments -MaxRetry $MaxRetry -SensitiveBody:$Sensitive
 }

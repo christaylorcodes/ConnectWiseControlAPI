@@ -83,6 +83,11 @@ publish/
 *credentials*
 *secret*
 !.github/SECURITY.md
+# Source, tests and docs are never secrets, even when a name matches (e.g. Test-CWCApiSecretConnection.ps1)
+!ConnectWiseControlAPI/**/*.ps1
+!ConnectWiseControlAPI/en-US/*-help.xml
+!Tests/**/*.ps1
+!Docs/**/*.md
 
 # ---- Claude Code ----
 .claude/settings.local.json

@@ -73,39 +73,40 @@
             break
         }
         catch {
-            # PS 6+ puts the HttpRequestMessage (with auth headers) on the error record, which stays in
-            # $Error. Strip the secrets from it.
+            # The failed request object (with auth headers) stays on the error record in $Error:
+            # HttpRequestMessage on PS 6+, HttpWebRequest on PS 5.1. Strip the secrets from it.
             # Type-name check: a [System.Net.Http.HttpRequestMessage] literal fails on PS 5.1 when the assembly isn't loaded.
-            if ($_.TargetObject -and $_.TargetObject.GetType().FullName -eq 'System.Net.Http.HttpRequestMessage') {
+            $FailedRequest = $_.TargetObject
+            if ($FailedRequest -and $FailedRequest.GetType().FullName -in 'System.Net.Http.HttpRequestMessage', 'System.Net.HttpWebRequest') {
                 foreach ($SecretHeader in 'Authorization', 'CTRLAuthHeader', 'x-anti-forgery-token') {
-                    $null = $_.TargetObject.Headers.Remove($SecretHeader)
+                    try { $null = $FailedRequest.Headers.Remove($SecretHeader) } catch { Write-Verbose "Could not strip $SecretHeader from the failed request." }
                 }
             }
 
-            # Retry on HTTP 500 (no response yields 0)
+            # Retry on HTTP 500 when the caller allows it (no response yields 0)
             $StatusCode = [int]$_.Exception.Response.StatusCode
-            if ($StatusCode -eq 500) {
-                if ($Retry -ge $MaxRetry) {
-                    return Write-Error "Max retries hit. Status: 500"
-                }
+            if ($StatusCode -eq 500 -and $Retry -lt $MaxRetry) {
                 $Retry++
-                # ConnectWise Manage recommended wait time
-                $Wait = [math]::pow(2, $Retry)
-                Write-Warning "Issue with request, status: 500"
-                Write-Warning "$($Retry)/$($MaxRetry) retries, waiting $($Wait)ms."
-                Start-Sleep -Milliseconds $Wait
+                # Exponential backoff: 2, 4, 8 ... seconds
+                $Wait = [math]::Pow(2, $Retry)
+                Write-Warning "HTTP 500 from the server; retry $Retry/$MaxRetry in $Wait seconds."
+                Start-Sleep -Seconds $Wait
                 continue
             }
 
-            # Build error message for non-retryable errors
+            # Build the error message, keeping the server's error body
             $ErrorMessage = @()
+            if ($StatusCode -eq 500 -and $MaxRetry -gt 0) { $ErrorMessage += "Max retries hit ($MaxRetry). Status: 500" }
 
             if ($_.Exception.Response -and $PSVersionTable.PSVersion.Major -lt 6) {
-                $ErrorStream = $_.Exception.Response.GetResponseStream()
-                $Reader = New-Object System.IO.StreamReader($ErrorStream)
-                # Error bodies are not always JSON (IIS 401/404 pages); don't let the parse mask the status.
+                # Error bodies are not always JSON (IIS 401/404 pages) and the stream may be unreadable;
+                # don't let reading or parsing it mask the status.
                 $ErrBody = $null
-                try { $ErrBody = $Reader.ReadToEnd() | ConvertFrom-Json } catch { $ErrBody = $null }
+                try {
+                    $Reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
+                    $ErrBody = $Reader.ReadToEnd() | ConvertFrom-Json
+                }
+                catch { $ErrBody = $null }
 
                 if ($ErrBody.code) {
                     $ErrorMessage += 'An exception has been thrown.'
@@ -134,8 +135,9 @@
                 }
             }
 
-            if ($ErrorMessage.Length -lt 1) { $ErrorMessage = $_ }
-            else { $ErrorMessage += $_.ScriptStackTrace }
+            # Nothing beyond the retry line: fall back to the exception itself
+            if ($ErrorMessage.Count -le 1) { $ErrorMessage += "$_" }
+            $ErrorMessage += $_.ScriptStackTrace
 
             return Write-Error ($ErrorMessage | Out-String)
         }

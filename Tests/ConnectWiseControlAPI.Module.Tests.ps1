@@ -359,3 +359,20 @@ Describe 'Parameter Validation' {
         }
     }
 }
+
+Describe 'Repository' {
+    # A .gitignore pattern once hid Private/Test-CWCApiSecretConnection.ps1 (matched *secret*), so the
+    # module only worked on machines that already had the file.
+    It 'does not git-ignore any module source file' {
+        $RepoRoot = Split-Path $PSScriptRoot -Parent
+        if (-not (Get-Command git -ErrorAction SilentlyContinue) -or -not (Test-Path (Join-Path $RepoRoot '.git'))) {
+            Set-ItResult -Skipped -Because 'git or the repository is not available'
+            return
+        }
+        $SourceFiles = Get-ChildItem (Join-Path $RepoRoot 'ConnectWiseControlAPI') -Recurse -File |
+            ForEach-Object { $_.FullName.Substring($RepoRoot.Length + 1).Replace('\', '/') }
+        # Paths as arguments, not --stdin: piped lines carry a trailing CR on Windows, which defeats the patterns
+        $Ignored = @(git -C $RepoRoot check-ignore --no-index -- $SourceFiles | Where-Object { $_ })
+        $Ignored | Should -BeNullOrEmpty
+    }
+}

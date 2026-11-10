@@ -31,8 +31,9 @@ $RedundantSessionColl = Get-CWCSession -Type Access -Group $GroupName |
 Group-Object -Property Name |
 Where-Object -Property Count -gt 1 |
 ForEach-Object {
-    # Newest first, so Skip 1 keeps the most recently connected session
-    $_.Group | Sort-Object -Property LastConnectedEventTime -Descending |
+    # LastConnectedEventTime is seconds since the last connection: smallest first, so Skip 1 keeps
+    # the most recently connected session
+    $_.Group | Sort-Object -Property { [double]$_.LastConnectedEventTime } |
     Select-Object -Skip 1
 }
 

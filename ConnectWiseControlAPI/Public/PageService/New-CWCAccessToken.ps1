@@ -9,7 +9,8 @@
 		permission in -Group. Treat the token as a secret.
 
 	.PARAMETER Group
-		Session group containing the session. Defaults to 'All Machines'.
+		Session group containing the session: a name, or the path parts of a nested group
+		(e.g. 'Clients','Acme'). Defaults to 'All Machines'.
 
 	.PARAMETER GUID
 		Session ID.
@@ -26,7 +27,7 @@
 	#>
 	[CmdletBinding()]
 	param (
-		[string]$Group = 'All Machines',
+		[string[]]$Group = 'All Machines',
 		[Parameter(Mandatory = $True)]
 		[guid]$GUID
 	)

@@ -46,8 +46,10 @@
     }
 
     # Poll for the command's output: the first RanCommand event newer than the queued command.
+    # Event times are compared on the server's clock (response BaseTime minus elapsed ms), so the
+    # round-trip time of each poll doesn't shift them.
     $TimeOutDateTime = (Get-Date).AddMilliseconds($TimeOut).AddSeconds(1)
-    $QueuedAtUtc = $null
+    $QueuedAtServerMs = $null
     do {
         # Events only: this polls every second against a rate-limited endpoint.
         try { $SessionDetails = Get-CWCSessionDetail -Group $Group -GUID $GUID -Include 'Events' -ErrorAction Stop }
@@ -56,18 +58,20 @@
             return
         }
 
-        if (-not $QueuedAtUtc) {
+        $BaseTime = [double]$SessionDetails.BaseTime
+
+        if ($null -eq $QueuedAtServerMs) {
             # The most recent queued command (smallest elapsed time) is the one just sent
             $QueuedEvent = $SessionDetails.Events | Where-Object { $_.EventType -eq $QueuedCommandEventType } |
                 Sort-Object { [double]$_.Time } | Select-Object -First 1
-            if ($QueuedEvent) { $QueuedAtUtc = ConvertFrom-CWCEventTime -SessionEvent $QueuedEvent }
+            if ($QueuedEvent) { $QueuedAtServerMs = $BaseTime - [double]$QueuedEvent.Time }
         }
 
-        if ($QueuedAtUtc) {
+        if ($null -ne $QueuedAtServerMs) {
             $OutputEvent = $SessionDetails.Events | Where-Object {
-                $_.EventType -eq $RanCommandEventType -and $_.Time -and
-                (ConvertFrom-CWCEventTime -SessionEvent $_) -gt $QueuedAtUtc
-            } | Select-Object -First 1
+                $_.EventType -eq $RanCommandEventType -and $null -ne $_.Time -and
+                ($BaseTime - [double]$_.Time) -gt $QueuedAtServerMs
+            } | Sort-Object { [double]$_.Time } -Descending | Select-Object -First 1
             if ($OutputEvent) {
                 Write-Verbose $OutputEvent.Data
                 return $OutputEvent.Data -split '[\r\n]' | Where-Object { $_ -and $_ -ne "C:\WINDOWS\system32>$Command" }
