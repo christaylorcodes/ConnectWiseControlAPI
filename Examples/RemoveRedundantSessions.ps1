@@ -27,11 +27,12 @@ Import-Module 'ConnectWiseControlAPI'
 Connect-CWC -Server $Server -Credentials $Credentials
 
 # Search for multiple sessions for the same machine, and collect all but the last connected one
-$RedundantSessionColl = Get-CWCSession -Type Access -Group $GroupNameAll |
+$RedundantSessionColl = Get-CWCSession -Type Access -Group $GroupName |
 Group-Object -Property Name |
 Where-Object -Property Count -gt 1 |
 ForEach-Object {
-    $_.Group | Sort-Object -Property LastConnectedEventTime |
+    # Newest first, so Skip 1 keeps the most recently connected session
+    $_.Group | Sort-Object -Property LastConnectedEventTime -Descending |
     Select-Object -Skip 1
 }
 

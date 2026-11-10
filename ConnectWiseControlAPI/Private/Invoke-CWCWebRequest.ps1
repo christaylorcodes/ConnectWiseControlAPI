@@ -141,9 +141,5 @@
         }
     }
 
-    # OutFile: the response body was saved to disk (used by WIP/Invoke-CWCSession)
-    if ($Arguments.OutFile) {
-        return $Result
-    }
     return $Result.content | ConvertFrom-Json
 }

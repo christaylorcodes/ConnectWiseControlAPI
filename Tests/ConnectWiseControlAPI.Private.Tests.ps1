@@ -272,19 +272,6 @@ Describe 'Invoke-CWCWebRequest' {
             }
         }
 
-        It 'returns raw result when OutFile is specified' {
-            InModuleScope 'ConnectWiseControlAPI' {
-                $mockResponse = [PSCustomObject]@{
-                    Content = 'binary-data'
-                    Headers = @{}
-                }
-                Mock Invoke-WebRequest { $mockResponse }
-                $arguments = @{ Endpoint = 'Services/Test.ashx'; Method = 'Get'; OutFile = 'C:\temp\test.bin' }
-                $result = Invoke-CWCWebRequest -Arguments $arguments
-                $result | Should -Be $mockResponse
-            }
-        }
-
         It 'does not store response Set-Cookie as a request header (issue #22)' {
             InModuleScope 'ConnectWiseControlAPI' {
                 Mock Invoke-WebRequest {
