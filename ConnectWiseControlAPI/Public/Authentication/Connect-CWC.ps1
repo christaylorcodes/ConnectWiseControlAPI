@@ -152,7 +152,7 @@ function Connect-CWC {
     if ($PSCmdlet.ParameterSetName -eq 'TotpSecret') {
         if ($TotpSecret.Length -eq 0) { throw 'TotpSecret cannot be empty.' }
         # Check the secret decodes before any request (and before a wait for a fresh code)
-        $Key = ConvertFrom-CWCBase32 -Text ((ConvertFrom-CWCSecureString $TotpSecret) -replace '^\s*ms:', '')
+        $Key = Get-CWCTotpKey -Secret $TotpSecret
         [array]::Clear($Key, 0, $Key.Length)
     }
 

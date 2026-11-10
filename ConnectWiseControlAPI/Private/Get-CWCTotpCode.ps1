@@ -37,7 +37,7 @@ function Get-CWCTotpCode {
     $Hash = $null
     $Hmac = $null
     try {
-        $Key = ConvertFrom-CWCBase32 -Text ((ConvertFrom-CWCSecureString $Secret) -replace '^\s*ms:', '')
+        $Key = Get-CWCTotpKey -Secret $Secret
 
         # The counter is the 30-second step number as a big-endian 64-bit integer
         $Counter = [BitConverter]::GetBytes([int64][math]::Floor($UnixTime / 30))

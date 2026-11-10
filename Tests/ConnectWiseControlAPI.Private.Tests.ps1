@@ -522,6 +522,28 @@ Describe 'Get-CWCTotpCode' {
         }
     }
 
+    It 'accepts an otpauth:// link and any type prefix' -TestCases @(
+        @{ Text = 'otpauth://totp/CW%20Control:user?secret=GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ&issuer=x' }
+        @{ Text = 'totp:GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ' }
+    ) {
+        param($Text)
+        InModuleScope 'ConnectWiseControlAPI' -Parameters @{ Text = $Text } {
+            param($Text)
+            $Secret = ConvertTo-SecureString $Text -AsPlainText -Force
+            Get-CWCTotpCode -Secret $Secret -UnixTime 59 | Should -Be '287082'
+        }
+    }
+
+    It 'names the kind of bad character, not the character itself, for digits' {
+        InModuleScope 'ConnectWiseControlAPI' {
+            $Secret = ConvertTo-SecureString 'GEZD9NBV' -AsPlainText -Force
+            $err = $null
+            try { Get-CWCTotpCode -Secret $Secret -UnixTime 59 } catch { $err = $_ }
+            "$err" | Should -Match 'digit 0, 1, 8 or 9'
+            "$err" | Should -Not -Match 'GEZD'
+        }
+    }
+
     It 'rejects a secret that decodes to nothing' {
         InModuleScope 'ConnectWiseControlAPI' {
             $Secret = ConvertTo-SecureString 'ms:A' -AsPlainText -Force

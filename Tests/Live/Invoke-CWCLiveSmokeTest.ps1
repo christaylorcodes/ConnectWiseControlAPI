@@ -280,6 +280,9 @@ if ($MfaUserName) {
             Connect-CWC -Server $Server -Credentials $MfaCredential -TotpSecret $MfaTotpSecret
             Get-MfaConnectionInfo
         }
+    }
+    # The rest needs the TOTP login
+    if ($MfaTotpSecret.Length -gt 0 -and $Results.Steps['Mfa.Totp.Connect'].Ok) {
         Invoke-Step 'Mfa.Totp.GetSession' { @(Get-CWCSession -Type Access -Group $Group -Limit 5).Count }
         Invoke-Step 'Mfa.Totp.ExpiredLoginHint' {
             # Log out on the server, as an expired login would behave

@@ -25,7 +25,12 @@ function ConvertFrom-CWCBase32 {
         $Value = $Alphabet.IndexOf($Char)
         if ($Value -lt 0) {
             [array]::Clear($Bytes, 0, $Bytes.Length)
-            throw 'The TOTP secret is not valid Base32 (letters A-Z and digits 2-7, optionally prefixed with "ms:").'
+            # Name the kind of character, never the secret: digits and letters could reveal part of it
+            $Found = if ([char]::IsDigit($Char)) { 'a digit 0, 1, 8 or 9' }
+            elseif ([char]::IsLetter($Char)) { 'a non-ASCII letter' }
+            else { "the character '$Char'" }
+            throw ("The TOTP secret is not valid Base32: it contains $Found. Use the authenticator secret " +
+                '(letters A-Z and digits 2-7), optionally as "ms:<secret>" or an otpauth:// link.')
         }
         $Buffer = ($Buffer -shl 5) -bor $Value
         $Bits += 5
