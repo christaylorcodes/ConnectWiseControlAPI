@@ -186,12 +186,23 @@ Describe 'Connect-CWC' {
             }
         }
 
-        It 'reuses the cached connection for the same server and auth method' {
+        It 'reuses the cached connection for the same server, auth method and user' {
             InModuleScope 'ConnectWiseControlAPI' -Parameters @{ cred = $cred } {
                 param($cred)
+                $Basic = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("$($cred.UserName):$($cred.GetNetworkCredential().Password)"))
+                $script:CWCServerConnection = @{ Server = 'existing.server.com'; AuthType = 'Credentials'; Headers = @{ authorization = "Basic $Basic" } }
                 Connect-CWC -Server 'existing.server.com' -Credentials $cred
                 Should -Invoke Invoke-WebRequest -Times 0
                 $script:CWCServerConnection.Server | Should -Be 'existing.server.com'
+            }
+        }
+
+        It 'reconnects for a different user on the same server' {
+            InModuleScope 'ConnectWiseControlAPI' -Parameters @{ cred = $cred } {
+                param($cred)
+                $script:CWCServerConnection = @{ Server = 'existing.server.com'; AuthType = 'Credentials'; Headers = @{ authorization = 'Basic b3RoZXI6dXNlcg==' } }
+                Connect-CWC -Server 'existing.server.com' -Credentials $cred
+                Should -Invoke Invoke-WebRequest -Times 1
             }
         }
 
@@ -308,14 +319,24 @@ Describe 'Connect-CWC -ApiSecret' {
         }
     }
 
-    It 'keeps the previous connection when a -Force reconnect fails' {
+    It 'keeps the previous connection when a -Force refresh of the same connection fails' {
         InModuleScope 'ConnectWiseControlAPI' -Parameters @{ secret = $secret } {
             param($secret)
-            $previous = @{ Server = 'old.example.com'; AuthType = 'Credentials'; Headers = @{} }
-            $script:CWCServerConnection = $previous
+            $Copy = $secret.Copy()
+            $script:CWCServerConnection = @{ Server = 'old.example.com'; AuthType = 'ApiSecret'; ApiSecret = $Copy; Headers = @{} }
             Mock Invoke-CWCWebRequest { throw 'Unauthorized' }
-            Connect-CWC -Server 'new.example.com' -ApiSecret $secret -Force -ErrorAction SilentlyContinue
+            Connect-CWC -Server 'old.example.com' -ApiSecret $secret -Force -ErrorAction SilentlyContinue
             $script:CWCServerConnection.Server | Should -Be 'old.example.com'
+        }
+    }
+
+    It 'is left disconnected when switching to another server fails, so commands cannot reach the old one' {
+        InModuleScope 'ConnectWiseControlAPI' -Parameters @{ secret = $secret } {
+            param($secret)
+            $script:CWCServerConnection = @{ Server = 'old.example.com'; AuthType = 'Credentials'; Headers = @{} }
+            Mock Invoke-CWCWebRequest { throw 'Unauthorized' }
+            Connect-CWC -Server 'new.example.com' -ApiSecret $secret -ErrorAction SilentlyContinue
+            $script:CWCServerConnection | Should -BeNullOrEmpty
         }
     }
 
@@ -498,13 +519,11 @@ Describe 'Session detail polling callers' {
 
     BeforeEach { Set-CWCTestConnection }
 
-    It 'Get-CWCLastContact requests only Events and Connections' {
+    It 'Get-CWCLastContact requests only Events' {
         InModuleScope 'ConnectWiseControlAPI' {
-            Mock Get-CWCSessionDetail { @{ Events = @(@{ EventType = 10; Time = 0 }); Connections = @() } }
+            Mock Get-CWCSessionDetail { @{ Events = @(@{ EventType = 10; Time = 0 }) } }
             $null = Get-CWCLastContact -GUID ([guid]::NewGuid()) -Quiet
-            Should -Invoke Get-CWCSessionDetail -Times 1 -ParameterFilter {
-                ($Include | Sort-Object) -join ',' -eq 'Connections,Events'
-            }
+            Should -Invoke Get-CWCSessionDetail -Times 1 -ParameterFilter { $Include -eq 'Events' }
         }
     }
 
@@ -575,6 +594,18 @@ Describe 'Get-CWCLastContact' {
 
         It 'returns false with Quiet when last contact is older than Seconds' {
             InModuleScope 'ConnectWiseControlAPI' {
+                Get-CWCLastContact -GUID ([guid]::NewGuid()) -Quiet -Seconds 60 | Should -BeFalse
+            }
+        }
+
+        It 'ignores a technician leaving after the guest disconnected' {
+            InModuleScope 'ConnectWiseControlAPI' {
+                Mock Get-CWCSessionDetail {
+                    @{ Events = @(
+                            @{ EventType = 11; Time = 5000; Host = 'Technician'; ConnectionID = 'host1' }
+                            @{ EventType = 11; Time = 120000; Host = ''; ConnectionID = 'guest1' }
+                        ) }
+                }
                 Get-CWCLastContact -GUID ([guid]::NewGuid()) -Quiet -Seconds 60 | Should -BeFalse
             }
         }

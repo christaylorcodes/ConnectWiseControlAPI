@@ -49,9 +49,11 @@ function Get-CWCAuditLog {
     }
 
     # Server signature: QueryAuditLog(minTime, maxTime, sessionName, sessionEventTypes[], securityEventTypes[])
+    # Invariant culture: some cultures use another calendar (th-TH) or time separator.
+    $Invariant = [Globalization.CultureInfo]::InvariantCulture
     Invoke-CWCServiceMethod -Service AuditService -Method QueryAuditLog -Idempotent -Arguments @(
-        $StartDate.ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ss.fffZ'),
-        $EndDate.ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ss.fffZ'),
+        $StartDate.ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ss.fffZ', $Invariant),
+        $EndDate.ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ss.fffZ', $Invariant),
         $SessionName,
         $EventTypes,
         $SecurityTypes

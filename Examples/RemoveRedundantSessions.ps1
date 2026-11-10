@@ -33,7 +33,8 @@ Where-Object -Property Count -gt 1 |
 ForEach-Object {
     # LastConnectedEventTime is seconds since the last connection: smallest first, so Skip 1 keeps
     # the most recently connected session
-    $_.Group | Sort-Object -Property { [double]$_.LastConnectedEventTime } |
+    # A session that never connected (no time) sorts last, so it is never the one kept
+    $_.Group | Sort-Object -Property { if ($null -eq $_.LastConnectedEventTime) { [double]::MaxValue } else { [double]$_.LastConnectedEventTime } } |
     Select-Object -Skip 1
 }
 

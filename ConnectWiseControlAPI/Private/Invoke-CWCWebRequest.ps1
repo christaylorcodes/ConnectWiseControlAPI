@@ -78,6 +78,10 @@
                 foreach ($SecretHeader in 'Authorization', 'CTRLAuthHeader', 'x-anti-forgery-token') {
                     try { $null = $FailedRequest.Headers.Remove($SecretHeader) } catch { Write-Verbose "Could not strip $SecretHeader from the failed request." }
                 }
+                # PS 6+ also keeps the request body on the HttpRequestMessage (e.g. a new user's password)
+                if ($SensitiveBody -and $FailedRequest.PSObject.Properties['Content']) {
+                    try { $FailedRequest.Content = $null } catch { Write-Verbose 'Could not strip the body from the failed request.' }
+                }
             }
 
             # The server's error body, e.g. {"errorType":"SecurityException","message":"Needs permission"}
@@ -107,7 +111,7 @@
 
             # Build the error message, keeping the server's error body
             $ErrorMessage = @()
-            if ($StatusCode -eq 500 -and $Retry -gt 0) { $ErrorMessage += "Max retries hit ($MaxRetry). Status: 500" }
+            if ($StatusCode -eq 500 -and $Retry -gt 0 -and $Retry -ge $MaxRetry) { $ErrorMessage += "Max retries hit ($MaxRetry). Status: 500" }
             elseif ($StatusCode -gt 0) { $ErrorMessage += "HTTP $StatusCode" }
             if ($ServerMessage) { $ErrorMessage += $ServerMessage }
             else { $ErrorMessage += "$_" }

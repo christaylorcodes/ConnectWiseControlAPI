@@ -15,7 +15,8 @@ function Connect-CWC {
         functions return an error telling you to connect with -Credentials.
 
         The connection is validated before it is cached. An existing connection to the same server with
-        the same method is reused unless -Force is given; a different server or method always reconnects.
+        the same method and identity (user or secret) is reused unless -Force is given; anything else
+        reconnects.
 
     .PARAMETER Server
         Control server hostname, e.g. control.example.com. A leading http(s):// is removed. HTTPS is always used.
@@ -31,8 +32,9 @@ function Connect-CWC {
         extension's RESTfulAllowedOrigin setting if that setting is configured.
 
     .PARAMETER Force
-        Replace an existing cached connection. If the new connection fails validation, the previous
-        connection is kept.
+        Reconnect even when the cached connection is for the same server, method and identity. If that
+        refresh fails, the previous connection is kept. A failed connection to a different server, method
+        or identity leaves the module disconnected, so later commands can't reach the old server.
 
     .EXAMPLE
         Connect-CWC -Server 'control.example.com' -Credentials (Get-Credential)
@@ -78,21 +80,34 @@ function Connect-CWC {
     $Server = $Server -replace("http.*:\/\/",'')
     $RequestedAuthType = $PSCmdlet.ParameterSetName
 
-    # Reuse the cached connection only when it is for the same server and auth method. A request for a
-    # different one always reconnects: keeping the old one would send later commands (including deletes)
-    # to the wrong server.
-    if ($script:CWCServerConnection -and !$Force) {
+    if ($RequestedAuthType -eq 'Credentials') {
+        $EncodedCredentials = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes("$($Credentials.UserName):$($Credentials.GetNetworkCredential().Password)"))
+    }
+
+    # Is the cached connection the same server, auth method and identity (user or secret) as requested?
+    $SameAsCached = $False
+    if ($script:CWCServerConnection) {
         $Cached = $script:CWCServerConnection
         $CachedAuthType = if ($Cached.AuthType) { $Cached.AuthType } else { 'Credentials' }
         if ($Cached.Server -eq $Server -and $CachedAuthType -eq $RequestedAuthType) {
-            Write-Verbose "Using cached Authentication information."
-            return
+            if ($RequestedAuthType -eq 'Credentials') { $SameAsCached = $Cached.Headers.authorization -eq "Basic $EncodedCredentials" }
+            else { $SameAsCached = (ConvertFrom-CWCSecureString $Cached.ApiSecret) -eq (ConvertFrom-CWCSecureString $ApiSecret) }
         }
-        Write-Verbose "Replacing the connection to '$($Cached.Server)' ($CachedAuthType) with '$Server' ($RequestedAuthType)."
     }
 
-    # Kept so a failed -Force reconnect leaves the previous working connection in place
-    $PreviousConnection = $script:CWCServerConnection
+    # Reuse the cached connection only for the same server, method and identity. Anything else reconnects:
+    # keeping the old connection would send later commands (including deletes) to the wrong server, or
+    # run them as the wrong user.
+    if ($SameAsCached -and !$Force) {
+        Write-Verbose "Using cached Authentication information."
+        return
+    }
+
+    # On failure, restore the previous connection only when this was a refresh of that same connection
+    # (-Force). After a failed switch to another server, method or identity, stay disconnected.
+    $PreviousConnection = $null
+    if ($SameAsCached) { $PreviousConnection = $script:CWCServerConnection }
+    $script:CWCServerConnection = $null
 
     if ($RequestedAuthType -eq 'ApiSecret') {
         if ($ApiSecret.Length -eq 0) {
@@ -131,7 +146,6 @@ function Connect-CWC {
         return
     }
 
-    $EncodedCredentials = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes("$($Credentials.UserName):$($Credentials.GetNetworkCredential().Password)"))
     $Headers = @{
         'authorization' = "Basic $EncodedCredentials"
         'content-type' = "application/json; charset=utf-8"
@@ -145,6 +159,7 @@ function Connect-CWC {
         $FrontPage = Invoke-WebRequest -Uri $Headers.origin -Headers $Headers -UseBasicParsing -SessionVariable 'WebSession'
     }
     catch {
+        $script:CWCServerConnection = $PreviousConnection
         Write-Error "Failed to connect to Control server 'https://$Server': $_"
         return
     }

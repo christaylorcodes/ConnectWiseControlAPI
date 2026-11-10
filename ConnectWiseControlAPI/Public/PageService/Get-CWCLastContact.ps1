@@ -48,7 +48,7 @@ function Get-CWCLastContact {
         return Write-Error (Get-CWCAuthModeMessage -Command $MyInvocation.MyCommand.Name -Required Credentials) -ErrorId 'CWC.AuthModeMismatch' -Category InvalidOperation
     }
 
-    try { $SessionDetails = Get-CWCSessionDetail -Group $Group -GUID $GUID -Include 'Events', 'Connections' -ErrorAction Stop }
+    try { $SessionDetails = Get-CWCSessionDetail -Group $Group -GUID $GUID -Include 'Events' -ErrorAction Stop }
     catch {
         Write-Error $_
         return
@@ -59,11 +59,10 @@ function Get-CWCLastContact {
         return $null
     }
 
-    # The latest connect/disconnect event of a guest connection that is no longer open
-    $GuestSessionConnections = $SessionDetails.Connections | Where-Object { $_.ParticipantName }
+    # The guest's latest connect/disconnect event. Guest events have no Host; a technician's carry their
+    # name, so a technician joining or leaving doesn't count as the machine's last contact.
     $LatestEvent = $SessionDetails.Events | Where-Object {
-        $_.EventType -in ($script:CWCSessionEventType.Connected, $script:CWCSessionEventType.Disconnected) -and
-        $_.ConnectionID -NotIn $GuestSessionConnections.ConnectionID
+        $_.EventType -in ($script:CWCSessionEventType.Connected, $script:CWCSessionEventType.Disconnected) -and -not $_.Host
     } | Sort-Object { [double]$_.Time } | Select-Object -First 1
     if (-not $LatestEvent) { return Write-Error 'Unable to determine last contact.' }
 

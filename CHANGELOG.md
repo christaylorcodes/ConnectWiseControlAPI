@@ -23,9 +23,11 @@ Planned as 0.5.0.0 (the module manifest already carries this version; 0.4.0.0 is
   (`Invoke-CWCCommand` queues only on API-secret connections; output is not retrieved); other functions
   return an error naming the required auth method. `-Origin` overrides the Origin header for servers
   with `RESTfulAllowedOrigin` set
-- `Connect-CWC` keeps the previous connection when a reconnect fails. Asking for a different server or
-  auth method now connects to it even without `-Force`; before, the old connection was silently kept and
-  later commands went to the previous server
+- `Connect-CWC` reuses a cached connection only for the same server, auth method and identity (user or
+  secret); anything else reconnects, even without `-Force`. Before, the old connection was silently kept
+  and later commands went to the previous server or ran as the previous user. If connecting to a
+  different server, method or identity fails, the module is left disconnected; a failed `-Force` refresh
+  of the same connection keeps it
 - `Find-CWCSession` (`-Filter`/`-Name`/`-GUID`; API secret only), `New-CWCSession`,
   `Add-CWCSessionNote`, `Send-CWCSessionMessage`, `Send-CWCToolboxItem`. On credentials connections the
   last three queue session events (AddedNote 32, QueuedMessage 45, QueuedTool 47) and take `-Group`
