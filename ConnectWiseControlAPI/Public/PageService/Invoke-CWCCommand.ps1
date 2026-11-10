@@ -66,13 +66,19 @@ function Invoke-CWCCommand {
     $FormattedCommand = ($CommandLines | Out-String) -replace "`r`n", "`n"
 
     # Queueing a command is not idempotent, so it is never retried
-    if (Test-CWCApiSecretConnection) {
-        # RESTful API Manager: SendCommandToSession(Guid sessionID, string command) queues the same
-        # QueuedCommand event. Not scoped by group, so -Group is ignored.
-        $null = Invoke-CWCServiceMethod -RestApi -Method SendCommandToSession -Arguments @($GUID.ToString(), $FormattedCommand)
+    try {
+        if (Test-CWCApiSecretConnection) {
+            # RESTful API Manager: SendCommandToSession(Guid sessionID, string command) queues the same
+            # QueuedCommand event. Not scoped by group, so -Group is ignored.
+            $null = Invoke-CWCServiceMethod -RestApi -Method SendCommandToSession -Arguments @($GUID.ToString(), $FormattedCommand) -ErrorAction Stop
+        }
+        else {
+            Add-CWCSessionEvent -Group $Group -Entry @{ SessionID = $GUID; EventType = $QueuedCommandEventType; Data = $FormattedCommand } -ErrorAction Stop
+        }
     }
-    else {
-        Add-CWCSessionEvent -Group $Group -Entry @{ SessionID = $GUID; EventType = $QueuedCommandEventType; Data = $FormattedCommand }
+    catch {
+        # Not queued: don't report success or poll for output that will never come
+        return Write-Error $_
     }
     if ($NoWait) { return }
 

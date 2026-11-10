@@ -20,9 +20,11 @@
     $IsApiSecretConnection = Test-CWCApiSecretConnection
     $IsRestApiEndpoint = $Arguments.Endpoint -like "App_Extensions/$($script:CWCRestApiExtensionID)/*"
     if ($IsApiSecretConnection -ne $IsRestApiEndpoint) {
-        # Name the public function the user called, not the private request helpers.
-        $Caller = Get-PSCallStack | Select-Object -Skip 1 -ExpandProperty Command |
-            Where-Object { $_ -notin 'Invoke-CWCServiceMethod', 'Invoke-CWCWebRequest', 'Add-CWCSessionEvent' } | Select-Object -First 1
+        # Name the public function the user called: the outermost exported function on the call stack
+        # (not a private helper, nor a public function it calls internally).
+        $PublicFunctions = @($ExecutionContext.SessionState.Module.ExportedFunctions.Keys)
+        $Caller = Get-PSCallStack | Select-Object -ExpandProperty Command |
+            Where-Object { $_ -in $PublicFunctions } | Select-Object -Last 1
         if (-not $Caller -or $Caller -eq '<ScriptBlock>') { $Caller = 'This command' }
         $Required = if ($IsApiSecretConnection) { 'Credentials' } else { 'ApiSecret' }
         return Write-Error (Get-CWCAuthModeMessage -Command $Caller -Required $Required) -ErrorId 'CWC.AuthModeMismatch' -Category InvalidOperation
@@ -87,11 +89,14 @@
                 catch { $ServerMessage = $null }
             }
 
-            # Retry on HTTP 500 when the caller allows it (no response yields 0). Control also answers
-            # permission failures (including a wrong password) with 500 + SecurityException: retrying
-            # those only delays the error.
-            $IsPermissionFailure = "$ServerMessage" -match 'SecurityException'
-            if ($StatusCode -eq 500 -and -not $IsPermissionFailure -and $Retry -lt $MaxRetry) {
+            # Retry on HTTP 500 when the caller allows it (no response yields 0). Control answers
+            # application exceptions with 500 + {"errorType": ...}: permission failures (including a wrong
+            # password), bad arguments, missing sessions. Those fail the same way again, so only retry a
+            # 500 without an errorType (a server fault) or one that names a rate limit or timeout.
+            $ServerErrorType = $null
+            try { $ServerErrorType = ("$ServerMessage" | ConvertFrom-Json -ErrorAction Stop).errorType } catch { $ServerErrorType = $null }
+            $IsTransient = -not $ServerErrorType -or "$ServerErrorType" -match 'RateLimit|Timeout|Throttl'
+            if ($StatusCode -eq 500 -and $IsTransient -and $Retry -lt $MaxRetry) {
                 $Retry++
                 # Exponential backoff: 2, 4, 8 ... seconds
                 $Wait = [math]::Pow(2, $Retry)

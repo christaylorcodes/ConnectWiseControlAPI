@@ -42,7 +42,8 @@ function Remove-CWCSessionNote {
     .LINK
         https://github.com/christaylorcodes/ConnectWiseControlAPI
     #>
-    [CmdletBinding(SupportsShouldProcess, DefaultParameterSetName = 'ById')]
+    # ConfirmImpact High: removed notes can't be restored, and -All can remove many at once
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High', DefaultParameterSetName = 'ById')]
     param(
         [Parameter(Mandatory = $True)]
         [Alias('SessionID')]

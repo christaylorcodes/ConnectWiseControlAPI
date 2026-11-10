@@ -337,6 +337,21 @@ Describe 'Invoke-CWCWebRequest' {
             Mock Start-Sleep -ModuleName 'ConnectWiseControlAPI' {}
         }
 
+        It 'does not retry an application exception (errorType body), and keeps the server message' {
+            InModuleScope 'ConnectWiseControlAPI' {
+                Mock Invoke-WebRequest {
+                    $record = & $script:NewHttp500ErrorRecord
+                    $record.ErrorDetails = [System.Management.Automation.ErrorDetails]::new('{"errorType":"SecurityException","message":"Needs permission"}')
+                    throw $record
+                }
+                $arguments = @{ Endpoint = 'Services/Test.ashx'; Method = 'Get' }
+                $result = Invoke-CWCWebRequest -Arguments $arguments -MaxRetry 3 2>&1
+                Should -Invoke Invoke-WebRequest -Times 1 -Exactly
+                "$result" | Should -Match 'Needs permission'
+                $result.FullyQualifiedErrorId | Should -BeLike 'CWC.Http500*'
+            }
+        }
+
         It 'retries on HTTP 500 and succeeds' {
             InModuleScope 'ConnectWiseControlAPI' {
                 $script:RetryCallCount = 0

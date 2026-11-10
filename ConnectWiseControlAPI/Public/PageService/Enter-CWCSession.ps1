@@ -63,8 +63,12 @@ function Enter-CWCSession {
         [Alias('SessionID')]
         [guid]$GUID,
 
-        [ValidateSet('Support', 'Meeting', 'Access')]
-        [string]$Type = 'Access',
+        # Bound from piped sessions' SessionType, which the server sends as a number (Support 0,
+        # Meeting 1, Access 2); a name works too.
+        [Parameter(ValueFromPipelineByPropertyName = $True)]
+        [Alias('SessionType')]
+        [ValidateScript({ "$_" -in 'Support', 'Meeting', 'Access', '0', '1', '2' })]
+        $Type = 'Access',
 
         [string[]]$Group,
 
@@ -93,9 +97,13 @@ function Enter-CWCSession {
             return Write-Error 'Launching the Control client is supported on Windows only. Use -UrlOnly to get the launch URL and open it yourself.'
         }
 
-        # Local copy: a default chosen for one pipeline item must not stick to the next.
+        # Local copies: values chosen for one pipeline item must not stick to the next.
+        $TypeName = "$Type"
+        if ($TypeName -match '^\d$') {
+            $TypeName = $script:CWCSessionType.Keys | Where-Object { $script:CWCSessionType[$_] -eq [int]$Type } | Select-Object -First 1
+        }
         $SessionGroup = $Group
-        if (-not $SessionGroup) { $SessionGroup = $script:CWCDefaultSessionGroup[$Type] }
+        if (-not $SessionGroup) { $SessionGroup = $script:CWCDefaultSessionGroup[$TypeName] }
         $GroupText = $SessionGroup -join '/'
 
         $LaunchContext = Get-CWCHostLaunchContext
@@ -110,10 +118,10 @@ function Enter-CWCSession {
         # as this type in this group.
         $Title = $Name
         if (-not $PSBoundParameters.ContainsKey('Name')) {
-            $Session = Get-CWCSession -Type $Type -Group $SessionGroup -FindSessionID $GUID |
+            $Session = Get-CWCSession -Type $TypeName -Group $SessionGroup -FindSessionID $GUID |
                 Where-Object { "$($_.SessionID)" -eq "$GUID" } | Select-Object -First 1
             if (-not $Session) {
-                return Write-Error "Session $GUID was not found among $Type sessions in group '$GroupText'. Check -Type and -Group."
+                return Write-Error "Session $GUID was not found among $TypeName sessions in group '$GroupText'. Check -Type and -Group."
             }
             $Title = "$($Session.Name)"
         }
@@ -146,7 +154,7 @@ function Enter-CWCSession {
             SessionID   = $GUID
             PublicKey   = $LaunchContext.PublicKey
             AccessToken = "$Token"
-            SessionType = $Type
+            SessionType = $TypeName
             Title       = $Title
         }
         $Url = New-CWCHostLaunchUrl @UrlParameters

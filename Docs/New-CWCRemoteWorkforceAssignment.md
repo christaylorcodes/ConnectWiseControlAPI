@@ -13,7 +13,8 @@ Assign a user to machines.
 ## SYNTAX
 
 ```
-New-CWCRemoteWorkforceAssignment -GUID <Guid[]> -Username <String> [-DisplayName <String>] [-Group <String>] [-WhatIf] [-Confirm] [<CommonParameters>]
+New-CWCRemoteWorkforceAssignment [-GUID] <Guid[]> [-Username] <String> [[-DisplayName] <String>]
+ [[-Group] <String[]>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -37,7 +38,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: Named
+Position: 1
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -52,7 +53,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: Named
+Position: 2
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -67,22 +68,22 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: Named
+Position: 3
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Confirm
-Prompts you for confirmation before running the cmdlet.
+### -Group
+Session group containing the session(s). Defaults to 'All Machines' where a default exists.
 
 ```yaml
-Type: SwitchParameter
+Type: String[]
 Parameter Sets: (All)
-Aliases: cf
+Aliases:
 
 Required: False
-Position: Named
+Position: 4
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -103,13 +104,13 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Group
-Session group containing the session(s). Defaults to 'All Machines' where a default exists.
+### -Confirm
+Prompts you for confirmation before running the cmdlet.
 
 ```yaml
-Type: String
+Type: SwitchParameter
 Parameter Sets: (All)
-Aliases:
+Aliases: cf
 
 Required: False
 Position: Named

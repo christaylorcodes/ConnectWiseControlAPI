@@ -14,7 +14,8 @@ function Connect-CWC {
         account requires MFA. Only functions backed by that extension are available (see NOTES); other
         functions return an error telling you to connect with -Credentials.
 
-        The connection is validated before it is cached. Without -Force an existing connection is reused.
+        The connection is validated before it is cached. An existing connection to the same server with
+        the same method is reused unless -Force is given; a different server or method always reconnects.
 
     .PARAMETER Server
         Control server hostname, e.g. control.example.com. A leading http(s):// is removed. HTTPS is always used.
@@ -77,16 +78,17 @@ function Connect-CWC {
     $Server = $Server -replace("http.*:\/\/",'')
     $RequestedAuthType = $PSCmdlet.ParameterSetName
 
+    # Reuse the cached connection only when it is for the same server and auth method. A request for a
+    # different one always reconnects: keeping the old one would send later commands (including deletes)
+    # to the wrong server.
     if ($script:CWCServerConnection -and !$Force) {
         $Cached = $script:CWCServerConnection
         $CachedAuthType = if ($Cached.AuthType) { $Cached.AuthType } else { 'Credentials' }
-        if ($Cached.Server -ne $Server -or $CachedAuthType -ne $RequestedAuthType) {
-            Write-Warning "Already connected to '$($Cached.Server)' with $CachedAuthType. Keeping that connection; use -Force to connect to '$Server' with $RequestedAuthType."
-        }
-        else {
+        if ($Cached.Server -eq $Server -and $CachedAuthType -eq $RequestedAuthType) {
             Write-Verbose "Using cached Authentication information."
+            return
         }
-        return
+        Write-Verbose "Replacing the connection to '$($Cached.Server)' ($CachedAuthType) with '$Server' ($RequestedAuthType)."
     }
 
     # Kept so a failed -Force reconnect leaves the previous working connection in place

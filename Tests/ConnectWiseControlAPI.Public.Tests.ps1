@@ -186,12 +186,21 @@ Describe 'Connect-CWC' {
             }
         }
 
-        It 'returns early if already connected and Force not set' {
+        It 'reuses the cached connection for the same server and auth method' {
+            InModuleScope 'ConnectWiseControlAPI' -Parameters @{ cred = $cred } {
+                param($cred)
+                Connect-CWC -Server 'existing.server.com' -Credentials $cred
+                Should -Invoke Invoke-WebRequest -Times 0
+                $script:CWCServerConnection.Server | Should -Be 'existing.server.com'
+            }
+        }
+
+        It 'connects to a different server without -Force, so later commands go to it' {
             InModuleScope 'ConnectWiseControlAPI' -Parameters @{ cred = $cred } {
                 param($cred)
                 Connect-CWC -Server 'new.server.com' -Credentials $cred
-                Should -Invoke Invoke-WebRequest -Times 0
-                $script:CWCServerConnection.Server | Should -Be 'existing.server.com'
+                Should -Invoke Invoke-WebRequest -Times 1
+                $script:CWCServerConnection.Server | Should -Be 'new.server.com'
             }
         }
 
@@ -310,14 +319,14 @@ Describe 'Connect-CWC -ApiSecret' {
         }
     }
 
-    It 'warns instead of silently reusing a cached connection of another mode or server' {
+    It 'switches auth method without -Force instead of reusing the other mode' {
         InModuleScope 'ConnectWiseControlAPI' -Parameters @{ secret = $secret } {
             param($secret)
             $script:CWCServerConnection = @{ Server = 'server.example.com'; Headers = @{} }
             Mock Invoke-CWCWebRequest {}
-            Connect-CWC -Server 'server.example.com' -ApiSecret $secret -WarningVariable warn -WarningAction SilentlyContinue
-            ($warn -join ' ') | Should -Match '-Force'
-            Should -Invoke Invoke-CWCWebRequest -Times 0
+            Connect-CWC -Server 'server.example.com' -ApiSecret $secret
+            Should -Invoke Invoke-CWCWebRequest -Times 1
+            $script:CWCServerConnection.AuthType | Should -Be 'ApiSecret'
         }
     }
 
@@ -1990,6 +1999,20 @@ Describe 'Remove-CWCSessionNote' {
             Mock Invoke-WebRequest {}
             { Remove-CWCSessionNote -GUID ([guid]::NewGuid()) -All -Confirm:$false -ErrorAction Stop } | Should -Throw '*Connect-CWC -Credentials*'
             Should -Invoke Invoke-WebRequest -Times 0
+        }
+    }
+}
+
+Describe 'Enter-CWCSession pipeline binding' {
+    It 'takes the numeric SessionType of piped sessions (Support = 0) and uses its default group' {
+        InModuleScope 'ConnectWiseControlAPI' {
+            $script:CWCServerConnection = @{ Server = 'test.example.com'; AuthType = 'Credentials'; Headers = @{} }
+            Mock Get-CWCHostLaunchContext { [PSCustomObject]@{ Scheme = 'sc-test'; RelayHost = 'relay'; RelayPort = 443; PublicKey = 'k' } }
+            Mock New-CWCAccessToken { 'token' } -ParameterFilter { $Group -eq 'All Sessions' }
+            Mock Invoke-CWCServiceMethod {}
+            $Url = [PSCustomObject]@{ SessionID = [guid]::NewGuid(); Name = 'Ticket 1'; SessionType = 0 } | Enter-CWCSession -UrlOnly -WarningAction SilentlyContinue
+            $Url | Should -Match '/Support/'
+            Should -Invoke New-CWCAccessToken -Times 1 -ParameterFilter { $Group -eq 'All Sessions' }
         }
     }
 }

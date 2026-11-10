@@ -13,7 +13,7 @@ Opens the ConnectWise Control Host client joined to a session, like Join in the 
 ## SYNTAX
 
 ```
-Enter-CWCSession [-GUID] <Guid> [[-Type] <String>] [[-Group] <String[]>] [[-Name] <String>] [-UrlOnly] [<CommonParameters>]
+Enter-CWCSession [-GUID] <Guid> [[-Type] <Object>] [[-Group] <String[]>] [[-Name] <String>] [-UrlOnly] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -70,14 +70,14 @@ Session type.
 Defaults to Access.
 
 ```yaml
-Type: String
+Type: Object
 Parameter Sets: (All)
-Aliases:
+Aliases: SessionType
 
 Required: False
 Position: 2
 Default value: Access
-Accept pipeline input: False
+Accept pipeline input: True (ByPropertyName)
 Accept wildcard characters: False
 ```
 
