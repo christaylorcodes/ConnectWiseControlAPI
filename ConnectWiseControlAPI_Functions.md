@@ -20,6 +20,9 @@ Adds a note to a session.
 ### [Connect-CWC](Docs/Connect-CWC.md)
 Initializes the connection parameters for the module.
 
+### [Enter-CWCSession](Docs/Enter-CWCSession.md)
+Opens the ConnectWise Control Host client joined to a session, like Join in the web UI.
+
 ### [Find-CWCSession](Docs/Find-CWCSession.md)
 Finds sessions by session filter expression, name or ID (API secret connections).
 
