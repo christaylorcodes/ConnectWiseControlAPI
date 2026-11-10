@@ -1715,3 +1715,42 @@ Describe 'New-CWCMFA' {
         $result | Should -Not -BeNullOrEmpty
     }
 }
+
+Describe 'Remove-CWCHostFromSession' {
+
+    BeforeEach { Set-CWCTestConnection }
+
+    It 'queues one QueuedForceDisconnect (48) event for the connection, without retry' {
+        InModuleScope 'ConnectWiseControlAPI' {
+            $session = [guid]::NewGuid(); $connection = [guid]::NewGuid()
+            Mock Invoke-CWCWebRequest {
+                param($Arguments, $MaxRetry)
+                $Arguments.Endpoint | Should -Be 'Services/PageService.ashx/AddSessionEvents'
+                $MaxRetry | Should -Be 0
+                $body = $Arguments.Body | ConvertFrom-Json
+                @($body[0]) | Should -Be @('All Machines')
+                @($body[1]).Count | Should -Be 1
+                $body[1][0].SessionID | Should -Be $session.ToString()
+                $body[1][0].ConnectionID | Should -Be $connection.ToString()
+                $body[1][0].EventType | Should -Be 48
+            }
+            Remove-CWCHostFromSession -SessionID $session -ConnectionID $connection -Group 'All Machines' -Confirm:$false
+            Should -Invoke Invoke-CWCWebRequest -Times 1
+        }
+    }
+
+    It 'prompts by default (ConfirmImpact High) and sends nothing with -WhatIf' {
+        InModuleScope 'ConnectWiseControlAPI' {
+            Mock Invoke-CWCWebRequest {}
+            (Get-Command Remove-CWCHostFromSession).ScriptBlock.Attributes.Where({ $_ -is [System.Management.Automation.CmdletBindingAttribute] }).ConfirmImpact |
+                Should -Be 'High'
+            Remove-CWCHostFromSession -SessionID ([guid]::NewGuid()) -ConnectionID ([guid]::NewGuid()) -Group 'All Machines' -WhatIf
+            Should -Invoke Invoke-CWCWebRequest -Times 0
+        }
+    }
+
+    It 'rejects an empty session ID' {
+        { Remove-CWCHostFromSession -SessionID ([guid]::Empty) -ConnectionID ([guid]::NewGuid()) -Group 'x' -Confirm:$false } |
+            Should -Throw
+    }
+}

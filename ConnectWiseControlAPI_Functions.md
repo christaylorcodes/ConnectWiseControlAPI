@@ -78,6 +78,9 @@ Creates a session.
 ### [New-CWCUser](Docs/New-CWCUser.md)
 Creates a user.
 
+### [Remove-CWCHostFromSession](Docs/Remove-CWCHostFromSession.md)
+Disconnects one connection (for example a host) from a session.
+
 ### [Remove-CWCSession](Docs/Remove-CWCSession.md)
 Will end a given session.
 

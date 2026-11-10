@@ -1,38 +1,58 @@
-function Remove-CWCHostFromSession
-{
-  [CmdletBinding(SupportsShouldProcess)]
-  param (
-    [Parameter(Mandatory = $True)]
-    [guid[]]$SessionID,
-    [Parameter(Mandatory = $True)]
-    [guid[]]$ConnectionID,
-    [Parameter(Mandatory = $True)]
-    [string]$Group
-  )
+function Remove-CWCHostFromSession {
+    <#
+    .SYNOPSIS
+        Disconnects one connection (for example a host) from a session.
 
-  $Endpoint = 'Services/PageService.ashx/AddSessionEvents'
+    .DESCRIPTION
+        Queues a QueuedForceDisconnect session event (type 48) for the given connection, the same
+        action as disconnecting a participant in the Control web UI. Connection IDs are listed in
+        (Get-CWCSessionDetail -GUID <session> -Include Connections).Connections.
 
-  $SessionEventType = 48
-  $Body = ConvertTo-Json @(
-    @(
-      $Group
-    ),
-    @(
-      @{
-        SessionID = $SessionID
-        EventType = $SessionEventType
-        ConnectionID = $ConnectionID
-      }
+    .PARAMETER SessionID
+        Session ID.
+
+    .PARAMETER ConnectionID
+        ID of the connection to disconnect.
+
+    .PARAMETER Group
+        Session group containing the session: a name, or the path parts of a nested group.
+
+    .EXAMPLE
+        $Connections = (Get-CWCSessionDetail -GUID $SessionID -Include Connections).Connections
+        $HostConnection = $Connections | Where-Object { $_.ProcessType -eq 1 } | Select-Object -First 1
+        Remove-CWCHostFromSession -SessionID $SessionID -ConnectionID $HostConnection.ConnectionID -Group 'All Machines'
+
+        Disconnects the first host connected to the session (ProcessType 1 = Host).
+
+    .NOTES
+        Contributed by turbo-donkey (#28).
+        Author: Chris Taylor
+
+    .LINK
+        https://github.com/christaylorcodes/ConnectWiseControlAPI
+    #>
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    param (
+        [Parameter(Mandatory = $True)]
+        [ValidateScript({ $_ -ne [guid]::Empty })]
+        [guid]$SessionID,
+
+        [Parameter(Mandatory = $True)]
+        [ValidateScript({ $_ -ne [guid]::Empty })]
+        [guid]$ConnectionID,
+
+        [Parameter(Mandatory = $True)]
+        [string[]]$Group
     )
-  )
 
-  $WebRequestArguments = @{
-    Endpoint = $Endpoint
-    Body     = $Body
-    Method   = 'Post'
-  }
-  if ($PSCmdlet.ShouldProcess($WebRequestArguments.Body, 'Remove-CWCHostFromSession'))
-  {
-    Invoke-CWCWebRequest -Arguments $WebRequestArguments
-  }
+    if (-not $PSCmdlet.ShouldProcess("Connection $ConnectionID in session $SessionID", 'Force disconnect')) { return }
+
+    $DisconnectEvent = @{
+        SessionID    = $SessionID
+        EventType    = $script:CWCSessionEventType.QueuedForceDisconnect
+        ConnectionID = $ConnectionID
+    }
+
+    # Not idempotent: never retried
+    Invoke-CWCServiceMethod -Service PageService -Method AddSessionEvents -Arguments @(@($Group), @($DisconnectEvent))
 }

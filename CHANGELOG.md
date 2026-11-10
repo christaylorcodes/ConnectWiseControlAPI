@@ -34,6 +34,8 @@ Planned as 0.5.0.0 (the module manifest already carries this version; 0.4.0.0 is
 - `Get-CWCRemoteWorkforceSession` lists the calling user's assigned machines (`GetRemoteWorkforceSessions`)
 - `Initialize-CWCRemoteWorkforceSessionGroup` creates/repairs the extension's session group
   (`EnsureCorrectSessionGroupExists`)
+- `Remove-CWCHostFromSession` disconnects one connection from a session (QueuedForceDisconnect, event 48);
+  contributed by turbo-donkey (#28). Takes single `-SessionID`/`-ConnectionID` values and prompts by default
 - `Remove-CWCSession -Uninstall` queues `QueuedUninstallAndDelete` (event 100) so the Access client is
   uninstalled as well; without it the session record is only deleted (`DeletedSession`, event 21)
 

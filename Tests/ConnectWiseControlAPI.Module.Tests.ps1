@@ -25,6 +25,7 @@ BeforeDiscovery {
         'Invoke-CWCWake'
         'New-CWCAccessToken'
         'Remove-CWCSession'
+        'Remove-CWCHostFromSession'
         'Update-CWCCustomProperty'
         'Update-CWCSessionName'
         'Get-CWCSecurityConfigurationInfo'
@@ -166,6 +167,7 @@ Describe 'Function Structure' {
     Context 'ShouldProcess on destructive functions' {
         It '<_> supports ShouldProcess' -ForEach @(
             'Remove-CWCSession'
+            'Remove-CWCHostFromSession'
             'Update-CWCCustomProperty'
             'Update-CWCSessionName'
             'New-CWCUser'

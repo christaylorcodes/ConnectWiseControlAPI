@@ -13,7 +13,7 @@ Will update a custom property for a session.
 ## SYNTAX
 
 ```
-Update-CWCCustomProperty -GUID <Guid> -Property <Int32> [-Value <String>] [-Group <String>] [-WhatIf] [-Confirm] [<CommonParameters>]
+Update-CWCCustomProperty -GUID <Guid> -Property <Int32> [-Value <String>] [-Group <String[]>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -55,7 +55,7 @@ Accept wildcard characters: False
 Look for the session in these groups.
 
 ```yaml
-Type: String
+Type: String[]
 Parameter Sets: (All)
 Aliases:
 

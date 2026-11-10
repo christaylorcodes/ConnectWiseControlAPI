@@ -13,7 +13,8 @@ Gets an access token for joining a session.
 ## SYNTAX
 
 ```
-New-CWCAccessToken [[-Group] <String>] [-GUID] <Guid> [<CommonParameters>]
+New-CWCAccessToken [[-Group] <String[]>] [-GUID] <Guid>
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -37,7 +38,7 @@ Session group containing the session.
 Defaults to 'All Machines'.
 
 ```yaml
-Type: String
+Type: String[]
 Parameter Sets: (All)
 Aliases:
 
