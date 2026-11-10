@@ -13,7 +13,7 @@ Will return a list of sessions.
 ## SYNTAX
 
 ```
-Get-CWCSession -Type <Object> [-Group <String>] [-Search <String>] [-FindSessionID <String>] [-Limit <Int32>] [<CommonParameters>]
+Get-CWCSession -Type <Object> [-Group <String[]>] [-Search <String>] [-FindSessionID <String>] [-Limit <Int32>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -49,7 +49,7 @@ Accept wildcard characters: False
 Name of session group to use.
 
 ```yaml
-Type: String
+Type: String[]
 Parameter Sets: (All)
 Aliases:
 

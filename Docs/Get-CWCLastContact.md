@@ -13,7 +13,7 @@ Returns the date the machine last connected to the control server.
 ## SYNTAX
 
 ```
-Get-CWCLastContact [-GUID] <Guid> [-Quiet] [[-Seconds] <Int32>] [[-Group] <String>] [<CommonParameters>]
+Get-CWCLastContact [-GUID] <Guid> [-Quiet] [[-Seconds] <Int32>] [[-Group] <String[]>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -86,7 +86,7 @@ Accept wildcard characters: False
 Name of session group to use.
 
 ```yaml
-Type: String
+Type: String[]
 Parameter Sets: (All)
 Aliases:
 

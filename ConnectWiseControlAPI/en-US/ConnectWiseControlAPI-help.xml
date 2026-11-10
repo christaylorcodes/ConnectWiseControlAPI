@@ -129,9 +129,9 @@
           <maml:description>
             <maml:para>Session group containing the session (credentials connections only). Defaults to 'All Machines'.</maml:para>
           </maml:description>
-          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
           <dev:type>
-            <maml:name>String</maml:name>
+            <maml:name>String[]</maml:name>
             <maml:uri />
           </dev:type>
           <dev:defaultValue>All Machines</dev:defaultValue>
@@ -190,9 +190,9 @@
         <maml:description>
           <maml:para>Session group containing the session (credentials connections only). Defaults to 'All Machines'.</maml:para>
         </maml:description>
-        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
         <dev:type>
-          <maml:name>String</maml:name>
+          <maml:name>String[]</maml:name>
           <maml:uri />
         </dev:type>
         <dev:defaultValue>All Machines</dev:defaultValue>
@@ -473,6 +473,18 @@
           <maml:description>
             <maml:para>Session group containing the session. Defaults to 'All Machines' for Access, 'All Sessions' for Support and 'All Meetings' for Meeting.</maml:para>
           </maml:description>
+          <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+          <dev:type>
+            <maml:name>String[]</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="4" aliases="none">
+          <maml:name>Name</maml:name>
+          <maml:description>
+            <maml:para>Session name shown as the client's title. Taken from the pipeline (e.g. from Get-CWCSession); when given, the session lookup is skipped.</maml:para>
+          </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
             <maml:name>String</maml:name>
@@ -522,6 +534,18 @@
         <maml:name>Group</maml:name>
         <maml:description>
           <maml:para>Session group containing the session. Defaults to 'All Machines' for Access, 'All Sessions' for Support and 'All Meetings' for Meeting.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+        <dev:type>
+          <maml:name>String[]</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="4" aliases="none">
+        <maml:name>Name</maml:name>
+        <maml:description>
+          <maml:para>Session name shown as the client's title. Taken from the pipeline (e.g. from Get-CWCSession); when given, the session lookup is skipped.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -1016,9 +1040,9 @@ open $Url   # macOS</dev:code>
           <maml:description>
             <maml:para>Name of session group to use.</maml:para>
           </maml:description>
-          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
           <dev:type>
-            <maml:name>String</maml:name>
+            <maml:name>String[]</maml:name>
             <maml:uri />
           </dev:type>
           <dev:defaultValue>All Machines</dev:defaultValue>
@@ -1079,9 +1103,9 @@ open $Url   # macOS</dev:code>
         <maml:description>
           <maml:para>Name of session group to use.</maml:para>
         </maml:description>
-        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
         <dev:type>
-          <maml:name>String</maml:name>
+          <maml:name>String[]</maml:name>
           <maml:uri />
         </dev:type>
         <dev:defaultValue>All Machines</dev:defaultValue>
@@ -1571,9 +1595,9 @@ open $Url   # macOS</dev:code>
           <maml:description>
             <maml:para>Name of session group to use.</maml:para>
           </maml:description>
-          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
           <dev:type>
-            <maml:name>String</maml:name>
+            <maml:name>String[]</maml:name>
             <maml:uri />
           </dev:type>
           <dev:defaultValue>All Machines</dev:defaultValue>
@@ -1634,9 +1658,9 @@ open $Url   # macOS</dev:code>
         <maml:description>
           <maml:para>Name of session group to use.</maml:para>
         </maml:description>
-        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
         <dev:type>
-          <maml:name>String</maml:name>
+          <maml:name>String[]</maml:name>
           <maml:uri />
         </dev:type>
         <dev:defaultValue>All Machines</dev:defaultValue>
@@ -2022,9 +2046,9 @@ open $Url   # macOS</dev:code>
           <maml:description>
             <maml:para>Name of session group to use.</maml:para>
           </maml:description>
-          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
           <dev:type>
-            <maml:name>String</maml:name>
+            <maml:name>String[]</maml:name>
             <maml:uri />
           </dev:type>
           <dev:defaultValue>All Machines</dev:defaultValue>
@@ -2119,9 +2143,9 @@ open $Url   # macOS</dev:code>
         <maml:description>
           <maml:para>Name of session group to use.</maml:para>
         </maml:description>
-        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
         <dev:type>
-          <maml:name>String</maml:name>
+          <maml:name>String[]</maml:name>
           <maml:uri />
         </dev:type>
         <dev:defaultValue>All Machines</dev:defaultValue>
@@ -3363,9 +3387,9 @@ Remove-CWCHostFromSession -SessionID $SessionID -ConnectionID $HostConnection.Co
           <maml:description>
             <maml:para>Session group containing the session(s). Defaults to 'All Machines' where a default exists.</maml:para>
           </maml:description>
-          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
           <dev:type>
-            <maml:name>String</maml:name>
+            <maml:name>String[]</maml:name>
             <maml:uri />
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
@@ -3425,9 +3449,9 @@ Remove-CWCHostFromSession -SessionID $SessionID -ConnectionID $HostConnection.Co
         <maml:description>
           <maml:para>Session group containing the session(s). Defaults to 'All Machines' where a default exists.</maml:para>
         </maml:description>
-        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
         <dev:type>
-          <maml:name>String</maml:name>
+          <maml:name>String[]</maml:name>
           <maml:uri />
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
@@ -3889,9 +3913,9 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
           <maml:description>
             <maml:para>Session group containing the session (credentials connections only). Defaults to 'All Machines'.</maml:para>
           </maml:description>
-          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
           <dev:type>
-            <maml:name>String</maml:name>
+            <maml:name>String[]</maml:name>
             <maml:uri />
           </dev:type>
           <dev:defaultValue>All Machines</dev:defaultValue>
@@ -3962,9 +3986,9 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
         <maml:description>
           <maml:para>Session group containing the session (credentials connections only). Defaults to 'All Machines'.</maml:para>
         </maml:description>
-        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
         <dev:type>
-          <maml:name>String</maml:name>
+          <maml:name>String[]</maml:name>
           <maml:uri />
         </dev:type>
         <dev:defaultValue>All Machines</dev:defaultValue>
@@ -4063,9 +4087,9 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
           <maml:description>
             <maml:para>Session group containing the session (credentials connections only). Defaults to 'All Machines'.</maml:para>
           </maml:description>
-          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
           <dev:type>
-            <maml:name>String</maml:name>
+            <maml:name>String[]</maml:name>
             <maml:uri />
           </dev:type>
           <dev:defaultValue>All Machines</dev:defaultValue>
@@ -4124,9 +4148,9 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
         <maml:description>
           <maml:para>Session group containing the session (credentials connections only). Defaults to 'All Machines'.</maml:para>
         </maml:description>
-        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
         <dev:type>
-          <maml:name>String</maml:name>
+          <maml:name>String[]</maml:name>
           <maml:uri />
         </dev:type>
         <dev:defaultValue>All Machines</dev:defaultValue>
@@ -4408,9 +4432,9 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
           <maml:description>
             <maml:para>Group to look for the session in.</maml:para>
           </maml:description>
-          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
           <dev:type>
-            <maml:name>String</maml:name>
+            <maml:name>String[]</maml:name>
             <maml:uri />
           </dev:type>
           <dev:defaultValue>All Machines</dev:defaultValue>
@@ -4470,9 +4494,9 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
         <maml:description>
           <maml:para>Group to look for the session in.</maml:para>
         </maml:description>
-        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
         <dev:type>
-          <maml:name>String</maml:name>
+          <maml:name>String[]</maml:name>
           <maml:uri />
         </dev:type>
         <dev:defaultValue>All Machines</dev:defaultValue>

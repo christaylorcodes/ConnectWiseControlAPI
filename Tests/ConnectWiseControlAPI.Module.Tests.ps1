@@ -14,40 +14,10 @@
 #>
 
 BeforeDiscovery {
-    $ExpectedFunctions = @(
-        'Connect-CWC'
-        'Get-CWCAuditInfo'
-        'Get-CWCAuditLog'
-        'Get-CWCSession'
-        'Get-CWCSessionDetail'
-        'Get-CWCLastContact'
-        'Invoke-CWCCommand'
-        'Invoke-CWCWake'
-        'New-CWCAccessToken'
-        'Remove-CWCSession'
-        'Remove-CWCHostFromSession'
-        'Remove-CWCSessionNote'
-        'Update-CWCCustomProperty'
-        'Update-CWCSessionName'
-        'Get-CWCSecurityConfigurationInfo'
-        'New-CWCUser'
-        'Remove-CWCUser'
-        'Update-CWCUser'
-        'Get-CWCSessionGroup'
-        'Get-CWCLauncURL'
-        'Add-CWCRemoteWorkforceRequiredRole'
-        'New-CWCRemoteWorkforceAssignment'
-        'Get-CWCRemoteWorkforceLaunchURL'
-        'Get-CWCRemoteWorkforceSession'
-        'Initialize-CWCRemoteWorkforceSessionGroup'
-        'Find-CWCSession'
-        'New-CWCSession'
-        'Add-CWCSessionNote'
-        'Send-CWCSessionMessage'
-        'Send-CWCToolboxItem'
-        'New-CWCMFA'
-        'Enter-CWCSession'
-    )
+    # One public function per Public/**/*.ps1 file; the tests below check the manifest and the loaded
+    # module against this list, so a new function needs no test edit.
+    $ExpectedFunctions = @(Get-ChildItem -Path (Join-Path (Split-Path -Parent $PSScriptRoot) 'ConnectWiseControlAPI\Public') -Filter '*.ps1' -Recurse |
+        ForEach-Object BaseName | Sort-Object)
 }
 
 BeforeAll {
@@ -92,6 +62,12 @@ Describe 'Module: ConnectWiseControlAPI' {
 
         It 'exports no cmdlets' {
             $Manifest.ExportedCmdlets.Keys | Should -HaveCount 0
+        }
+
+        It 'lists every public function in FunctionsToExport exactly once' -ForEach @(@{ Expected = $ExpectedFunctions }) {
+            $Listed = @((Import-PowerShellDataFile -Path $ManifestPath).FunctionsToExport)
+            @($Listed | Group-Object | Where-Object Count -gt 1 | ForEach-Object Name) | Should -BeNullOrEmpty
+            @($Listed | Sort-Object) | Should -Be $Expected
         }
     }
 
@@ -368,16 +344,37 @@ Describe 'Parameter Validation' {
 Describe 'Repository' {
     # A .gitignore pattern once hid Private/Test-CWCApiSecretConnection.ps1 (matched *secret*), so the
     # module only worked on machines that already had the file.
-    It 'does not git-ignore any module source file' {
+    It 'does not git-ignore any source, test, docs, build or example file' {
         $RepoRoot = Split-Path $PSScriptRoot -Parent
         if (-not (Get-Command git -ErrorAction SilentlyContinue) -or -not (Test-Path (Join-Path $RepoRoot '.git'))) {
             Set-ItResult -Skipped -Because 'git or the repository is not available'
             return
         }
-        $SourceFiles = Get-ChildItem (Join-Path $RepoRoot 'ConnectWiseControlAPI') -Recurse -File |
+        $SourceFolders = 'ConnectWiseControlAPI', 'Tests', 'Docs', 'Build', 'Examples' |
+            ForEach-Object { Join-Path $RepoRoot $_ } | Where-Object { Test-Path $_ }
+        $SourceFiles = Get-ChildItem $SourceFolders -Recurse -File |
             ForEach-Object { $_.FullName.Substring($RepoRoot.Length + 1).Replace('\', '/') }
         # Paths as arguments, not --stdin: piped lines carry a trailing CR on Windows, which defeats the patterns
         $Ignored = @(git -C $RepoRoot check-ignore --no-index -- $SourceFiles | Where-Object { $_ })
         $Ignored | Should -BeNullOrEmpty
+    }
+}
+
+Describe 'Generated help' {
+    BeforeAll {
+        $RepoRoot = Split-Path $PSScriptRoot -Parent
+        $DocsPath = Join-Path $RepoRoot 'Docs'
+    }
+
+    It 'has a Docs page for <_>' -ForEach $ExpectedFunctions {
+        Join-Path $DocsPath "$_.md" | Should -Exist -Because 'run ./Build/Update-Help.ps1 after adding a function'
+    }
+
+    # platyPS on PowerShell 7.4+ adds -ProgressAction to every page; Build/Update-Help.ps1 strips it.
+    It 'does not document the -ProgressAction common parameter' {
+        $Files = @(Get-ChildItem $DocsPath -Filter '*.md' | ForEach-Object FullName) +
+            (Join-Path $RepoRoot 'ConnectWiseControlAPI\en-US\ConnectWiseControlAPI-help.xml')
+        @(Select-String -Path $Files -Pattern 'ProgressAction' | ForEach-Object { "$($_.Filename):$($_.LineNumber)" }) |
+            Should -BeNullOrEmpty -Because 'run ./Build/Update-Help.ps1 to regenerate the help'
     }
 }

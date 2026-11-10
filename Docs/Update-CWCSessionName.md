@@ -13,7 +13,7 @@ Updates the name of a session.
 ## SYNTAX
 
 ```
-Update-CWCSessionName -GUID <Guid> -NewName <String> [-Group <String>]
+Update-CWCSessionName -GUID <Guid> -NewName <String> [-Group <String[]>]
  [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
@@ -71,7 +71,7 @@ Accept wildcard characters: False
 Group to look for the session in.
 
 ```yaml
-Type: String
+Type: String[]
 Parameter Sets: (All)
 Aliases:
 

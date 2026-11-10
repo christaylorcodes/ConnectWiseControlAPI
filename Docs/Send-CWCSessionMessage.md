@@ -13,7 +13,7 @@ Sends a chat message to a session's guest.
 ## SYNTAX
 
 ```
-Send-CWCSessionMessage [-GUID] <Guid> [-Message] <String> [[-From] <String>] [[-Group] <String>] [-WhatIf] [-Confirm] [<CommonParameters>]
+Send-CWCSessionMessage [-GUID] <Guid> [-Message] <String> [[-From] <String>] [[-Group] <String[]>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -87,7 +87,7 @@ Session group containing the session (credentials connections only).
 Defaults to 'All Machines'.
 
 ```yaml
-Type: String
+Type: String[]
 Parameter Sets: (All)
 Aliases:
 

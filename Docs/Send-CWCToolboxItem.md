@@ -13,7 +13,7 @@ Queues a Toolbox item to run on a session.
 ## SYNTAX
 
 ```
-Send-CWCToolboxItem [-GUID] <Guid> [-Name] <String> [[-Group] <String>]
+Send-CWCToolboxItem [-GUID] <Guid> [-Name] <String> [[-Group] <String[]>]
  [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
@@ -69,7 +69,7 @@ Session group containing the session (credentials connections only).
 Defaults to 'All Machines'.
 
 ```yaml
-Type: String
+Type: String[]
 Parameter Sets: (All)
 Aliases:
 

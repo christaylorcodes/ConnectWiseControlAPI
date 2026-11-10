@@ -75,6 +75,15 @@ Planned as 0.5.0.0 (the module manifest already carries this version; 0.4.0.0 is
   PowerShell error) is reported as such instead of being blamed on the credentials
 - Removed the unloaded `WIP/Invoke-CWCSession.ps1` prototype, superseded by `Enter-CWCSession`
 - `Get-CWCLastContact` returns an error when no connection event is found, instead of the current time
+- `-Group` accepts the path parts of a nested session group (e.g. `'Clients','Acme'`) on every session
+  function that takes it; a single group name works as before
+- Errors from API calls carry an ErrorId: `CWC.NotConnected`, `CWC.AuthModeMismatch`, `CWC.Http<status>`
+  (the server answered) or `CWC.NoResponse`, so scripts can branch on `$_.FullyQualifiedErrorId`. The
+  message now shows the HTTP status and the server's own error text
+- `Invoke-CWCCommand` waits 1, 2, 3 … up to 5 seconds between polls of the rate-limited session details
+- `Enter-CWCSession` takes `-Name` from the pipeline (e.g. from `Get-CWCSession`) and then skips its
+  session lookup
+- `Build/Update-Help.ps1` regenerates `Docs/` and the MAML help in one step
 
 ### Fixed
 

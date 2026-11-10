@@ -13,7 +13,7 @@ Opens the ConnectWise Control Host client joined to a session, like Join in the 
 ## SYNTAX
 
 ```
-Enter-CWCSession [-GUID] <Guid> [[-Type] <String>] [[-Group] <String>] [-UrlOnly] [<CommonParameters>]
+Enter-CWCSession [-GUID] <Guid> [[-Type] <String>] [[-Group] <String[]>] [[-Name] <String>] [-UrlOnly] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -87,7 +87,7 @@ Defaults to 'All Machines' for Access, 'All Sessions' for
 Support and 'All Meetings' for Meeting.
 
 ```yaml
-Type: String
+Type: String[]
 Parameter Sets: (All)
 Aliases:
 
@@ -95,6 +95,22 @@ Required: False
 Position: 3
 Default value: None
 Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Name
+Session name shown as the client's title. Taken from the pipeline (e.g. from Get-CWCSession);
+when given, the session lookup is skipped.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 4
+Default value: None
+Accept pipeline input: True (ByPropertyName)
 Accept wildcard characters: False
 ```
 

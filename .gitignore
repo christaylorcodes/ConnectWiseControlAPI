@@ -8,7 +8,6 @@ output/
 coverage.xml
 testResults.xml
 nul
-*-help.xml
 
 # ---- Operating Systems ----
 
@@ -80,14 +79,15 @@ publish/
 *.key
 *.pem
 *.p12
-*credentials*
-*secret*
-!.github/SECURITY.md
-# Source, tests and docs are never secrets, even when a name matches (e.g. Test-CWCApiSecretConnection.ps1)
-!ConnectWiseControlAPI/**/*.ps1
-!ConnectWiseControlAPI/en-US/*-help.xml
-!Tests/**/*.ps1
-!Docs/**/*.md
+# Secret *data* files only (Export-Clixml credentials, secret JSON/text). Not name-only patterns like
+# *secret*: those matched module source such as Test-CWCApiSecretConnection.ps1.
+secrets/
+*.secret
+*credential*.xml
+*credential*.json
+*secret*.xml
+*secret*.json
+*secret*.txt
 
 # ---- Claude Code ----
 .claude/settings.local.json

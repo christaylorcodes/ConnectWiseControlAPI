@@ -13,7 +13,7 @@ Adds a note to a session.
 ## SYNTAX
 
 ```
-Add-CWCSessionNote [-GUID] <Guid> [-Note] <String> [[-Group] <String>]
+Add-CWCSessionNote [-GUID] <Guid> [-Note] <String> [[-Group] <String[]>]
  [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
@@ -72,7 +72,7 @@ Session group containing the session (credentials connections only).
 Defaults to 'All Machines'.
 
 ```yaml
-Type: String
+Type: String[]
 Parameter Sets: (All)
 Aliases:
 

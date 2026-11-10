@@ -13,7 +13,7 @@ Will end a given session.
 ## SYNTAX
 
 ```
-Remove-CWCSession -GUID <Guid[]> -Group <String> [-Uninstall] [-WhatIf]
+Remove-CWCSession -GUID <Guid[]> -Group <String[]> [-Uninstall] [-WhatIf]
  [-Confirm] [<CommonParameters>]
 ```
 
@@ -81,7 +81,7 @@ Accept wildcard characters: False
 Session group containing the session(s). Defaults to 'All Machines' where a default exists.
 
 ```yaml
-Type: String
+Type: String[]
 Parameter Sets: (All)
 Aliases:
 

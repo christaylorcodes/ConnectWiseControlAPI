@@ -54,7 +54,7 @@ BeforeAll {
         # Access sessions are used by the Session, Session Detail and Last Contact tests
         $script:AccessSessionsError = $null
         try {
-            $script:AccessSessions = Get-CWCSession -Type 'Access'
+            $script:AccessSessions = Get-CWCSession -Type 'Access' -Limit 5
         }
         catch {
             $script:AccessSessionsError = $_

@@ -93,32 +93,29 @@ function Select-Event {
 function Get-NewEvent {
     param([datetime]$SinceUtc)
     $ElapsedMs = ([DateTime]::UtcNow - $SinceUtc).TotalMilliseconds + 500
-    $Detail = Get-CWCSessionDetail -Group $Group -GUID $TestSessionID
+    $Detail = Get-CWCSessionDetail -Group $Group -GUID $TestSessionID -Include Events
     Select-Event ($Detail.Events | Where-Object { [double]$_.Time -le $ElapsedMs })
 }
 
-# Deletes every note this script added to the test session (any run). Needs a credentials connection.
-# A note is removed by adding a DeletedEvent (SessionEventType 1) correlated to the note's EventID;
-# the server checks RemoveNote permission. Returns how many notes were deleted and how many remain.
-function Remove-SmokeTestNote {
-    $NoteType = 32
-    $DeletedEventType = 1
-    $Events = @((Get-CWCSessionDetail -Group $Group -GUID $TestSessionID).Events)
-    $AlreadyDeleted = @($Events | Where-Object { $_.EventType -eq $DeletedEventType } | ForEach-Object CorrelationEventID)
-    $TestNotes = @($Events | Where-Object {
-        $_.EventType -eq $NoteType -and "$($_.Data)" -like 'CWC smoke test note*' -and $_.EventID -notin $AlreadyDeleted
+# Notes this script added to the test session (any run) that are not deleted yet. The event numbers are
+# written out (AddedNote 32, DeletedEvent 1) so this checks the server independently of the module.
+function Get-OpenSmokeTestNote {
+    $Events = @((Get-CWCSessionDetail -Group $Group -GUID $TestSessionID -Include Events).Events)
+    $AlreadyDeleted = @($Events | Where-Object { $_.EventType -eq 1 } | ForEach-Object CorrelationEventID)
+    @($Events | Where-Object {
+        $_.EventType -eq 32 -and "$($_.Data)" -like 'CWC smoke test note*' -and $_.EventID -notin $AlreadyDeleted
     })
+}
+
+# Deletes every note this script added, with Remove-CWCSessionNote (so it is exercised live), and
+# checks none remain. Needs a credentials connection and the RemoveNote permission.
+function Remove-SmokeTestNote {
+    $TestNotes = @(Get-OpenSmokeTestNote)
     if ($TestNotes.Count -gt 0) {
-        # Also exercises Remove-CWCSessionNote live
         Remove-CWCSessionNote -GUID $TestSessionID -Group $Group -NoteEventID ($TestNotes | ForEach-Object { [guid]$_.EventID }) -Confirm:$false
         Start-Sleep -Seconds 2
     }
-
-    $Events = @((Get-CWCSessionDetail -Group $Group -GUID $TestSessionID).Events)
-    $AlreadyDeleted = @($Events | Where-Object { $_.EventType -eq $DeletedEventType } | ForEach-Object CorrelationEventID)
-    $Remaining = @($Events | Where-Object {
-        $_.EventType -eq $NoteType -and "$($_.Data)" -like 'CWC smoke test note*' -and $_.EventID -notin $AlreadyDeleted
-    }).Count
+    $Remaining = @(Get-OpenSmokeTestNote).Count
     if ($Remaining -gt 0) { throw "$Remaining smoke test note(s) still on session $TestSessionID" }
     [ordered]@{ Deleted = $TestNotes.Count; Remaining = $Remaining }
 }
@@ -164,7 +161,7 @@ Invoke-Step 'Creds.SessionEventTypeEnum' {
 
 Invoke-Step 'Creds.GetSession' { @(Get-CWCSession -Type Access -Group $Group -Limit 5).Count }
 Invoke-Step 'Creds.GetSessionDetail' {
-    $Detail = Get-CWCSessionDetail -Group $Group -GUID $TestSessionID
+    $Detail = Get-CWCSessionDetail -Group $Group -GUID $TestSessionID -Include Events
     [ordered]@{ BaseTime = $Detail.BaseTime; Events = @(Select-Event ($Detail.Events | Select-Object -First 15)) }
 }
 Invoke-Step 'Creds.LastContact' { (Get-CWCLastContact -GUID $TestSessionID -Group $Group).ToString('o') }
@@ -221,22 +218,25 @@ if ($MfaUserName) {
     }
 
     $Password = $MfaCredential.GetNetworkCredential().Password
-    Invoke-Step 'Mfa.TryLoginWithoutOtp' {
-        $LoginResult = Select-LoginResult (Invoke-MfaRequest 'Services/AuthenticationService.ashx/TryLogin' @($MfaUserName, $Password, $null, $False, $null))
-        [ordered]@{ Result = $LoginResult; Cookies = @($Mfa.Session.Cookies.GetCookies("https://$Server") | ForEach-Object Name) }
+    function Get-MfaCookieName { @($Mfa.Session.Cookies.GetCookies("https://$Server") | ForEach-Object Name) }
+    # One TryLogin attempt: the login result code and which cookies the session holds afterwards
+    function Invoke-TryLoginStep {
+        param([string]$Name, $OneTimeCode)
+        Invoke-Step $Name {
+            [ordered]@{
+                Result  = Select-LoginResult (Invoke-MfaRequest 'Services/AuthenticationService.ashx/TryLogin' @($MfaUserName, $Password, $OneTimeCode, $False, $null))
+                Cookies = Get-MfaCookieName
+            }
+        }
     }
-    Invoke-Step 'Mfa.TryLoginWrongOtp' {
-        $LoginResult = Select-LoginResult (Invoke-MfaRequest 'Services/AuthenticationService.ashx/TryLogin' @($MfaUserName, $Password, '000000', $False, $null))
-        [ordered]@{ Result = $LoginResult; Cookies = @($Mfa.Session.Cookies.GetCookies("https://$Server") | ForEach-Object Name) }
-    }
+
+    Invoke-TryLoginStep 'Mfa.TryLoginWithoutOtp' $null
+    Invoke-TryLoginStep 'Mfa.TryLoginWrongOtp' '000000'
 
     $OneTimePassword = Read-Host -Prompt "One-time password for $MfaUserName (Enter to skip)"
     if ($OneTimePassword) {
-        Invoke-Step 'Mfa.TryLoginWithOtp' {
-            $LoginResult = Select-LoginResult (Invoke-MfaRequest 'Services/AuthenticationService.ashx/TryLogin' @($MfaUserName, $Password, $OneTimePassword, $False, $null))
-            [ordered]@{ Result = $LoginResult; Cookies = @($Mfa.Session.Cookies.GetCookies("https://$Server") | ForEach-Object Name) }
-        }
-        Invoke-Step 'Mfa.CookiesAfterLogin' { @($Mfa.Session.Cookies.GetCookies("https://$Server") | ForEach-Object Name) }
+        Invoke-TryLoginStep 'Mfa.TryLoginWithOtp' $OneTimePassword
+        Invoke-Step 'Mfa.CookiesAfterLogin' { Get-MfaCookieName }
 
         # Anti-forgery tokens may be tied to the logged-in user: compare old and fresh.
         Invoke-Step 'Mfa.RefreshToken' {

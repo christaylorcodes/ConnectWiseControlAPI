@@ -14,7 +14,7 @@ Will issue a command against a given machine and return the results.
 
 ```
 Invoke-CWCCommand [-GUID] <Guid> [[-Command] <String>] [[-TimeOut] <Int32>] [-MaxLength <Int32>] [-PowerShell]
- [[-Group] <String>] [-NoWait] [<CommonParameters>]
+ [[-Group] <String[]>] [-NoWait] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -104,7 +104,7 @@ Accept wildcard characters: False
 Name of session group to use.
 
 ```yaml
-Type: String
+Type: String[]
 Parameter Sets: (All)
 Aliases:
 
