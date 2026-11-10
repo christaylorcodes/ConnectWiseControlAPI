@@ -45,8 +45,18 @@ param(
 # 'Stop' turns the module's non-terminating Write-Error calls into terminating errors and breaks the error-path tests.
 # Use -ErrorAction Stop on individual calls instead.
 $RepoRoot = Split-Path -Parent $PSScriptRoot
-$ModuleFolder = Join-Path $RepoRoot 'ConnectWiseControlAPI'
-$ManifestPath = Join-Path $ModuleFolder 'ConnectWiseControlAPI.psd1'
+# Find the module manifest instead of hard-coding its name or folder, so a module rename or a move to source/
+# needs no change here: the only .psd1 one level below the repo root that declares a RootModule.
+$ManifestCandidates = @(Get-ChildItem -Path $RepoRoot -Directory |
+        Where-Object { $_.Name -notin 'Tests', 'Build', 'Docs', 'Examples', 'output', '.github', '.vscode' } |
+        Get-ChildItem -Filter '*.psd1' -File |
+        Where-Object { (Get-Content -LiteralPath $_.FullName -Raw) -match '(?m)^\s*RootModule\s*=' })
+if ($ManifestCandidates.Count -ne 1) {
+    throw "Expected exactly one module manifest one level below $RepoRoot; found $($ManifestCandidates.Count)."
+}
+$ManifestPath = $ManifestCandidates[0].FullName
+$ModuleFolder = Split-Path -Parent $ManifestPath
+$ModuleName = [IO.Path]::GetFileNameWithoutExtension($ManifestPath)
 $Failures = New-Object System.Collections.Generic.List[string]
 
 function Write-Stage([string]$Name) {
@@ -114,7 +124,7 @@ if ($Stage -contains 'Docs') {
     Write-Stage 'Docs'
     # Compare the generated files before and after regenerating them, so help that was already regenerated
     # (staged or not) passes, and only help that Update-Help.ps1 would still change fails.
-    $GeneratedPaths = 'Docs', 'ConnectWiseControlAPI_Functions.md', 'ConnectWiseControlAPI/en-US'
+    $GeneratedPaths = 'Docs', "$($ModuleName)_Functions.md", (Join-Path (Split-Path -Leaf $ModuleFolder) 'en-US')
     $GetSnapshot = {
         (git -C $RepoRoot diff HEAD -- $GeneratedPaths) -join "`n"
         (git -C $RepoRoot ls-files --others --exclude-standard -- $GeneratedPaths) -join "`n"
