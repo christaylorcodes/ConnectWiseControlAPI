@@ -13,7 +13,7 @@ Will return a list of sessions.
 ## SYNTAX
 
 ```
-Get-CWCSession -Type <Object> [-Group <String>] [-Search <String>] [-Limit <Int32>] [<CommonParameters>]
+Get-CWCSession -Type <Object> [-Group <String>] [-Search <String>] [-FindSessionID <String>] [-Limit <Int32>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -89,6 +89,22 @@ Default value: 0
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
+
+### -FindSessionID
+Session ID to locate in the results, so the session is included even when -Limit would cut it off.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 
 ### CommonParameters
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).

@@ -13,7 +13,8 @@ Will end a given session.
 ## SYNTAX
 
 ```
-Remove-CWCSession -GUID <Guid[]> -Group <String> [-WhatIf] [-Confirm] [<CommonParameters>]
+Remove-CWCSession -GUID <Guid[]> -Group <String> [-Uninstall] [-WhatIf]
+ [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -77,7 +78,7 @@ Accept wildcard characters: False
 ```
 
 ### -Group
-{{ Fill Group Description }}
+Session group containing the session(s). Defaults to 'All Machines' where a default exists.
 
 ```yaml
 Type: String
@@ -85,6 +86,22 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+
+### -Uninstall
+Queue an uninstall of the Access client and delete the session (QueuedUninstallAndDelete) instead of only deleting the session record.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
 Position: Named
 Default value: None
 Accept pipeline input: False

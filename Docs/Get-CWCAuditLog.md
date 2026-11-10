@@ -32,7 +32,7 @@ Get the audit logs for Computer1 for the last day.
 ## PARAMETERS
 
 ### -EndDate
-{{ Fill EndDate Description }}
+End of the time range. Defaults to now. Local times are converted to UTC.
 
 ```yaml
 Type: DateTime
@@ -47,7 +47,7 @@ Accept wildcard characters: False
 ```
 
 ### -EventTypes
-{{ Fill EventTypes Description }}
+Session event type numbers to include (for example 44 for QueuedCommand, 70 for RanCommand).
 
 ```yaml
 Type: Int32[]
@@ -62,7 +62,7 @@ Accept wildcard characters: False
 ```
 
 ### -IncludeSessionCaptures
-{{ Fill IncludeSessionCaptures Description }}
+Deprecated. The server no longer accepts this option; it is ignored with a warning.
 
 ```yaml
 Type: SwitchParameter
@@ -77,7 +77,7 @@ Accept wildcard characters: False
 ```
 
 ### -SecurityTypes
-{{ Fill SecurityTypes Description }}
+Security event type numbers to include.
 
 ```yaml
 Type: Int32[]
@@ -92,7 +92,7 @@ Accept wildcard characters: False
 ```
 
 ### -SessionName
-{{ Fill SessionName Description }}
+Only return entries for sessions with this name.
 
 ```yaml
 Type: String
@@ -107,7 +107,7 @@ Accept wildcard characters: False
 ```
 
 ### -StartDate
-{{ Fill StartDate Description }}
+Start of the time range. Defaults to 24 hours ago. Local times are converted to UTC.
 
 ```yaml
 Type: DateTime
@@ -120,6 +120,7 @@ Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
+
 
 ### CommonParameters
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).

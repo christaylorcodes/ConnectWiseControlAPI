@@ -14,8 +14,14 @@ This module wraps the web API into PowerShell functions.
 ### [Add-CWCRemoteWorkforceRequiredRole](Docs/Add-CWCRemoteWorkforceRequiredRole.md)
 Create a new Remote Workforce security role
 
+### [Add-CWCSessionNote](Docs/Add-CWCSessionNote.md)
+Adds a note to a session.
+
 ### [Connect-CWC](Docs/Connect-CWC.md)
 Initializes the connection parameters for the module.
+
+### [Find-CWCSession](Docs/Find-CWCSession.md)
+Finds sessions by session filter expression, name or ID (API secret connections).
 
 ### [Get-CWCAuditInfo](Docs/Get-CWCAuditInfo.md)
 Shows current audit settings
@@ -27,7 +33,14 @@ Pull audit log information
 Returns the date the machine last connected to the control server.
 
 ### [Get-CWCLauncURL](Docs/Get-CWCLauncURL.md)
-{{ Fill in the Synopsis }}
+DEPRECATED.
+Use Get-CWCRemoteWorkforceLaunchURL.
+
+### [Get-CWCRemoteWorkforceLaunchURL](Docs/Get-CWCRemoteWorkforceLaunchURL.md)
+Gets a Remote Workforce host launch URL for an assigned machine.
+
+### [Get-CWCRemoteWorkforceSession](Docs/Get-CWCRemoteWorkforceSession.md)
+Lists the Remote Workforce machines assigned to the calling user.
 
 ### [Get-CWCSecurityConfigurationInfo](Docs/Get-CWCSecurityConfigurationInfo.md)
 Will return security configuration information.
@@ -41,6 +54,9 @@ Will return information about a session.
 ### [Get-CWCSessionGroup](Docs/Get-CWCSessionGroup.md)
 Returns details of all session groups.
 
+### [Initialize-CWCRemoteWorkforceSessionGroup](Docs/Initialize-CWCRemoteWorkforceSessionGroup.md)
+Creates or repairs the session group used by the Remote Workforce extension.
+
 ### [Invoke-CWCCommand](Docs/Invoke-CWCCommand.md)
 Will issue a command against a given machine and return the results.
 
@@ -48,13 +64,16 @@ Will issue a command against a given machine and return the results.
 Will issue a wake command to a given session.
 
 ### [New-CWCAccessToken](Docs/New-CWCAccessToken.md)
-{{ Fill in the Synopsis }}
+Gets an access token for joining a session.
 
 ### [New-CWCMFA](Docs/New-CWCMFA.md)
 Will generate an MFA code to use with user creation.
 
 ### [New-CWCRemoteWorkforceAssignment](Docs/New-CWCRemoteWorkforceAssignment.md)
 Assign a user to machines.
+
+### [New-CWCSession](Docs/New-CWCSession.md)
+Creates a session.
 
 ### [New-CWCUser](Docs/New-CWCUser.md)
 Creates a user.
@@ -64,6 +83,12 @@ Will end a given session.
 
 ### [Remove-CWCUser](Docs/Remove-CWCUser.md)
 Removes an internal user.
+
+### [Send-CWCSessionMessage](Docs/Send-CWCSessionMessage.md)
+Sends a chat message to a session's guest.
+
+### [Send-CWCToolboxItem](Docs/Send-CWCToolboxItem.md)
+Queues a Toolbox item to run on a session.
 
 ### [Update-CWCCustomProperty](Docs/Update-CWCCustomProperty.md)
 Will update a custom property for a session.

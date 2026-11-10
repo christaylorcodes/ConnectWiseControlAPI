@@ -13,7 +13,8 @@ Will return information about a session.
 ## SYNTAX
 
 ```
-Get-CWCSessionDetail [-Group <String>] -GUID <Guid> [<CommonParameters>]
+Get-CWCSessionDetail [-Group <String>] -GUID <Guid> [-Include <String[]>]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -59,6 +60,22 @@ Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
+
+### -Include
+Parts of the session details to return: SessionInfo, GuestScreenshotContent, Events, Connections. Omit to return everything, including the guest screenshot. Ignored on -ApiSecret connections.
+
+```yaml
+Type: String[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 
 ### CommonParameters
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).

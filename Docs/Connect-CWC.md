@@ -12,8 +12,15 @@ Initializes the connection parameters for the module.
 
 ## SYNTAX
 
+### Credentials (Default)
 ```
-Connect-CWC [-Server] <String> [-Credentials] <PSCredential> [-Force] [<CommonParameters>]
+Connect-CWC -Server <String> -Credentials <PSCredential> [-Force]
+ [<CommonParameters>]
+```
+
+### ApiSecret
+```
+Connect-CWC -Server <String> -ApiSecret <SecureString> [-Origin <String>] [-Force] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -30,16 +37,62 @@ Sets connection information used by the module and overwrites any previously set
 
 ## PARAMETERS
 
+### -Server
+The URL to your control server.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Credentials
 Credentials used to authenticate with the control server.
 
 ```yaml
 Type: PSCredential
-Parameter Sets: (All)
+Parameter Sets: Credentials
 Aliases:
 
 Required: True
-Position: 1
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ApiSecret
+The RESTful API Manager extension's RESTfulAuthenticationSecret value.
+
+```yaml
+Type: SecureString
+Parameter Sets: ApiSecret
+Aliases:
+
+Required: True
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Origin
+Origin header sent with -ApiSecret requests. Defaults to https://<Server>. Set it to match the
+extension's RESTfulAllowedOrigin setting if that setting is configured.
+
+```yaml
+Type: String
+Parameter Sets: ApiSecret
+Aliases:
+
+Required: False
+Position: Named
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -60,30 +113,14 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Server
-The URL to your control server.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: 0
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
 
 ### CommonParameters
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 
-### None
 ## OUTPUTS
 
-### System.Object
 ## NOTES
 
 ## RELATED LINKS
