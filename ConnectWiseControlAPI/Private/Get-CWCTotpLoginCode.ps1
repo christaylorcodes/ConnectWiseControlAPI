@@ -6,15 +6,16 @@ function Get-CWCTotpLoginCode {
     .DESCRIPTION
         Waits for the next 30-second step when:
         - fewer than 3 seconds are left in this one, so the code doesn't expire in flight;
-        - this step was already used for the same server and user, because the server may reject a
-          code it has already accepted.
-        Only the step number is remembered (not secret); the code and the seed are never stored.
+        - this step was already sent for the same server and user ($script:CWCLastTotpStep, set by the
+          caller once the server has seen the code), because the server may reject a reused code.
+        Returns the code and its step number. Only step numbers are remembered (not secret); the code
+        and the seed are never stored.
 
     .PARAMETER Key
-        Identifies the server and user, e.g. "server|user".
+        Identifies the server and user, lowercase, e.g. "server|user".
     #>
     [CmdletBinding()]
-    [OutputType([string])]
+    [OutputType([pscustomobject])]
     param(
         [Parameter(Mandatory = $True)]
         [securestring]$Secret,
@@ -24,7 +25,6 @@ function Get-CWCTotpLoginCode {
     )
 
     if (-not $script:CWCLastTotpStep) { $script:CWCLastTotpStep = @{} }
-    $Key = $Key.ToLowerInvariant()
 
     $Now = Get-CWCUnixTime
     $Remaining = 30 - ($Now % 30)
@@ -37,6 +37,8 @@ function Get-CWCTotpLoginCode {
         $Step++
     }
 
-    $script:CWCLastTotpStep[$Key] = $Step
-    Get-CWCTotpCode -Secret $Secret -UnixTime $Now
+    [pscustomobject]@{
+        Code = Get-CWCTotpCode -Secret $Secret -UnixTime $Now
+        Step = $Step
+    }
 }

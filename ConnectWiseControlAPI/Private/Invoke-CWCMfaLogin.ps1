@@ -63,7 +63,8 @@ function Invoke-CWCMfaLogin {
 
     # One TryLogin call. Never retried: each attempt counts toward the server's login limits.
     function Invoke-TryLogin {
-        param([AllowNull()][string]$Code)
+        # Untyped: a [string] parameter would turn $null into "", and "no code" must be sent as null
+        param($Code)
         $Password = $Credentials.GetNetworkCredential().Password
         try {
             $Arguments = @($UserName, $Password, $Code, $False, $null)
@@ -100,6 +101,8 @@ function Invoke-CWCMfaLogin {
         IdentityHash = $IdentityHash
         Headers      = $Headers
         WebSession   = $WebSession
+        # Tells Invoke-CWCWebRequest not to suggest an expired login while logging in
+        LoggingIn    = $True
     }
 
     switch ($PSCmdlet.ParameterSetName) {
@@ -123,7 +126,12 @@ function Invoke-CWCMfaLogin {
             $Result = Invoke-TryLogin -Code $OneTimeCode
         }
         'TotpSecret' {
-            $Result = Invoke-TryLogin -Code (Get-CWCTotpLoginCode -Secret $TotpSecret -Key "$Server|$UserName")
+            $StepKey = "$Server|$UserName".ToLowerInvariant()
+            $Totp = Get-CWCTotpLoginCode -Secret $TotpSecret -Key $StepKey
+            $Result = Invoke-TryLogin -Code $Totp.Code
+            # The server has seen this step's code (accepted or rejected): don't send it again
+            if ("$Result" -in '1', 'Success', '10') { $script:CWCLastTotpStep[$StepKey] = $Totp.Step }
+            $Totp = $null
         }
     }
 
@@ -142,23 +150,31 @@ function Invoke-CWCMfaLogin {
         }
     }
 
-    # The anti-forgery token is issued per login: fetch the new one
-    $Token = Get-FrontPageToken
-    if ($Token) { $Headers.'x-anti-forgery-token' = $Token }
-    else {
-        $Headers.Remove('x-anti-forgery-token')
-        Write-Warning 'Unable to find the anti-forgery token on the server front page. Commands that change sessions may fail with "Invalid anti-forgery token".'
-    }
-
+    # Logged in from here on: if a later step fails, log out so the login doesn't stay valid on the server
     try {
-        # GetEligibleHosts requires any permission, so it validates non-admin accounts too
-        $null = Invoke-CWCServiceMethod -Service PageService -Method GetEligibleHosts -Idempotent -ErrorAction Stop
+        # The anti-forgery token is issued per login: fetch the new one
+        $Token = Get-FrontPageToken
+        if ($Token) { $Headers.'x-anti-forgery-token' = $Token }
+        else {
+            $Headers.Remove('x-anti-forgery-token')
+            Write-Warning 'Unable to find the anti-forgery token on the server front page. Commands that change sessions may fail with "Invalid anti-forgery token".'
+        }
+
+        try {
+            # GetEligibleHosts requires any permission, so it validates non-admin accounts too
+            $null = Invoke-CWCServiceMethod -Service PageService -Method GetEligibleHosts -Idempotent -ErrorAction Stop
+        }
+        catch {
+            if ($_.FullyQualifiedErrorId -like 'CWC.Http*') {
+                throw (New-LoginError ("Logged in to '$Origin' as '$UserName', but the account can't use the API. " +
+                    "Check that its role grants at least one permission. $($_.Exception.Message)") 'CWC.LoginFailed' AuthenticationError)
+            }
+            throw (New-LoginError "Connecting to '$Origin' failed after login: $($_.Exception.Message)" 'CWC.NoResponse' ConnectionError)
+        }
     }
     catch {
-        if ($_.FullyQualifiedErrorId -like 'CWC.Http*') {
-            throw (New-LoginError ("Logged in to '$Origin' as '$UserName', but the account can't use the API. " +
-                "Check that its role grants at least one permission. $($_.Exception.Message)") 'CWC.LoginFailed' AuthenticationError)
-        }
-        throw (New-LoginError "Connecting to '$Origin' failed after login: $($_.Exception.Message)" 'CWC.NoResponse' ConnectionError)
+        Invoke-CWCLogout -Connection $script:CWCServerConnection
+        throw
     }
+    $script:CWCServerConnection.Remove('LoggingIn')
 }

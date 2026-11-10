@@ -149,7 +149,12 @@ function Connect-CWC {
     }
 
     if ($RequestedAuthType -eq 'ApiSecret' -and $ApiSecret.Length -eq 0) { throw 'ApiSecret cannot be empty.' }
-    if ($PSCmdlet.ParameterSetName -eq 'TotpSecret' -and $TotpSecret.Length -eq 0) { throw 'TotpSecret cannot be empty.' }
+    if ($PSCmdlet.ParameterSetName -eq 'TotpSecret') {
+        if ($TotpSecret.Length -eq 0) { throw 'TotpSecret cannot be empty.' }
+        # Check the secret decodes before any request (and before a wait for a fresh code)
+        $Key = ConvertFrom-CWCBase32 -Text ((ConvertFrom-CWCSecureString $TotpSecret) -replace '^\s*ms:', '')
+        [array]::Clear($Key, 0, $Key.Length)
+    }
 
     if ($RequestedAuthType -eq 'Credentials') {
         $EncodedCredentials = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes("$($Credentials.UserName):$($Credentials.GetNetworkCredential().Password)"))
@@ -182,14 +187,20 @@ function Connect-CWC {
         }
         # An MFA login is a cookie the server expires: check it is still accepted
         try {
-            $null = Invoke-CWCServiceMethod -Service PageService -Method GetEligibleHosts -ErrorAction Stop
+            $null = Invoke-CWCServiceMethod -Service PageService -Method GetEligibleHosts -Idempotent -ErrorAction Stop
             Write-Verbose 'Using the cached MFA login.'
             return
         }
         catch {
+            if ($_.FullyQualifiedErrorId -notlike 'CWC.Http*') {
+                # No answer: says nothing about the login. Keep it rather than spend a new code.
+                Write-Error "Could not reach 'https://$Server' to check the cached MFA login: $($_.Exception.Message)"
+                return
+            }
             Write-Verbose "The cached MFA login is no longer accepted; logging in again. $($_.Exception.Message)"
             # Never restore an expired login
             $SameAsCached = $False
+            $Cached = $null
         }
     }
 
@@ -197,10 +208,14 @@ function Connect-CWC {
     # (-Force). After a failed switch to another server, method or identity, stay disconnected.
     $PreviousConnection = $null
     if ($SameAsCached) { $PreviousConnection = $Cached }
-    # An MFA login this replaces is logged out at the end, so its cookie stops working on the server too
-    $OldMfaConnection = $null
-    if ($Cached -and $Cached.AuthType -eq 'Mfa') { $OldMfaConnection = $Cached }
     $script:CWCServerConnection = $null
+
+    # A switch away from an MFA login drops it whatever happens next: log it out so its cookie stops
+    # working on the server too. A refresh of the same login is not logged out (it is restored if the
+    # refresh fails, and the server may end all of the user's logins), nor is an expired one.
+    if ($Cached -and $Cached.AuthType -eq 'Mfa' -and -not $SameAsCached) {
+        Invoke-CWCLogout -Connection $Cached
+    }
 
     if ($RequestedAuthType -eq 'ApiSecret') {
         if (-not $Origin) { $Origin = "https://$Server" }
@@ -307,9 +322,5 @@ function Connect-CWC {
                 }
             }
         }
-    }
-
-    if ($OldMfaConnection -and -not [object]::ReferenceEquals($script:CWCServerConnection, $OldMfaConnection)) {
-        Invoke-CWCLogout -Connection $OldMfaConnection
     }
 }

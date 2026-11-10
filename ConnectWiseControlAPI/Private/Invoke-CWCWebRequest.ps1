@@ -123,7 +123,7 @@
 
             # An expired MFA login makes requests run as an anonymous user: they fail with a permission
             # error, or an anti-forgery error because the token belonged to the login.
-            if ($StatusCode -gt 0 -and $script:CWCServerConnection.AuthType -eq 'Mfa' -and
+            if ($StatusCode -gt 0 -and $script:CWCServerConnection.AuthType -eq 'Mfa' -and -not $script:CWCServerConnection.LoggingIn -and
                 ("$ServerErrorType" -match 'Security' -or "$ServerMessage" -match 'anti-?forgery|Needs permission')) {
                 $ErrorMessage += 'If the MFA login has expired, run Connect-CWC again.'
             }

@@ -455,6 +455,14 @@ Describe 'Invoke-CWCWebRequest' {
             }
         }
 
+        It 'does not suggest an expired login while logging in' {
+            InModuleScope 'ConnectWiseControlAPI' {
+                $script:CWCServerConnection.LoggingIn = $True
+                Mock Invoke-WebRequest { throw (& $script:NewServerErrorRecord '{"errorType":"SecurityException","message":"Needs permission"}' $null) }
+                $null = Invoke-CWCWebRequest -Arguments @{ Endpoint = 'Services/PageService.ashx/GetEligibleHosts'; Method = 'Post' } -ErrorAction SilentlyContinue -ErrorVariable err
+                "$err" | Should -Not -Match 'MFA login'
+            }
+        }
         It 'strips the login cookie from the failed request kept on the error record' {
             InModuleScope 'ConnectWiseControlAPI' {
                 $script:FailedRequest = [System.Net.WebRequest]::Create('https://test.example.com/Services/PageService.ashx/GetSessionDetails')
@@ -548,9 +556,11 @@ Describe 'Get-CWCTotpLoginCode' {
 
     It 'uses the current step when there is time left' {
         InModuleScope 'ConnectWiseControlAPI' {
-            Mock Get-CWCUnixTime { [int64]3010 }   # 10 s into a step
+            Mock Get-CWCUnixTime { [int64]3010 }   # 10 s into step 100
             $Secret = ConvertTo-SecureString 'GEZDGNBV' -AsPlainText -Force
-            Get-CWCTotpLoginCode -Secret $Secret -Key 'server|user' | Should -Be '3010'
+            $Result = Get-CWCTotpLoginCode -Secret $Secret -Key 'server|user'
+            $Result.Code | Should -Be '3010'
+            $Result.Step | Should -Be 100
             Should -Invoke Start-Sleep -Times 0
         }
     }
@@ -559,33 +569,34 @@ Describe 'Get-CWCTotpLoginCode' {
         InModuleScope 'ConnectWiseControlAPI' {
             Mock Get-CWCUnixTime { [int64]3028 }   # 2 s left
             $Secret = ConvertTo-SecureString 'GEZDGNBV' -AsPlainText -Force
-            Get-CWCTotpLoginCode -Secret $Secret -Key 'server|user' | Should -Be '3030'
+            $Result = Get-CWCTotpLoginCode -Secret $Secret -Key 'server|user'
+            $Result.Code | Should -Be '3030'
+            $Result.Step | Should -Be 101
             Should -Invoke Start-Sleep -Times 1 -ParameterFilter { $Seconds -eq 2 }
         }
     }
 
-    It 'never uses the same step twice for the same server and user' {
+    It 'waits for the next step when this one was already sent for the same server and user' {
         InModuleScope 'ConnectWiseControlAPI' {
             Mock Get-CWCUnixTime { [int64]3010 }
+            $script:CWCLastTotpStep['server|user'] = 100
             $Secret = ConvertTo-SecureString 'GEZDGNBV' -AsPlainText -Force
-            $null = Get-CWCTotpLoginCode -Secret $Secret -Key 'server|user'
-            Get-CWCTotpLoginCode -Secret $Secret -Key 'SERVER|User' | Should -Be '3030'
+            (Get-CWCTotpLoginCode -Secret $Secret -Key 'server|user').Code | Should -Be '3030'
             Should -Invoke Start-Sleep -Times 1 -ParameterFilter { $Seconds -eq 20 }
             # Another user is independent
-            Get-CWCTotpLoginCode -Secret $Secret -Key 'server|other' | Should -Be '3010'
+            (Get-CWCTotpLoginCode -Secret $Secret -Key 'server|other').Code | Should -Be '3010'
         }
     }
 
-    It 'remembers only the step number, never the code' {
+    It 'does not record the step itself (the caller does, once the server has seen the code)' {
         InModuleScope 'ConnectWiseControlAPI' {
             Mock Get-CWCUnixTime { [int64]3010 }
             $Secret = ConvertTo-SecureString 'GEZDGNBV' -AsPlainText -Force
             $null = Get-CWCTotpLoginCode -Secret $Secret -Key 'server|user'
-            $script:CWCLastTotpStep['server|user'] | Should -Be 100
+            $script:CWCLastTotpStep.Count | Should -Be 0
         }
     }
 }
-
 Describe 'Get-CWCIdentityHash' {
     It 'matches for the same user (any case) and password, and differs for another password' {
         InModuleScope 'ConnectWiseControlAPI' {
