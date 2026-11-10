@@ -9,13 +9,10 @@
         [switch]$SensitiveBody
     )
 
-    # Check that we have cached connection info
+    # Errors carry an ErrorId so callers can tell them apart without parsing text:
+    # CWC.NotConnected, CWC.AuthModeMismatch, CWC.Http<status> (the server answered), CWC.NoResponse.
     if (!$script:CWCServerConnection) {
-        $ErrorMessage = @()
-        $ErrorMessage += 'Not connected to a Control server.'
-        $ErrorMessage += '--> $CWCServerConnection variable not found.'
-        $ErrorMessage += "----> Run 'Connect-CWC' to initialize the connection before issuing other CWC cmdlets."
-        return Write-Error ($ErrorMessage | Out-String)
+        return Write-Error "Not connected to a Control server. Run 'Connect-CWC' first." -ErrorId 'CWC.NotConnected' -Category ConnectionError
     }
 
     # The two auth methods reach different endpoints: an API secret is only accepted by the
@@ -25,12 +22,10 @@
     if ($IsApiSecretConnection -ne $IsRestApiEndpoint) {
         # Name the public function the user called, not the private request helpers.
         $Caller = Get-PSCallStack | Select-Object -Skip 1 -ExpandProperty Command |
-            Where-Object { $_ -notin 'Invoke-CWCServiceMethod', 'Invoke-CWCWebRequest' } | Select-Object -First 1
+            Where-Object { $_ -notin 'Invoke-CWCServiceMethod', 'Invoke-CWCWebRequest', 'Add-CWCSessionEvent' } | Select-Object -First 1
         if (-not $Caller -or $Caller -eq '<ScriptBlock>') { $Caller = 'This command' }
-        if ($IsApiSecretConnection) {
-            return Write-Error "$Caller is not available when connected with -ApiSecret (RESTful API Manager). Connect with 'Connect-CWC -Credentials' to use it."
-        }
-        return Write-Error "$Caller requires the RESTful API Manager extension. Connect with 'Connect-CWC -ApiSecret' to use it."
+        $Required = if ($IsApiSecretConnection) { 'Credentials' } else { 'ApiSecret' }
+        return Write-Error (Get-CWCAuthModeMessage -Command $Caller -Required $Required) -ErrorId 'CWC.AuthModeMismatch' -Category InvalidOperation
     }
 
     $BaseURI = "https://$($script:CWCServerConnection.Server)"
@@ -94,52 +89,23 @@
                 continue
             }
 
-            # Build the error message, keeping the server's error body
+            # Build the error message, keeping the server's error body (e.g. {"errorType":"SecurityException","message":"Needs permission"})
             $ErrorMessage = @()
             if ($StatusCode -eq 500 -and $MaxRetry -gt 0) { $ErrorMessage += "Max retries hit ($MaxRetry). Status: 500" }
+            elseif ($StatusCode -gt 0) { $ErrorMessage += "HTTP $StatusCode" }
 
-            if ($_.Exception.Response -and $PSVersionTable.PSVersion.Major -lt 6) {
-                # Error bodies are not always JSON (IIS 401/404 pages) and the stream may be unreadable;
-                # don't let reading or parsing it mask the status.
-                $ErrBody = $null
-                try {
-                    $Reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
-                    $ErrBody = $Reader.ReadToEnd() | ConvertFrom-Json
-                }
-                catch { $ErrBody = $null }
-
-                if ($ErrBody.code) {
-                    $ErrorMessage += 'An exception has been thrown.'
-                    $ErrorMessage += "--> $($ErrBody.code)"
-                    if ($ErrBody.code -eq 'Unauthorized') {
-                        $ErrorMessage += "-----> $($ErrBody.message)"
-                        $ErrorMessage += "-----> Use 'Disconnect-CWC' or 'Connect-CWC -Force' to set new authentication."
-                    }
-                    else {
-                        $ErrorMessage += "-----> $($ErrBody.code): $($ErrBody.message)"
-                        $ErrorMessage += '-----> ^ Error has not been documented please report. ^'
-                    }
-                }
-                elseif ($_.Exception.message) {
-                    $ErrorMessage += 'An exception has been thrown.'
-                    $ErrorMessage += "--> $($_.Exception.message)"
-                }
+            $ServerMessage = $_.ErrorDetails.Message
+            if (-not $ServerMessage -and $_.Exception.Response -and $PSVersionTable.PSVersion.Major -lt 6) {
+                # Fallback for Windows PowerShell when ErrorDetails is empty; the stream may be unreadable.
+                try { $ServerMessage = (New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())).ReadToEnd() }
+                catch { $ServerMessage = $null }
             }
+            if ($ServerMessage) { $ErrorMessage += $ServerMessage }
+            else { $ErrorMessage += "$_" }
 
-            if ($_.ErrorDetails) {
-                $ErrorMessage += 'An error has been thrown.'
-                $ErrorMessage += "--> $($_.ErrorDetails.code)"
-                $ErrorMessage += "--> $($_.ErrorDetails.message)"
-                if ($_.ErrorDetails.errors.message) {
-                    $ErrorMessage += "-----> $($_.ErrorDetails.errors.message)"
-                }
-            }
-
-            # Nothing beyond the retry line: fall back to the exception itself
-            if ($ErrorMessage.Count -le 1) { $ErrorMessage += "$_" }
-            $ErrorMessage += $_.ScriptStackTrace
-
-            return Write-Error ($ErrorMessage | Out-String)
+            if ($StatusCode -gt 0) { $ErrorId = "CWC.Http$StatusCode"; $Category = 'InvalidResult' }
+            else { $ErrorId = 'CWC.NoResponse'; $Category = 'ConnectionError' }
+            return Write-Error ($ErrorMessage -join ' ') -ErrorId $ErrorId -Category $Category
         }
     }
 

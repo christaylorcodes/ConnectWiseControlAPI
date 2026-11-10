@@ -9,19 +9,10 @@ function Invoke-CWCWake {
     )
 
     # PageService.AddEventToSessions no longer exists on the server; wake is queued as a session event.
-    $SessionEventType = $script:CWCSessionEventType.QueuedWake
-
-    if ($Type -eq 'Support') { $Group = 'All Sessions' }
-    else { $Group = 'All Machines' }
-
     $EventEntries = @(
         foreach ($SessionID in $GUID) {
-            @{
-                SessionID = $SessionID
-                EventType = $SessionEventType
-            }
+            @{ SessionID = $SessionID; EventType = $script:CWCSessionEventType.QueuedWake }
         }
     )
-
-    Invoke-CWCServiceMethod -Service PageService -Method AddSessionEvents -Arguments @(@($Group), $EventEntries)
+    Add-CWCSessionEvent -Group $script:CWCDefaultSessionGroup[$Type] -Entry $EventEntries
 }

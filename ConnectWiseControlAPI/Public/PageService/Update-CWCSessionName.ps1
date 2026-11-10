@@ -5,7 +5,8 @@ function Update-CWCSessionName {
         [guid]$GUID,
         [Parameter(Mandatory=$True)]
         [string]$NewName,
-        [string]$Group = 'All Machines'
+        # Session group name, or the path parts of a nested group
+        [string[]]$Group = 'All Machines'
     )
 
     if ($PSCmdlet.ShouldProcess("$GUID", "Rename to '$NewName'")) {
@@ -15,7 +16,7 @@ function Update-CWCSessionName {
             Invoke-CWCServiceMethod -RestApi -Method UpdateSessionName -Arguments @($GUID.ToString(), $NewName) -Idempotent
         }
         else {
-            Invoke-CWCServiceMethod -Service PageService -Method UpdateSessionName -Arguments @($Group, $GUID, $NewName) -Idempotent
+            Invoke-CWCServiceMethod -Service PageService -Method UpdateSessionName -Arguments @(@($Group), $GUID, $NewName) -Idempotent
         }
     }
 }

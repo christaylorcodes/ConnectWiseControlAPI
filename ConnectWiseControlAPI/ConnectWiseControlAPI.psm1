@@ -21,6 +21,15 @@ $script:InternalUserSource = 'InternalMembershipProvider'
 # ScreenConnect.SessionType values (verified against ScreenConnect.Core.dll)
 $script:CWCSessionType = @{ Support = 0; Meeting = 1; Access = 2 }
 
+# Built-in session group that lists every session of each type
+$script:CWCDefaultSessionGroup = @{ Support = 'All Sessions'; Meeting = 'All Meetings'; Access = 'All Machines' }
+
+# ScreenConnect.ProcessType values (SC.types.ProcessType in the web client)
+$script:CWCProcessType = @{ Host = 1; Guest = 2 }
+
+# SessionPermissions.All (SC.types.SessionPermissions); the server grants only what the user may delegate
+$script:CWCAllSessionPermissions = 268435455
+
 # ScreenConnect.SessionEventType values used by this module (verified live from the web client's
 # SC.types.SessionEventType, 2026-11-10)
 $script:CWCSessionEventType = @{
@@ -44,5 +53,5 @@ $script:CWCRemoteWorkforceExtensionID = '2c4f522f-b39a-413a-8807-dc52a2fce13e'
 # RESTful API Manager extension ID, used by Connect-CWC -ApiSecret
 $script:CWCRestApiExtensionID = '2d558935-686a-4bd0-9991-07539f5fe749'
 
-# Export Public functions ($Public.BaseName) for WIP modules
+# Export only the Public/ functions
 Export-ModuleMember -Function $Public.Basename

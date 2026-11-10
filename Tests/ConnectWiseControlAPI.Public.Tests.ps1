@@ -218,8 +218,16 @@ Describe 'Connect-CWC' {
         It 'blames the credentials when the server rejects the validation call' {
             InModuleScope 'ConnectWiseControlAPI' -Parameters @{ cred = $cred } {
                 param($cred)
-                Mock Invoke-CWCWebRequest { Write-Error 'Needs permission' }
+                Mock Invoke-CWCWebRequest { Write-Error 'Needs permission' -ErrorId 'CWC.Http500' }
                 { Connect-CWC -Server 'server.example.com' -Credentials $cred -ErrorAction Stop } | Should -Throw "Authentication to*Check the username and password*"
+            }
+        }
+
+        It 'does not blame the credentials when the server does not answer' {
+            InModuleScope 'ConnectWiseControlAPI' -Parameters @{ cred = $cred } {
+                param($cred)
+                Mock Invoke-CWCWebRequest { Write-Error 'No such host is known.' -ErrorId 'CWC.NoResponse' }
+                { Connect-CWC -Server 'server.example.com' -Credentials $cred -ErrorAction Stop } | Should -Throw "*failed before authentication could be checked*No such host*"
             }
         }
 

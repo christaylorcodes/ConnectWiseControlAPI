@@ -7,7 +7,8 @@
         [int]$TimeOut = 10000,
         [int]$MaxLength = 10000,
         [switch]$PowerShell,
-        [string]$Group = 'All Machines',
+        # Session group name, or the path parts of a nested group
+        [string[]]$Group = 'All Machines',
         [switch]$NoWait
     )
 
@@ -29,12 +30,7 @@
         $null = Invoke-CWCServiceMethod -RestApi -Method SendCommandToSession -Arguments @($GUID.ToString(), $FormattedCommand)
     }
     else {
-        $CommandEvent = @{
-            SessionID = $GUID
-            EventType = $QueuedCommandEventType
-            Data      = $FormattedCommand
-        }
-        $null = Invoke-CWCServiceMethod -Service PageService -Method AddSessionEvents -Arguments @(@($Group), @($CommandEvent))
+        Add-CWCSessionEvent -Group $Group -Entry @{ SessionID = $GUID; EventType = $QueuedCommandEventType; Data = $FormattedCommand }
     }
     if ($NoWait) { return }
 
@@ -50,8 +46,9 @@
     # round-trip time of each poll doesn't shift them.
     $TimeOutDateTime = (Get-Date).AddMilliseconds($TimeOut).AddSeconds(1)
     $QueuedAtServerMs = $null
+    $PollDelaySeconds = 1
     do {
-        # Events only: this polls every second against a rate-limited endpoint.
+        # Events only, with a growing delay (1, 2, 3 ... 5 s): GetSessionDetails is rate limited.
         try { $SessionDetails = Get-CWCSessionDetail -Group $Group -GUID $GUID -Include 'Events' -ErrorAction Stop }
         catch {
             Write-Error $_
@@ -78,7 +75,9 @@
             }
         }
 
-        Start-Sleep -Seconds 1
+        $SecondsLeft = [math]::Ceiling(($TimeOutDateTime - (Get-Date)).TotalSeconds)
+        Start-Sleep -Seconds ([math]::Max(0, [math]::Min($PollDelaySeconds, $SecondsLeft)))
+        $PollDelaySeconds = [math]::Min($PollDelaySeconds + 1, 5)
     } while ((Get-Date) -le $TimeOutDateTime)
 
     Write-Warning 'Command timed out.'

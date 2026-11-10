@@ -40,7 +40,7 @@ function Send-CWCToolboxItem {
         [string]$Name,
 
         [ValidateNotNullOrEmpty()]
-        [string]$Group = 'All Machines'
+        [string[]]$Group = 'All Machines'
     )
 
     process {
@@ -52,12 +52,7 @@ function Send-CWCToolboxItem {
             Invoke-CWCServiceMethod -RestApi -Method SendToolboxItemToSession -Arguments @($GUID.ToString(), $Name)
         }
         else {
-            $ToolEvent = @{
-                SessionID = $GUID
-                EventType = $script:CWCSessionEventType.QueuedTool
-                Data      = $Name
-            }
-            Invoke-CWCServiceMethod -Service PageService -Method AddSessionEvents -Arguments @(@($Group), @($ToolEvent))
+            Add-CWCSessionEvent -Group $Group -Entry @{ SessionID = $GUID; EventType = $script:CWCSessionEventType.QueuedTool; Data = $Name }
         }
     }
 }

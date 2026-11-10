@@ -7,8 +7,9 @@ function Remove-CWCSession
     [Parameter(Mandatory = $True)]
     [ValidateScript({ $_ -ne [guid]::Empty })]
     [guid[]]$GUID,
+    # Session group name, or the path parts of a nested group
     [Parameter(Mandatory = $True)]
-    [string]$Group,
+    [string[]]$Group,
     # Queue an uninstall of the Access client and delete the session (QueuedUninstallAndDelete),
     # instead of only deleting the session record (DeletedSession).
     [switch]$Uninstall
@@ -27,17 +28,10 @@ function Remove-CWCSession
   # SessionEventEntry per approved session in a single request.
   $EventEntries = @(
     foreach ($SessionID in $GUID) {
-      if ($PSCmdlet.ShouldProcess("Session $SessionID (group '$Group')", $Action)) {
-        @{
-          SessionID = $SessionID
-          EventType = $SessionEventType
-        }
+      if ($PSCmdlet.ShouldProcess("Session $SessionID (group '$($Group -join '/')')", $Action)) {
+        @{ SessionID = $SessionID; EventType = $SessionEventType }
       }
     }
   )
-
-  if ($EventEntries.Count -eq 0) { return }
-
-  # Not idempotent: never retried
-  Invoke-CWCServiceMethod -Service PageService -Method AddSessionEvents -Arguments @(@($Group), $EventEntries)
+  Add-CWCSessionEvent -Group $Group -Entry $EventEntries
 }

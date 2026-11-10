@@ -48,7 +48,7 @@ function Send-CWCSessionMessage {
         [string]$From = 'RESTful API',
 
         [ValidateNotNullOrEmpty()]
-        [string]$Group = 'All Machines'
+        [string[]]$Group = 'All Machines'
     )
 
     process {
@@ -64,12 +64,7 @@ function Send-CWCSessionMessage {
             if ($PSBoundParameters.ContainsKey('From')) {
                 Write-Warning '-From is only used with -ApiSecret connections; the guest sees the connected user as the sender.'
             }
-            $MessageEvent = @{
-                SessionID = $GUID
-                EventType = $script:CWCSessionEventType.QueuedMessage
-                Data      = $Message
-            }
-            Invoke-CWCServiceMethod -Service PageService -Method AddSessionEvents -Arguments @(@($Group), @($MessageEvent))
+            Add-CWCSessionEvent -Group $Group -Entry @{ SessionID = $GUID; EventType = $script:CWCSessionEventType.QueuedMessage; Data = $Message }
         }
     }
 }

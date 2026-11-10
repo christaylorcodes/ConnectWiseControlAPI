@@ -59,8 +59,9 @@ function Remove-CWCSessionNote {
         [string[]]$Group = 'All Machines'
     )
 
+    # Checked up front: with -All, the read below would otherwise succeed through the extension first.
     if (Test-CWCApiSecretConnection) {
-        return Write-Error "Remove-CWCSessionNote is not available when connected with -ApiSecret (RESTful API Manager). Connect with 'Connect-CWC -Credentials' to use it."
+        return Write-Error (Get-CWCAuthModeMessage -Command $MyInvocation.MyCommand.Name -Required Credentials) -ErrorId 'CWC.AuthModeMismatch' -Category InvalidOperation
     }
 
     $NoteType = $script:CWCSessionEventType.AddedNote
@@ -86,16 +87,9 @@ function Remove-CWCSessionNote {
     $EventEntries = @(
         foreach ($NoteID in $NotesToRemove) {
             if ($PSCmdlet.ShouldProcess("Note $NoteID on session $GUID", 'Remove note')) {
-                @{
-                    SessionID          = $GUID
-                    EventType          = $DeletedType
-                    CorrelationEventID = $NoteID
-                }
+                @{ SessionID = $GUID; EventType = $DeletedType; CorrelationEventID = $NoteID }
             }
         }
     )
-    if ($EventEntries.Count -eq 0) { return }
-
-    # Not idempotent: never retried
-    $null = Invoke-CWCServiceMethod -Service PageService -Method AddSessionEvents -Arguments @(@($Group), $EventEntries)
+    Add-CWCSessionEvent -Group $Group -Entry $EventEntries
 }

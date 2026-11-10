@@ -21,8 +21,12 @@ function Enter-CWCSession {
         Session type. Defaults to Access.
 
     .PARAMETER Group
-        Session group containing the session. Defaults to 'All Machines' for Access, 'All Sessions' for
-        Support and 'All Meetings' for Meeting.
+        Session group containing the session: a name, or the path parts of a nested group. Defaults to
+        'All Machines' for Access, 'All Sessions' for Support and 'All Meetings' for Meeting.
+
+    .PARAMETER Name
+        Session name shown as the client's title. Taken from the pipeline (e.g. from Get-CWCSession);
+        when given, the session lookup is skipped.
 
     .PARAMETER UrlOnly
         Return the launch URL instead of opening the client. The URL holds an access token: treat it
@@ -62,64 +66,67 @@ function Enter-CWCSession {
         [ValidateSet('Support', 'Meeting', 'Access')]
         [string]$Type = 'Access',
 
-        [string]$Group,
+        [string[]]$Group,
+
+        [Parameter(ValueFromPipelineByPropertyName = $True)]
+        [string]$Name,
 
         [switch]$UrlOnly
     )
 
     begin {
-        # SessionPermissions.All; the server grants only what the user may delegate for the session.
-        $AllSessionPermissions = 268435455
         $DelegatedTokenSeconds = 300
         $ModuleVersion = $MyInvocation.MyCommand.Module.Version
+        # Set after the first failed delegated-token request, so a pipeline doesn't retry and warn per item
+        $DelegatedTokenUnavailable = $False
     }
 
     process {
         if (-not $script:CWCServerConnection) {
-            return Write-Error "Not connected to a Control server. Run 'Connect-CWC' first."
+            return Write-Error "Not connected to a Control server. Run 'Connect-CWC' first." -ErrorId 'CWC.NotConnected' -Category ConnectionError
         }
+        # Checked up front: the launch settings below are read without going through the request helper.
         if (Test-CWCApiSecretConnection) {
-            return Write-Error "Enter-CWCSession is not available when connected with -ApiSecret (RESTful API Manager). Connect with 'Connect-CWC -Credentials' to use it."
+            return Write-Error (Get-CWCAuthModeMessage -Command $MyInvocation.MyCommand.Name -Required Credentials) -ErrorId 'CWC.AuthModeMismatch' -Category InvalidOperation
+        }
+        if (-not $UrlOnly -and [Environment]::OSVersion.Platform -ne 'Win32NT') {
+            return Write-Error 'Launching the Control client is supported on Windows only. Use -UrlOnly to get the launch URL and open it yourself.'
         }
 
         # Local copy: a default chosen for one pipeline item must not stick to the next.
         $SessionGroup = $Group
-        if (-not $SessionGroup) {
-            $SessionGroup = switch ($Type) {
-                'Support' { 'All Sessions' }
-                'Meeting' { 'All Meetings' }
-                default { 'All Machines' }
-            }
-        }
+        if (-not $SessionGroup) { $SessionGroup = $script:CWCDefaultSessionGroup[$Type] }
+        $GroupText = $SessionGroup -join '/'
 
         $LaunchContext = Get-CWCHostLaunchContext
         if (-not $LaunchContext) { return }
 
-        # Title shown by the client, and a check that the session exists as this type in this group.
-        $Session = Get-CWCSession -Type $Type -Group $SessionGroup -FindSessionID $GUID |
-            Where-Object { "$($_.SessionID)" -eq "$GUID" } | Select-Object -First 1
-        if (-not $Session) {
-            return Write-Error "Session $GUID was not found among $Type sessions in group '$SessionGroup'. Check -Type and -Group."
+        if (-not $UrlOnly -and -not (Test-Path -LiteralPath "Registry::HKEY_CLASSES_ROOT\$($LaunchContext.Scheme)")) {
+            return Write-Error ("The Control client for $($script:CWCServerConnection.Server) is not installed for this Windows user " +
+                "(no handler for $($LaunchContext.Scheme)://). Join any session once from the web UI to install it, or use -UrlOnly.")
         }
 
-        if (-not $UrlOnly) {
-            if ([Environment]::OSVersion.Platform -ne 'Win32NT') {
-                return Write-Error 'Launching the Control client is supported on Windows only. Use -UrlOnly to get the launch URL and open it yourself.'
+        # Title shown by the client. Without -Name, look the session up, which also checks that it exists
+        # as this type in this group.
+        $Title = $Name
+        if (-not $PSBoundParameters.ContainsKey('Name')) {
+            $Session = Get-CWCSession -Type $Type -Group $SessionGroup -FindSessionID $GUID |
+                Where-Object { "$($_.SessionID)" -eq "$GUID" } | Select-Object -First 1
+            if (-not $Session) {
+                return Write-Error "Session $GUID was not found among $Type sessions in group '$GroupText'. Check -Type and -Group."
             }
-            if (-not (Test-Path -LiteralPath "Registry::HKEY_CLASSES_ROOT\$($LaunchContext.Scheme)")) {
-                return Write-Error ("The Control client for $($script:CWCServerConnection.Server) is not installed for this Windows user " +
-                    "(no handler for $($LaunchContext.Scheme)://). Join any session once from the web UI to install it, or use -UrlOnly.")
-            }
+            $Title = "$($Session.Name)"
         }
 
         $Token = $null
-        if ($UrlOnly) {
+        if ($UrlOnly -and -not $DelegatedTokenUnavailable) {
             try {
                 $Token = Invoke-CWCServiceMethod -Service PageService -Method GetDelegatedAccessToken -Arguments @(
-                    @($SessionGroup), "$GUID", $AllSessionPermissions, $DelegatedTokenSeconds, 'ConnectWiseControlAPI Enter-CWCSession -UrlOnly'
+                    @($SessionGroup), "$GUID", $script:CWCAllSessionPermissions, $DelegatedTokenSeconds, 'ConnectWiseControlAPI Enter-CWCSession -UrlOnly'
                 ) -ErrorAction Stop
             }
             catch {
+                $DelegatedTokenUnavailable = $True
                 Write-Verbose "Delegated access token not available: $($_.Exception.Message)"
                 Write-Warning ("Could not get a short-lived delegated token (needs CreateDelegatedAccessToken); the URL uses a regular " +
                     "Host token valid for the server's access token lifetime. Treat it like a password.")
@@ -127,7 +134,7 @@ function Enter-CWCSession {
         }
         if (-not $Token) {
             try { $Token = New-CWCAccessToken -Group $SessionGroup -GUID $GUID -ErrorAction Stop }
-            catch { return Write-Error "Could not get an access token for session $GUID (JoinSession permission in '$SessionGroup' is required): $($_.Exception.Message)" }
+            catch { return Write-Error "Could not get an access token for session $GUID (JoinSession permission in '$GroupText' is required): $($_.Exception.Message)" }
         }
         if (-not $Token) { return Write-Error "The server returned no access token for session $GUID." }
 
@@ -139,7 +146,7 @@ function Enter-CWCSession {
             PublicKey   = $LaunchContext.PublicKey
             AccessToken = "$Token"
             SessionType = $Type
-            Title       = "$($Session.Name)"
+            Title       = $Title
         }
         $Url = New-CWCHostLaunchUrl @UrlParameters
         $Token = $null
@@ -151,10 +158,10 @@ function Enter-CWCSession {
         catch { return Write-Error "$($_.Exception.Message)" }
         finally { $Url = $null }
 
-        # Same audit entry as a web UI join: LogInitiatedJoin(sessionID, ProcessType.Host = 1, data).
+        # Same audit entry as a web UI join: LogInitiatedJoin(sessionID, processType, data).
         try {
             $JoinData = "(UrlLaunch) ConnectWiseControlAPI/$ModuleVersion PowerShell/$($PSVersionTable.PSVersion)"
-            $null = Invoke-CWCServiceMethod -Service PageService -Method LogInitiatedJoin -Arguments @("$GUID", 1, $JoinData) -ErrorAction Stop
+            $null = Invoke-CWCServiceMethod -Service PageService -Method LogInitiatedJoin -Arguments @("$GUID", $script:CWCProcessType.Host, $JoinData) -ErrorAction Stop
         }
         catch {
             Write-Warning "The client was opened, but the join could not be logged on the server: $($_.Exception.Message)"

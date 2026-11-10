@@ -41,7 +41,7 @@ function Add-CWCSessionNote {
         [string]$Note,
 
         [ValidateNotNullOrEmpty()]
-        [string]$Group = 'All Machines'
+        [string[]]$Group = 'All Machines'
     )
 
     process {
@@ -53,12 +53,7 @@ function Add-CWCSessionNote {
             Invoke-CWCServiceMethod -RestApi -Method AddNoteToSession -Arguments @($GUID.ToString(), $Note)
         }
         else {
-            $NoteEvent = @{
-                SessionID = $GUID
-                EventType = $script:CWCSessionEventType.AddedNote
-                Data      = $Note
-            }
-            Invoke-CWCServiceMethod -Service PageService -Method AddSessionEvents -Arguments @(@($Group), @($NoteEvent))
+            Add-CWCSessionEvent -Group $Group -Entry @{ SessionID = $GUID; EventType = $script:CWCSessionEventType.AddedNote; Data = $Note }
         }
     }
 }

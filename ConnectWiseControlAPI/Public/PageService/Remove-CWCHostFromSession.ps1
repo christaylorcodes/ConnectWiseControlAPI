@@ -47,12 +47,9 @@ function Remove-CWCHostFromSession {
 
     if (-not $PSCmdlet.ShouldProcess("Connection $ConnectionID in session $SessionID", 'Force disconnect')) { return }
 
-    $DisconnectEvent = @{
+    Add-CWCSessionEvent -Group $Group -Entry @{
         SessionID    = $SessionID
         EventType    = $script:CWCSessionEventType.QueuedForceDisconnect
         ConnectionID = $ConnectionID
     }
-
-    # Not idempotent: never retried
-    Invoke-CWCServiceMethod -Service PageService -Method AddSessionEvents -Arguments @(@($Group), @($DisconnectEvent))
 }
