@@ -4,9 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-PowerShell module wrapping the ConnectWise Control (ScreenConnect) web API; published to the PowerShell Gallery and used by MSPs. Version lives in `ConnectWiseControlAPI/ConnectWiseControlAPI.psd1` (history in `CHANGELOG.md`). Two auth modes via `Connect-CWC`:
+PowerShell module wrapping the ConnectWise Control (ScreenConnect) web API; published to the PowerShell Gallery and used by MSPs. Version lives in `ConnectWiseControlAPI/ConnectWiseControlAPI.psd1` (history in `CHANGELOG.md`). Three auth modes via `Connect-CWC` (stored as `AuthType`):
 
-- `-Credentials`: Basic auth, non-MFA account. Reaches the built-in `Services/*.ashx` and extensions.
+- `-Credentials` (`Credentials`): Basic auth, non-MFA account. Reaches the built-in `Services/*.ashx` and extensions.
+- `-Credentials` plus `-Mfa`, `-OneTimeCode` or `-TotpSecret` (`Mfa`): `Private/Invoke-CWCMfaLogin.ps1` signs in with `AuthenticationService.TryLogin` and the connection uses the `.ASPXAUTH` cookie, with no Authorization header and no stored password. Reaches the same endpoints as `Credentials`. The login expires; a cache hit is re-checked with `GetEligibleHosts`.
 - `-ApiSecret`: RESTful API Manager extension secret. Reaches only that extension's methods: `Public/RestApi/` functions plus the dual-mode ones (`Get-CWCSessionDetail`, `Update-CWCSessionName`, `Invoke-CWCCommand`), which branch on `Test-CWCApiSecretConnection`.
 
 ## Commands

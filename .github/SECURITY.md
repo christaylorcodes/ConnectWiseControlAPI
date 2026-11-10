@@ -71,7 +71,10 @@ When using this module, please:
 1. **Secure Your Credentials**
    - Never commit API credentials or passwords to source control
    - Use PowerShell `[PSCredential]` objects, not plaintext passwords
-   - The module requires a non-MFA account; use a complex username and password
+   - Use a complex username and password; accounts that require MFA sign in with `-Mfa`,
+     `-OneTimeCode` or `-TotpSecret`
+   - A TOTP secret for unattended logins (`-TotpSecret`) is a second password: keep it in a secret
+     store, apart from the account password where you can, and replace it if the computer is compromised
 
 2. **Use HTTPS**
    - The module requires your Control server to use HTTPS

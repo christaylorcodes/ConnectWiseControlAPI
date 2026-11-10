@@ -37,9 +37,13 @@ param(
     # Name of an existing toolbox item to send (skipped when empty).
     [string]$ToolboxItem,
 
-    # Probe the MFA login flow (#12) with this account: TryLogin with a one-time password, then
-    # call PageService with only the login cookies + anti-forgery token (no Basic auth).
+    # Test the MFA login (#12) with this account: Connect-CWC -Mfa (asks for the code), reads, the cached
+    # reconnect and, with -AllowWrites, a note. Optionally Connect-CWC -TotpSecret and an expired login.
     [string]$MfaUserName,
+
+    # With -MfaUserName: also record the raw TryLogin result for a missing and a wrong code. Each is a
+    # failed login that counts toward the server's limits for the account.
+    [switch]$MfaNegativeProbes,
 
     # Only delete the notes earlier runs left on the test session, then exit.
     [switch]$CleanupOnly,
@@ -195,89 +199,105 @@ if ($LimitedCredential) {
 }
 #endregion
 
-#region MFA login probe (#12): raw requests, not module code
+#region MFA login (#12)
 if ($MfaUserName) {
     $MfaCredential = Get-Credential -UserName $MfaUserName -Message 'MFA account'
-    $Mfa = @{ Session = $null; Token = $null }
+    $MfaTotpSecret = Read-Host -AsSecureString -Prompt 'OPTIONAL: TOTP secret of the MFA account, for the unattended login test (Enter to skip)'
 
-    # Result object with secrets dropped and long strings cut, so it's safe to record.
-    function Select-LoginResult {
-        param($LoginResult)
-        # SecurityOperationResult may come back as a bare enum value (number or string)
-        if ($null -eq $LoginResult -or $LoginResult -is [ValueType] -or $LoginResult -is [string]) {
-            return [ordered]@{ Raw = $LoginResult; Type = if ($null -ne $LoginResult) { $LoginResult.GetType().Name } else { 'null' } }
+    # Login cookies without their values: name, lifetime and flags only
+    function Get-MfaCookieInfo {
+        $Connection = & $CWCModule { $script:CWCServerConnection }
+        @($Connection.WebSession.Cookies.GetCookies("https://$Server") | ForEach-Object {
+                [pscustomobject]@{
+                    Name     = $_.Name
+                    Session  = ($_.Expires -eq [datetime]::MinValue)
+                    Expires  = if ($_.Expires -ne [datetime]::MinValue) { $_.Expires.ToUniversalTime().ToString('o') } else { $null }
+                    Expired  = $_.Expired
+                    Secure   = $_.Secure
+                    HttpOnly = $_.HttpOnly
+                }
+            })
+    }
+    function Get-MfaConnectionInfo {
+        $Connection = & $CWCModule { $script:CWCServerConnection }
+        [pscustomobject]@{
+            AuthType      = $Connection.AuthType
+            HasAuthHeader = [bool]$Connection.Headers.authorization
+            HasToken      = [bool]$Connection.Headers.'x-anti-forgery-token'
+            HasPassword   = [bool]($Connection.Values | Where-Object { $_ -is [securestring] -or $_ -is [pscredential] })
         }
-        $Safe = [ordered]@{}
-        foreach ($Property in @($LoginResult.PSObject.Properties)) {
-            if ($Property.Name -match 'nonce|token|secret|password|key') { $Safe[$Property.Name] = '<redacted>'; continue }
-            $Value = "$($Property.Value)"
-            $Safe[$Property.Name] = $Value.Substring(0, [math]::Min(120, $Value.Length))
-        }
-        $Safe
     }
 
-    function Get-AntiForgeryToken {
-        $Page = Invoke-WebRequest -Uri "https://$Server" -WebSession $Mfa.Session -UseBasicParsing
-        $Match = [regex]::Match($Page.Content, 'antiForgeryToken":"([A-Za-z0-9+/=_-]{16,512})"')
-        if ($Match.Success) { $Match.Groups[1].Value } else { $null }
-    }
-
-    function Invoke-MfaRequest {
-        param([string]$Endpoint, $Arguments)
-        $Headers = @{ 'content-type' = 'application/json; charset=utf-8'; origin = "https://$Server" }
-        if ($Mfa.Token) { $Headers['x-anti-forgery-token'] = $Mfa.Token }
-        $Body = ConvertTo-Json -InputObject @($Arguments) -Depth 10
-        (Invoke-WebRequest -Uri "https://$Server/$Endpoint" -Method Post -Headers $Headers -Body $Body -WebSession $Mfa.Session -UseBasicParsing).Content | ConvertFrom-Json
-    }
-
-    Invoke-Step 'Mfa.FrontPage' {
-        $null = Invoke-WebRequest -Uri "https://$Server" -UseBasicParsing -SessionVariable 'MfaSession'
-        $Mfa.Session = $MfaSession
-        $Mfa.Token = Get-AntiForgeryToken
-        [ordered]@{ TokenFound = [bool]$Mfa.Token; Cookies = @($Mfa.Session.Cookies.GetCookies("https://$Server") | ForEach-Object Name) }
-    }
-
-    $Password = $MfaCredential.GetNetworkCredential().Password
-    function Get-MfaCookieName { @($Mfa.Session.Cookies.GetCookies("https://$Server") | ForEach-Object Name) }
-    # One TryLogin attempt: the login result code and which cookies the session holds afterwards
-    function Invoke-TryLoginStep {
-        param([string]$Name, $OneTimeCode)
-        Invoke-Step $Name {
-            [ordered]@{
-                Result  = Select-LoginResult (Invoke-MfaRequest 'Services/AuthenticationService.ashx/TryLogin' @($MfaUserName, $Password, $OneTimeCode, $False, $null))
-                Cookies = Get-MfaCookieName
+    # Raw failed logins, to record the result codes. Off by default: each one counts toward the server's
+    # login limits for this account.
+    if ($MfaNegativeProbes) {
+        function Invoke-RawTryLogin {
+            param($OneTimeCode)
+            $Page = Invoke-WebRequest -Uri "https://$Server" -UseBasicParsing -SessionVariable 'RawSession'
+            $Match = [regex]::Match($Page.Content, 'antiForgeryToken":"([A-Za-z0-9+/=_-]{16,512})"')
+            $Headers = @{ 'content-type' = 'application/json; charset=utf-8'; origin = "https://$Server" }
+            if ($Match.Success) { $Headers['x-anti-forgery-token'] = $Match.Groups[1].Value }
+            $Password = $MfaCredential.GetNetworkCredential().Password
+            try {
+                $Body = ConvertTo-Json -InputObject @($MfaUserName, $Password, $OneTimeCode, $False, $null)
+                $Raw = (Invoke-WebRequest -Uri "https://$Server/Services/AuthenticationService.ashx/TryLogin" -Method Post -Headers $Headers -Body $Body -WebSession $RawSession -UseBasicParsing).Content
+            }
+            finally { Remove-Variable -Name Password, Body -ErrorAction SilentlyContinue }
+            [pscustomobject]@{
+                RawResponse = "$Raw"
+                Cookies     = @($RawSession.Cookies.GetCookies("https://$Server") | ForEach-Object Name)
             }
         }
+        Invoke-Step 'Mfa.Raw.TryLoginWithoutCode' { Invoke-RawTryLogin $null }
+        Invoke-Step 'Mfa.Raw.TryLoginWrongCode' { Invoke-RawTryLogin '000000' }
     }
 
-    Invoke-TryLoginStep 'Mfa.TryLoginWithoutOtp' $null
-    Invoke-TryLoginStep 'Mfa.TryLoginWrongOtp' '000000'
+    # Interactive: Connect-CWC -Mfa asks for the code
+    Disconnect-Test
+    Invoke-Step 'Mfa.Connect' {
+        Connect-CWC -Server $Server -Credentials $MfaCredential -Mfa
+        Get-MfaConnectionInfo
+    }
+    Invoke-Step 'Mfa.Cookies' { Get-MfaCookieInfo }
+    Invoke-Step 'Mfa.GetSession' { @(Get-CWCSession -Type Access -Group $Group -Limit 5).Count }
+    Invoke-Step 'Mfa.GetSessionDetail' { @((Get-CWCSessionDetail -Group $Group -GUID $TestSessionID -Include Events).Events).Count }
+    Invoke-Step 'Mfa.CachedReconnect' {
+        # Same credentials again: must reuse the login (one check call, no new code)
+        $Before = & $CWCModule { $script:CWCServerConnection }
+        Connect-CWC -Server $Server -Credentials $MfaCredential -Mfa
+        $After = & $CWCModule { $script:CWCServerConnection }
+        if (-not [object]::ReferenceEquals($Before, $After)) { throw 'Logged in again instead of reusing the cached login' }
+        'reused'
+    }
+    if ($AllowWrites) {
+        Invoke-Step 'Mfa.AddNote' { $null = Add-CWCSessionNote -GUID $TestSessionID -Group $Group -Note 'CWC smoke test note (MFA login)'; 'sent' }
+    }
 
-    $OneTimePassword = Read-Host -Prompt "One-time password for $MfaUserName (Enter to skip)"
-    if ($OneTimePassword) {
-        Invoke-TryLoginStep 'Mfa.TryLoginWithOtp' $OneTimePassword
-        Invoke-Step 'Mfa.CookiesAfterLogin' { Get-MfaCookieName }
-
-        # Anti-forgery tokens may be tied to the logged-in user: compare old and fresh.
-        Invoke-Step 'Mfa.RefreshToken' {
-            $OldToken = $Mfa.Token
-            $Mfa.Token = Get-AntiForgeryToken
-            [ordered]@{ TokenFound = [bool]$Mfa.Token; ChangedAfterLogin = ($OldToken -ne $Mfa.Token) }
+    # Unattended: Connect-CWC -TotpSecret, then a logged-out login must be noticed and replaced
+    if ($MfaTotpSecret.Length -gt 0) {
+        Disconnect-Test
+        Invoke-Step 'Mfa.Totp.Connect' {
+            Connect-CWC -Server $Server -Credentials $MfaCredential -TotpSecret $MfaTotpSecret
+            Get-MfaConnectionInfo
         }
-        Invoke-Step 'Mfa.GetEligibleHosts' { @(Invoke-MfaRequest 'Services/PageService.ashx/GetEligibleHosts' @()).Count }
-        Invoke-Step 'Mfa.GetSessionDetail' {
-            $Detail = Invoke-MfaRequest 'Services/PageService.ashx/GetSessionDetails' @($Group, "$TestSessionID")
-            @($Detail.Events).Count
+        Invoke-Step 'Mfa.Totp.GetSession' { @(Get-CWCSession -Type Access -Group $Group -Limit 5).Count }
+        Invoke-Step 'Mfa.Totp.ExpiredLoginHint' {
+            # Log out on the server, as an expired login would behave
+            & $CWCModule { Invoke-CWCLogout -Connection $script:CWCServerConnection }
+            $Message = $null
+            try { $null = Get-CWCSession -Type Access -Group $Group -Limit 5 } catch { $Message = "$_" }
+            if (-not $Message) { throw 'Requests still worked after logout' }
+            [pscustomobject]@{ MentionsExpiredLogin = $Message -match 'MFA login has expired'; Message = $Message.Substring(0, [math]::Min(200, $Message.Length)) }
         }
-        if ($AllowWrites) {
-            Invoke-Step 'Mfa.AddNote' {
-                $NoteEvent = @{ SessionID = "$TestSessionID"; EventType = 32; Data = 'CWC smoke test note (MFA login)' }
-                $null = Invoke-MfaRequest 'Services/PageService.ashx/AddSessionEvents' @(@($Group), @($NoteEvent))
-                'sent'
-            }
+        Invoke-Step 'Mfa.Totp.ReconnectAfterLogout' {
+            $Before = & $CWCModule { $script:CWCServerConnection }
+            Connect-CWC -Server $Server -Credentials $MfaCredential -TotpSecret $MfaTotpSecret
+            $After = & $CWCModule { $script:CWCServerConnection }
+            if ([object]::ReferenceEquals($Before, $After)) { throw 'Kept the logged-out login' }
+            @(Get-CWCSession -Type Access -Group $Group -Limit 5).Count
         }
     }
-    $Password = $null
+    Remove-Variable -Name MfaTotpSecret -ErrorAction SilentlyContinue
 }
 #endregion
 

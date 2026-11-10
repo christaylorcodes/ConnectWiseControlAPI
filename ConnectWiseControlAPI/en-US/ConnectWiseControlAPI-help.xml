@@ -251,11 +251,15 @@
       <command:verb>Connect</command:verb>
       <command:noun>CWC</command:noun>
       <maml:description>
-        <maml:para>Initializes the connection parameters for the module.</maml:para>
+        <maml:para>Connects to a ConnectWise Control server.</maml:para>
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>Initializes the connection parameters used by other commands in the module.</maml:para>
+      <maml:para>Three ways to sign in:</maml:para>
+      <maml:para>-Credentials alone (default): Basic auth with a Control user account that does not use MFA. Gives access to every function in the module, limited by that user's permissions. Never expires.</maml:para>
+      <maml:para>-Credentials with -Mfa, -OneTimeCode or -TotpSecret: signs in the way the web page does, with a one-time code, for accounts that require MFA. Gives the same access as -Credentials alone. The login is a cookie that the server expires; when it does, commands fail with a permission error and you run Connect-CWC again. The password and TOTP secret are not kept after the login.</maml:para>
+      <maml:para>-ApiSecret: the authentication secret configured in the RESTful API Manager extension's RESTfulAuthenticationSecret setting, sent as the CTRLAuthHeader header. Works when every user account requires MFA. Only functions backed by that extension are available (see NOTES); other functions return an error telling you to connect with -Credentials.</maml:para>
+      <maml:para>The connection is validated before it is cached. An existing connection to the same server with the same method and identity (user and password, or secret) is reused unless -Force is given; anything else reconnects. A cached MFA login is checked with one call first and replaced with a new login if it has expired.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -263,7 +267,7 @@
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>Server</maml:name>
           <maml:description>
-            <maml:para>The URL to your control server.</maml:para>
+            <maml:para>Control server hostname, e.g. control.example.com. A leading http(s):// is removed. HTTPS is always used.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -275,7 +279,7 @@
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>Credentials</maml:name>
           <maml:description>
-            <maml:para>Credentials used to authenticate with the control server.</maml:para>
+            <maml:para>Username and password of a Control user account.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">PSCredential</command:parameterValue>
           <dev:type>
@@ -287,7 +291,7 @@
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>Force</maml:name>
           <maml:description>
-            <maml:para>Used to overwrite any information already loaded in the session.</maml:para>
+            <maml:para>Reconnect even when the cached connection is for the same server, method and identity. If that refresh fails, the previous connection is kept. A failed connection to a different server, method or identity leaves the module disconnected, so later commands can't reach the old server.</maml:para>
           </maml:description>
           <dev:type>
             <maml:name>SwitchParameter</maml:name>
@@ -301,7 +305,157 @@
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>Server</maml:name>
           <maml:description>
-            <maml:para>The URL to your control server.</maml:para>
+            <maml:para>Control server hostname, e.g. control.example.com. A leading http(s):// is removed. HTTPS is always used.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Credentials</maml:name>
+          <maml:description>
+            <maml:para>Username and password of a Control user account.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">PSCredential</command:parameterValue>
+          <dev:type>
+            <maml:name>PSCredential</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>TotpSecret</maml:name>
+          <maml:description>
+            <maml:para>The account's authenticator-app (TOTP) secret, for unattended scripts. The current code is computed from it at each login; the secret itself is not stored. Accepts the value Control stores for authenticator apps ("ms:" followed by Base32, as New-CWCMFA creates) or bare Base32. Not for email or SMS codes.</maml:para>
+            <maml:para>Keep it in a secret store, e.g. Microsoft.PowerShell.SecretManagement: -TotpSecret (Get-Secret ...). A TOTP secret stored next to the password turns MFA into a single factor: keep them in separate vaults where you can, prefer -ApiSecret when its functions are enough, and replace the secret if the computer is compromised.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">SecureString</command:parameterValue>
+          <dev:type>
+            <maml:name>SecureString</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Force</maml:name>
+          <maml:description>
+            <maml:para>Reconnect even when the cached connection is for the same server, method and identity. If that refresh fails, the previous connection is kept. A failed connection to a different server, method or identity leaves the module disconnected, so later commands can't reach the old server.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+      <command:syntaxItem>
+        <maml:name>Connect-CWC</maml:name>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Server</maml:name>
+          <maml:description>
+            <maml:para>Control server hostname, e.g. control.example.com. A leading http(s):// is removed. HTTPS is always used.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Credentials</maml:name>
+          <maml:description>
+            <maml:para>Username and password of a Control user account.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">PSCredential</command:parameterValue>
+          <dev:type>
+            <maml:name>PSCredential</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>OneTimeCode</maml:name>
+          <maml:description>
+            <maml:para>The current one-time code (6 to 8 digits) for an account that requires MFA. Quote it, so a leading zero is kept.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Force</maml:name>
+          <maml:description>
+            <maml:para>Reconnect even when the cached connection is for the same server, method and identity. If that refresh fails, the previous connection is kept. A failed connection to a different server, method or identity leaves the module disconnected, so later commands can't reach the old server.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+      <command:syntaxItem>
+        <maml:name>Connect-CWC</maml:name>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Server</maml:name>
+          <maml:description>
+            <maml:para>Control server hostname, e.g. control.example.com. A leading http(s):// is removed. HTTPS is always used.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Credentials</maml:name>
+          <maml:description>
+            <maml:para>Username and password of a Control user account.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">PSCredential</command:parameterValue>
+          <dev:type>
+            <maml:name>PSCredential</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Mfa</maml:name>
+          <maml:description>
+            <maml:para>Sign in for an account that requires MFA, asking for the one-time code at the console when the server requests it. Works with authenticator apps and with codes the server sends by email or SMS (they are sent at this point). For interactive use only.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Force</maml:name>
+          <maml:description>
+            <maml:para>Reconnect even when the cached connection is for the same server, method and identity. If that refresh fails, the previous connection is kept. A failed connection to a different server, method or identity leaves the module disconnected, so later commands can't reach the old server.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+      <command:syntaxItem>
+        <maml:name>Connect-CWC</maml:name>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Server</maml:name>
+          <maml:description>
+            <maml:para>Control server hostname, e.g. control.example.com. A leading http(s):// is removed. HTTPS is always used.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -337,7 +491,7 @@
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>Force</maml:name>
           <maml:description>
-            <maml:para>Used to overwrite any information already loaded in the session.</maml:para>
+            <maml:para>Reconnect even when the cached connection is for the same server, method and identity. If that refresh fails, the previous connection is kept. A failed connection to a different server, method or identity leaves the module disconnected, so later commands can't reach the old server.</maml:para>
           </maml:description>
           <dev:type>
             <maml:name>SwitchParameter</maml:name>
@@ -351,7 +505,7 @@
       <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>Server</maml:name>
         <maml:description>
-          <maml:para>The URL to your control server.</maml:para>
+          <maml:para>Control server hostname, e.g. control.example.com. A leading http(s):// is removed. HTTPS is always used.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -363,11 +517,48 @@
       <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>Credentials</maml:name>
         <maml:description>
-          <maml:para>Credentials used to authenticate with the control server.</maml:para>
+          <maml:para>Username and password of a Control user account.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">PSCredential</command:parameterValue>
         <dev:type>
           <maml:name>PSCredential</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>Mfa</maml:name>
+        <maml:description>
+          <maml:para>Sign in for an account that requires MFA, asking for the one-time code at the console when the server requests it. Works with authenticator apps and with codes the server sends by email or SMS (they are sent at this point). For interactive use only.</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>OneTimeCode</maml:name>
+        <maml:description>
+          <maml:para>The current one-time code (6 to 8 digits) for an account that requires MFA. Quote it, so a leading zero is kept.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>TotpSecret</maml:name>
+        <maml:description>
+          <maml:para>The account's authenticator-app (TOTP) secret, for unattended scripts. The current code is computed from it at each login; the secret itself is not stored. Accepts the value Control stores for authenticator apps ("ms:" followed by Base32, as New-CWCMFA creates) or bare Base32. Not for email or SMS codes.</maml:para>
+          <maml:para>Keep it in a secret store, e.g. Microsoft.PowerShell.SecretManagement: -TotpSecret (Get-Secret ...). A TOTP secret stored next to the password turns MFA into a single factor: keep them in separate vaults where you can, prefer -ApiSecret when its functions are enough, and replace the secret if the computer is compromised.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">SecureString</command:parameterValue>
+        <dev:type>
+          <maml:name>SecureString</maml:name>
           <maml:uri />
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
@@ -399,7 +590,7 @@
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>Force</maml:name>
         <maml:description>
-          <maml:para>Used to overwrite any information already loaded in the session.</maml:para>
+          <maml:para>Reconnect even when the cached connection is for the same server, method and identity. If that refresh fails, the previous connection is kept. A failed connection to a different server, method or identity leaves the module disconnected, so later commands can't reach the old server.</maml:para>
         </maml:description>
         <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
         <dev:type>
@@ -413,19 +604,56 @@
     <command:returnValues />
     <maml:alertSet>
       <maml:alert>
-        <maml:para></maml:para>
+        <maml:para>Functions available with -ApiSecret: Get-CWCSessionDetail, Update-CWCSessionName, Invoke-CWCCommand (queues the command; output is not retrieved), Find-CWCSession, New-CWCSession, Add-CWCSessionNote, Send-CWCSessionMessage, Send-CWCToolboxItem. Only calls that are safe to repeat (reads, "set to value" updates) are retried on HTTP 500.</maml:para>
+        <maml:para>The API secret is not tied to a Control user: the extension does not apply role permissions or session group scoping, so it can act on every session. Treat it like an administrator password. Requires the RESTful API Manager extension (2d558935-686a-4bd0-9991-07539f5fe749).</maml:para>
+        <maml:para>MFA logins are never retried automatically: each attempt counts toward the server's login limits. Errors carry an ErrorId: CWC.MfaRequired, CWC.MfaCodeRejected, CWC.LoginFailed, CWC.LoginThrottled or CWC.NoResponse. The device is never marked as trusted, and the login is never saved to disk.</maml:para>
       </maml:alert>
     </maml:alertSet>
     <command:examples>
       <command:example>
         <maml:title>-------------------------- Example 1 --------------------------</maml:title>
-        <dev:code>PS C:\&gt; Connect-CWC -Server 'control.christaylor.codes' -Credentials $Credentials -Force</dev:code>
+        <dev:code>PS C:\&gt; Connect-CWC -Server 'control.example.com' -Credentials (Get-Credential)</dev:code>
         <dev:remarks>
-          <maml:para>Sets connection information used by the module and overwrites any previously set information.</maml:para>
+          <maml:para>Connects with an account that does not use MFA.</maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>-------------------------- Example 2 --------------------------</maml:title>
+        <dev:code>PS C:\&gt; Connect-CWC -Server 'control.example.com' -Credentials (Get-Credential) -Mfa</dev:code>
+        <dev:remarks>
+          <maml:para>Connects with an account that requires MFA and asks for the one-time code.</maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>-------------------------- Example 3 --------------------------</maml:title>
+        <dev:code>PS C:\&gt; Connect-CWC -Server 'control.example.com' -Credentials $Credential -OneTimeCode (Read-Host 'One-time code')</dev:code>
+        <dev:remarks>
+          <maml:para>Connects with an account that requires MFA, using a code you supply. Reading it with Read-Host keeps it out of the command history.</maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>-------------------------- Example 4 --------------------------</maml:title>
+        <dev:code>PS C:\&gt; $Credential = Get-Secret -Name 'CWC-Login'
+PS C:\&gt; Connect-CWC -Server 'control.example.com' -Credentials $Credential -TotpSecret (Get-Secret -Name 'CWC-TOTP')</dev:code>
+        <dev:remarks>
+          <maml:para>Unattended login for an account that requires MFA. Run it again before each batch of work: when the cached login is still valid it costs one call, and when it has expired it logs in again.</maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>-------------------------- Example 5 --------------------------</maml:title>
+        <dev:code>PS C:\&gt; $Secret = Read-Host -AsSecureString -Prompt 'RESTful API secret'
+PS C:\&gt; Connect-CWC -Server 'control.example.com' -ApiSecret $Secret</dev:code>
+        <dev:remarks>
+          <maml:para>Connects with the RESTful API Manager extension's secret.</maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
-    <command:relatedLinks />
+    <command:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>https://github.com/christaylorcodes/ConnectWiseControlAPI</maml:linkText>
+        <maml:uri>https://github.com/christaylorcodes/ConnectWiseControlAPI</maml:uri>
+      </maml:navigationLink>
+    </command:relatedLinks>
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>

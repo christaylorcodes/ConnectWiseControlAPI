@@ -25,7 +25,7 @@ function Invoke-CWCServiceMethod {
     [CmdletBinding(DefaultParameterSetName = 'Service')]
     param(
         [Parameter(Mandatory = $True, ParameterSetName = 'Service')]
-        [ValidateSet('PageService', 'SecurityService', 'AuditService', 'SessionGroupService')]
+        [ValidateSet('PageService', 'SecurityService', 'AuditService', 'SessionGroupService', 'AuthenticationService')]
         [string]$Service,
 
         [Parameter(Mandatory = $True, ParameterSetName = 'RestApi')]

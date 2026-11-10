@@ -75,8 +75,13 @@
             # Type-name check: a [System.Net.Http.HttpRequestMessage] literal fails on PS 5.1 when the assembly isn't loaded.
             $FailedRequest = $_.TargetObject
             if ($FailedRequest -and $FailedRequest.GetType().FullName -in 'System.Net.Http.HttpRequestMessage', 'System.Net.HttpWebRequest') {
-                foreach ($SecretHeader in 'Authorization', 'CTRLAuthHeader', 'x-anti-forgery-token') {
+                # Cookie: the .ASPXAUTH login cookie of MFA and credentials connections
+                foreach ($SecretHeader in 'Authorization', 'CTRLAuthHeader', 'x-anti-forgery-token', 'Cookie') {
                     try { $null = $FailedRequest.Headers.Remove($SecretHeader) } catch { Write-Verbose "Could not strip $SecretHeader from the failed request." }
+                }
+                # PS 5.1's HttpWebRequest also references the whole cookie jar
+                if ($FailedRequest.PSObject.Properties['CookieContainer']) {
+                    try { $FailedRequest.CookieContainer = $null } catch { Write-Verbose 'Could not strip the cookies from the failed request.' }
                 }
                 # PS 6+ also keeps the request body on the HttpRequestMessage (e.g. a new user's password)
                 if ($SensitiveBody -and $FailedRequest.PSObject.Properties['Content']) {
@@ -115,6 +120,13 @@
             elseif ($StatusCode -gt 0) { $ErrorMessage += "HTTP $StatusCode" }
             if ($ServerMessage) { $ErrorMessage += $ServerMessage }
             else { $ErrorMessage += "$_" }
+
+            # An expired MFA login makes requests run as an anonymous user: they fail with a permission
+            # error, or an anti-forgery error because the token belonged to the login.
+            if ($StatusCode -gt 0 -and $script:CWCServerConnection.AuthType -eq 'Mfa' -and
+                ("$ServerErrorType" -match 'Security' -or "$ServerMessage" -match 'anti-?forgery|Needs permission')) {
+                $ErrorMessage += 'If the MFA login has expired, run Connect-CWC again.'
+            }
 
             if ($StatusCode -gt 0) { $ErrorId = "CWC.Http$StatusCode"; $Category = 'InvalidResult' }
             else { $ErrorId = 'CWC.NoResponse'; $Category = 'ConnectionError' }

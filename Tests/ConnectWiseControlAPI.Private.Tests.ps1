@@ -392,6 +392,211 @@ Describe 'Invoke-CWCWebRequest' {
             }
         }
     }
+
+    Context 'MFA connection (#12)' {
+        BeforeAll {
+            InModuleScope 'ConnectWiseControlAPI' {
+                # HTTP 500 with a server error body; the failed request (with a login cookie) as TargetObject
+                $script:NewServerErrorRecord = {
+                    param([string]$Body, $Request)
+                    $exception = [System.Net.WebException]::new('Server Error')
+                    $exception | Add-Member -NotePropertyName Response -NotePropertyValue ([PSCustomObject]@{ StatusCode = 500 }) -Force
+                    $record = [System.Management.Automation.ErrorRecord]::new($exception, 'WebError', 'InvalidResult', $Request)
+                    $record.ErrorDetails = [System.Management.Automation.ErrorDetails]::new($Body)
+                    $record
+                }
+            }
+        }
+
+        BeforeEach {
+            InModuleScope 'ConnectWiseControlAPI' {
+                $script:CWCServerConnection = @{
+                    Server     = 'test.example.com'
+                    AuthType   = 'Mfa'
+                    Headers    = @{ 'origin' = 'https://test.example.com' }
+                    WebSession = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+                }
+            }
+        }
+
+        It 'sends the WebSession and no Authorization header' {
+            InModuleScope 'ConnectWiseControlAPI' {
+                Mock Invoke-WebRequest { [PSCustomObject]@{ Content = '{}' } }
+                $arguments = @{ Endpoint = 'Services/PageService.ashx/GetEligibleHosts'; Method = 'Post' }
+                $null = Invoke-CWCWebRequest -Arguments $arguments
+                Should -Invoke Invoke-WebRequest -Times 1 -ParameterFilter { $null -ne $WebSession }
+                $arguments.Headers.Keys | Should -Not -Contain 'authorization'
+            }
+        }
+
+        It 'says the login may have expired on a permission error' {
+            InModuleScope 'ConnectWiseControlAPI' {
+                Mock Invoke-WebRequest { throw (& $script:NewServerErrorRecord '{"errorType":"SecurityException","message":"Needs permission"}' $null) }
+                $result = Invoke-CWCWebRequest -Arguments @{ Endpoint = 'Services/PageService.ashx/GetSessionDetails'; Method = 'Post' } -ErrorAction SilentlyContinue -ErrorVariable err
+                "$err" | Should -Match 'MFA login has expired'
+                @($err | Where-Object { $_.FullyQualifiedErrorId -like 'CWC.Http500*' }).Count | Should -BeGreaterThan 0
+            }
+        }
+
+        It 'says the login may have expired on an anti-forgery error' {
+            InModuleScope 'ConnectWiseControlAPI' {
+                Mock Invoke-WebRequest { throw (& $script:NewServerErrorRecord '{"errorType":"InvalidOperationException","message":"Invalid anti-forgery token"}' $null) }
+                $null = Invoke-CWCWebRequest -Arguments @{ Endpoint = 'Services/PageService.ashx/AddSessionEvents'; Method = 'Post' } -ErrorAction SilentlyContinue -ErrorVariable err
+                "$err" | Should -Match 'MFA login has expired'
+            }
+        }
+
+        It 'does not add the hint on a credentials connection' {
+            InModuleScope 'ConnectWiseControlAPI' {
+                $script:CWCServerConnection.AuthType = 'Credentials'
+                Mock Invoke-WebRequest { throw (& $script:NewServerErrorRecord '{"errorType":"SecurityException","message":"Needs permission"}' $null) }
+                $null = Invoke-CWCWebRequest -Arguments @{ Endpoint = 'Services/PageService.ashx/GetSessionDetails'; Method = 'Post' } -ErrorAction SilentlyContinue -ErrorVariable err
+                "$err" | Should -Not -Match 'MFA login'
+            }
+        }
+
+        It 'strips the login cookie from the failed request kept on the error record' {
+            InModuleScope 'ConnectWiseControlAPI' {
+                $script:FailedRequest = [System.Net.WebRequest]::Create('https://test.example.com/Services/PageService.ashx/GetSessionDetails')
+                $script:FailedRequest.Headers.Add('Cookie', '.ASPXAUTH=cookiesecretvalue')
+                $script:FailedRequest.CookieContainer = New-Object System.Net.CookieContainer
+                Mock Invoke-WebRequest { throw (& $script:NewServerErrorRecord '{"errorType":"SecurityException","message":"Needs permission"}' $script:FailedRequest) }
+                $null = Invoke-CWCWebRequest -Arguments @{ Endpoint = 'Services/PageService.ashx/GetSessionDetails'; Method = 'Post' } -ErrorAction SilentlyContinue
+                $script:FailedRequest.Headers['Cookie'] | Should -BeNullOrEmpty
+                $script:FailedRequest.CookieContainer | Should -BeNullOrEmpty
+            }
+        }
+    }
+}
+
+# =============================================================================
+# MFA helpers (#12)
+# =============================================================================
+Describe 'Get-CWCTotpCode' {
+
+    # RFC 6238 appendix B test key "12345678901234567890" in Base32
+    It 'matches the RFC 6238 SHA-1 test vector at T=<Time> (<Digits> digits)' -TestCases @(
+        @{ Time = 59; Digits = 8; Expected = '94287082' }
+        @{ Time = 59; Digits = 6; Expected = '287082' }
+        @{ Time = 1111111109; Digits = 8; Expected = '07081804' }
+        @{ Time = 1234567890; Digits = 8; Expected = '89005924' }
+        @{ Time = 20000000000; Digits = 8; Expected = '65353130' }
+    ) {
+        param($Time, $Digits, $Expected)
+        InModuleScope 'ConnectWiseControlAPI' -Parameters @{ Time = $Time; Digits = $Digits; Expected = $Expected } {
+            param($Time, $Digits, $Expected)
+            $Secret = ConvertTo-SecureString 'GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ' -AsPlainText -Force
+            Get-CWCTotpCode -Secret $Secret -UnixTime $Time -Digits $Digits | Should -Be $Expected
+        }
+    }
+
+    It 'accepts the ms: prefix, lowercase, spaces and padding' {
+        InModuleScope 'ConnectWiseControlAPI' {
+            $Secret = ConvertTo-SecureString 'MS:gezd gnbv gy3t qojq gezd gnbv gy3t qojq====' -AsPlainText -Force
+            Get-CWCTotpCode -Secret $Secret -UnixTime 59 | Should -Be '287082'
+        }
+    }
+
+    It 'keeps leading zeros' {
+        InModuleScope 'ConnectWiseControlAPI' {
+            $Secret = ConvertTo-SecureString 'GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ' -AsPlainText -Force
+            Get-CWCTotpCode -Secret $Secret -UnixTime 1111111109 -Digits 8 | Should -Be '07081804'
+        }
+    }
+
+    It 'rejects a secret that is not Base32, without echoing it' {
+        InModuleScope 'ConnectWiseControlAPI' {
+            $Secret = ConvertTo-SecureString 'not-base32-secret!' -AsPlainText -Force
+            $err = $null
+            try { Get-CWCTotpCode -Secret $Secret -UnixTime 59 } catch { $err = $_ }
+            "$err" | Should -Match 'not valid Base32'
+            "$err" | Should -Not -Match 'secret!'
+        }
+    }
+
+    It 'rejects a secret that decodes to nothing' {
+        InModuleScope 'ConnectWiseControlAPI' {
+            $Secret = ConvertTo-SecureString 'ms:A' -AsPlainText -Force
+            { Get-CWCTotpCode -Secret $Secret -UnixTime 59 } | Should -Throw '*empty or too short*'
+        }
+    }
+}
+
+Describe 'ConvertFrom-CWCBase32' {
+    It 'decodes RFC 4648 vectors' -TestCases @(
+        @{ Text = 'MY======'; Expected = 'f' }
+        @{ Text = 'MZXW6==='; Expected = 'foo' }
+        @{ Text = 'MZXW6YTBOI======'; Expected = 'foobar' }
+    ) {
+        param($Text, $Expected)
+        InModuleScope 'ConnectWiseControlAPI' -Parameters @{ Text = $Text; Expected = $Expected } {
+            param($Text, $Expected)
+            [Text.Encoding]::ASCII.GetString((ConvertFrom-CWCBase32 -Text $Text)) | Should -Be $Expected
+        }
+    }
+}
+
+Describe 'Get-CWCTotpLoginCode' {
+
+    BeforeEach {
+        InModuleScope 'ConnectWiseControlAPI' {
+            $script:CWCLastTotpStep = @{}
+            Mock Start-Sleep {}
+            Mock Get-CWCTotpCode { "$UnixTime" }
+        }
+    }
+
+    It 'uses the current step when there is time left' {
+        InModuleScope 'ConnectWiseControlAPI' {
+            Mock Get-CWCUnixTime { [int64]3010 }   # 10 s into a step
+            $Secret = ConvertTo-SecureString 'GEZDGNBV' -AsPlainText -Force
+            Get-CWCTotpLoginCode -Secret $Secret -Key 'server|user' | Should -Be '3010'
+            Should -Invoke Start-Sleep -Times 0
+        }
+    }
+
+    It 'waits for the next step when fewer than 3 seconds are left' {
+        InModuleScope 'ConnectWiseControlAPI' {
+            Mock Get-CWCUnixTime { [int64]3028 }   # 2 s left
+            $Secret = ConvertTo-SecureString 'GEZDGNBV' -AsPlainText -Force
+            Get-CWCTotpLoginCode -Secret $Secret -Key 'server|user' | Should -Be '3030'
+            Should -Invoke Start-Sleep -Times 1 -ParameterFilter { $Seconds -eq 2 }
+        }
+    }
+
+    It 'never uses the same step twice for the same server and user' {
+        InModuleScope 'ConnectWiseControlAPI' {
+            Mock Get-CWCUnixTime { [int64]3010 }
+            $Secret = ConvertTo-SecureString 'GEZDGNBV' -AsPlainText -Force
+            $null = Get-CWCTotpLoginCode -Secret $Secret -Key 'server|user'
+            Get-CWCTotpLoginCode -Secret $Secret -Key 'SERVER|User' | Should -Be '3030'
+            Should -Invoke Start-Sleep -Times 1 -ParameterFilter { $Seconds -eq 20 }
+            # Another user is independent
+            Get-CWCTotpLoginCode -Secret $Secret -Key 'server|other' | Should -Be '3010'
+        }
+    }
+
+    It 'remembers only the step number, never the code' {
+        InModuleScope 'ConnectWiseControlAPI' {
+            Mock Get-CWCUnixTime { [int64]3010 }
+            $Secret = ConvertTo-SecureString 'GEZDGNBV' -AsPlainText -Force
+            $null = Get-CWCTotpLoginCode -Secret $Secret -Key 'server|user'
+            $script:CWCLastTotpStep['server|user'] | Should -Be 100
+        }
+    }
+}
+
+Describe 'Get-CWCIdentityHash' {
+    It 'matches for the same user (any case) and password, and differs for another password' {
+        InModuleScope 'ConnectWiseControlAPI' {
+            $a = [pscredential]::new('User', (ConvertTo-SecureString 'pw1' -AsPlainText -Force))
+            $b = [pscredential]::new('user', (ConvertTo-SecureString 'pw1' -AsPlainText -Force))
+            $c = [pscredential]::new('user', (ConvertTo-SecureString 'pw2' -AsPlainText -Force))
+            Get-CWCIdentityHash -Credentials $a | Should -Be (Get-CWCIdentityHash -Credentials $b)
+            Get-CWCIdentityHash -Credentials $a | Should -Not -Be (Get-CWCIdentityHash -Credentials $c)
+            Get-CWCIdentityHash -Credentials $a | Should -Not -Match 'pw1'
+        }
+    }
 }
 
 # =============================================================================

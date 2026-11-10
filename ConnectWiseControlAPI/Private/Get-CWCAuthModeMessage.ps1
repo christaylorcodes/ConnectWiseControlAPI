@@ -21,7 +21,7 @@ function Get-CWCAuthModeMessage {
     )
 
     if ($Required -eq 'Credentials') {
-        return "$Command is not available when connected with -ApiSecret (RESTful API Manager). Connect with 'Connect-CWC -Credentials' to use it."
+        return "$Command is not available when connected with -ApiSecret (RESTful API Manager). Connect with 'Connect-CWC -Credentials' to use it (for an account that requires MFA, add -Mfa, -OneTimeCode or -TotpSecret)."
     }
     "$Command requires the RESTful API Manager extension. Connect with 'Connect-CWC -ApiSecret' to use it."
 }

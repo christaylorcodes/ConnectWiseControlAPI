@@ -50,10 +50,25 @@ Install-Module 'ConnectWiseControlAPI'
 
 * Requires your Control server to use https.
 
-* One of two authentication methods:
+* One of three authentication methods:
 
   * **Credentials** (`Connect-CWC -Credentials`): an account without MFA. Use a complex username and
     password. All functions except `Find-CWCSession` are available, limited by the account's permissions.
+
+  * **Credentials with MFA** (`Connect-CWC -Credentials` plus `-Mfa`, `-OneTimeCode` or `-TotpSecret`):
+    an account that requires MFA, signed in the way the web page does. Same functions as credentials.
+    `-Mfa` asks for the code at the console (authenticator app, email or SMS). `-TotpSecret` computes the
+    authenticator-app code for unattended scripts from the account's TOTP secret (`ms:...` or Base32);
+    keep that secret in a secret store, and note that storing it next to the password makes MFA a
+    single factor. The login expires on the server; run `Connect-CWC` again before each batch of work
+    (a still-valid login is reused with one check call).
+
+    ```powershell
+    Connect-CWC -Server 'control.example.com' -Credentials (Get-Credential) -Mfa
+
+    # Unattended, with Microsoft.PowerShell.SecretManagement
+    Connect-CWC -Server 'control.example.com' -Credentials (Get-Secret 'CWC-Login') -TotpSecret (Get-Secret 'CWC-TOTP')
+    ```
 
   * **API secret** (`Connect-CWC -ApiSecret`): install the **RESTful API Manager** extension and set its
     `RESTfulAuthenticationSecret` setting to a long random value. Works when every account requires MFA.

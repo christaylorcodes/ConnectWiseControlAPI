@@ -369,6 +369,315 @@ Describe 'Connect-CWC -ApiSecret' {
     }
 }
 
+Describe 'Connect-CWC MFA (#12)' {
+
+    BeforeAll {
+        # Fake server: two front pages with different tokens (the token changes at login), TryLogin
+        # answering from a queue, GetEligibleHosts succeeding unless $script:ProbeFails.
+        function Set-FakeMfaServer {
+            param([object[]]$LoginResults = @(1))
+            InModuleScope 'ConnectWiseControlAPI' -Parameters @{ LoginResults = $LoginResults } {
+                param($LoginResults)
+                $script:FrontPageCalls = 0
+                $script:LoginResults = [System.Collections.ArrayList]@($LoginResults)
+                $script:LoginBodies = [System.Collections.ArrayList]@()
+                $script:ProbeFails = $False
+                $script:LogoutCalls = 0
+                Mock Invoke-WebRequest {
+                    $script:FrontPageCalls++
+                    $Token = if ($script:FrontPageCalls -eq 1) { 'pretokenpretoken1234' } else { 'posttokenposttoken12' }
+                    [PSCustomObject]@{ Content = "{`"antiForgeryToken`":`"$Token`"}" }
+                }
+                Mock Invoke-CWCWebRequest {
+                    param($Arguments, $MaxRetry, $SensitiveBody)
+                    switch -Wildcard ($Arguments.Endpoint) {
+                        '*/TryLogin' {
+                            $null = $script:LoginBodies.Add([PSCustomObject]@{ Body = $Arguments.Body; MaxRetry = $MaxRetry; Sensitive = [bool]$SensitiveBody })
+                            $Result = $script:LoginResults[0]
+                            $script:LoginResults.RemoveAt(0)
+                            return $Result
+                        }
+                        '*/TryLogout' { $script:LogoutCalls++ }
+                        '*/GetEligibleHosts' {
+                            if ($script:ProbeFails) { Write-Error 'Needs permission' -ErrorId 'CWC.Http500' }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    BeforeEach {
+        $cred = [PSCredential]::new('mfauser', ('mfapass' | ConvertTo-SecureString -AsPlainText -Force))
+        InModuleScope 'ConnectWiseControlAPI' { $script:CWCServerConnection = $null; $script:CWCLastTotpStep = @{} }
+    }
+
+    Context 'Parameter sets' {
+        It 'keeps Basic auth for -Credentials alone' {
+            (Get-Command Connect-CWC).ParameterSets | Where-Object IsDefault | ForEach-Object Name | Should -Be 'Credentials'
+        }
+
+        It 'rejects <Name>' -TestCases @(
+            @{ Name = '-OneTimeCode with -TotpSecret'; Extra = @{ OneTimeCode = '123456'; TotpSecret = (ConvertTo-SecureString 'GEZDGNBV' -AsPlainText -Force) } }
+            @{ Name = '-Mfa with -OneTimeCode'; Extra = @{ Mfa = $True; OneTimeCode = '123456' } }
+            @{ Name = '-Origin with -Mfa'; Extra = @{ Mfa = $True; Origin = 'https://x' } }
+            @{ Name = 'a 5-digit code'; Extra = @{ OneTimeCode = '12345' } }
+            @{ Name = 'a code with letters'; Extra = @{ OneTimeCode = '12a456' } }
+        ) {
+            param($Name, $Extra)
+            { Connect-CWC -Server 's.example.com' -Credentials $cred @Extra -ErrorAction Stop } | Should -Throw
+        }
+
+        It 'accepts a code with a leading zero' {
+            Set-FakeMfaServer
+            InModuleScope 'ConnectWiseControlAPI' -Parameters @{ cred = $cred } {
+                param($cred)
+                Connect-CWC -Server 's.example.com' -Credentials $cred -OneTimeCode '012345' -ErrorAction Stop
+                ($script:LoginBodies[0].Body | ConvertFrom-Json)[2] | Should -Be '012345'
+            }
+        }
+    }
+
+    Context 'Login with -OneTimeCode' {
+        It 'logs in with TryLogin and stores a cookie connection without the password' {
+            Set-FakeMfaServer
+            InModuleScope 'ConnectWiseControlAPI' -Parameters @{ cred = $cred } {
+                param($cred)
+                Connect-CWC -Server 'https://s.example.com' -Credentials $cred -OneTimeCode '123456' -ErrorAction Stop
+
+                # No @(): PS 5.1 would wrap the parsed array in another array
+                $Body = $script:LoginBodies[0].Body | ConvertFrom-Json
+                $Body.Count | Should -Be 5
+                $Body[0] | Should -Be 'mfauser'
+                $Body[1] | Should -Be 'mfapass'
+                $Body[2] | Should -Be '123456'
+                $Body[3] | Should -BeFalse          # shouldTrust
+                $Body[4] | Should -BeNullOrEmpty    # securityNonce
+                $script:LoginBodies[0].MaxRetry | Should -Be 0
+                $script:LoginBodies[0].Sensitive | Should -BeTrue
+
+                $Connection = $script:CWCServerConnection
+                $Connection.AuthType | Should -Be 'Mfa'
+                $Connection.Server | Should -Be 's.example.com'
+                $Connection.UserName | Should -Be 'mfauser'
+                $Connection.Headers.Keys | Should -Not -Contain 'authorization'
+                $Connection.Headers.'x-anti-forgery-token' | Should -Be 'posttokenposttoken12'
+                ($Connection | ConvertTo-Json -Depth 3) | Should -Not -Match 'mfapass'
+                $Connection.WebSession | Should -BeOfType [Microsoft.PowerShell.Commands.WebRequestSession]
+            }
+        }
+
+        It 'shares one cookie jar between the front page requests' {
+            Set-FakeMfaServer
+            InModuleScope 'ConnectWiseControlAPI' -Parameters @{ cred = $cred } {
+                param($cred)
+                Connect-CWC -Server 's.example.com' -Credentials $cred -OneTimeCode '123456' -ErrorAction Stop
+                $Session = $script:CWCServerConnection.WebSession
+                Should -Invoke Invoke-WebRequest -Times 2 -Exactly -ParameterFilter { [object]::ReferenceEquals($WebSession, $Session) -and -not $Headers }
+                Should -Invoke Invoke-CWCWebRequest -Times 1 -Exactly -ParameterFilter { $Arguments.Endpoint -like '*/GetEligibleHosts' }
+            }
+        }
+
+        It 'reports <Result> as <ErrorId> and stays disconnected' -TestCases @(
+            @{ Result = 11; ErrorId = 'CWC.MfaRequired' }
+            @{ Result = 10; ErrorId = 'CWC.MfaCodeRejected' }
+            @{ Result = 7; ErrorId = 'CWC.LoginFailed' }
+            @{ Result = $null; ErrorId = 'CWC.LoginFailed' }
+        ) {
+            param($Result, $ErrorId)
+            Set-FakeMfaServer -LoginResults @(, $Result)
+            InModuleScope 'ConnectWiseControlAPI' -Parameters @{ cred = $cred; ErrorId = $ErrorId } {
+                param($cred, $ErrorId)
+                Connect-CWC -Server 's.example.com' -Credentials $cred -OneTimeCode '123456' -ErrorAction SilentlyContinue -ErrorVariable err
+                @($err | Where-Object { $_.FullyQualifiedErrorId -like "$ErrorId*" }).Count | Should -BeGreaterThan 0
+                $script:CWCServerConnection | Should -BeNullOrEmpty
+                "$err" | Should -Not -Match 'mfapass'
+            }
+        }
+
+        It 'reports a rate limit as CWC.LoginThrottled' {
+            Set-FakeMfaServer
+            InModuleScope 'ConnectWiseControlAPI' -Parameters @{ cred = $cred } {
+                param($cred)
+                Mock Invoke-CWCWebRequest { Write-Error '{"errorType":"OperationLimitExceededException"}' -ErrorId 'CWC.Http500' } -ParameterFilter { $Arguments.Endpoint -like '*/TryLogin' }
+                Connect-CWC -Server 's.example.com' -Credentials $cred -OneTimeCode '123456' -ErrorAction SilentlyContinue -ErrorVariable err
+                @($err | Where-Object { $_.FullyQualifiedErrorId -like 'CWC.LoginThrottled*' }).Count | Should -BeGreaterThan 0
+            }
+        }
+
+        It 'does not blame the code when the server does not answer' {
+            Set-FakeMfaServer
+            InModuleScope 'ConnectWiseControlAPI' -Parameters @{ cred = $cred } {
+                param($cred)
+                Mock Invoke-CWCWebRequest { Write-Error 'No such host is known.' -ErrorId 'CWC.NoResponse' } -ParameterFilter { $Arguments.Endpoint -like '*/TryLogin' }
+                Connect-CWC -Server 's.example.com' -Credentials $cred -OneTimeCode '123456' -ErrorAction SilentlyContinue -ErrorVariable err
+                "$err" | Should -Match 'failed before authentication could be checked'
+                @($err | Where-Object { $_.FullyQualifiedErrorId -like 'CWC.NoResponse*' }).Count | Should -BeGreaterThan 0
+            }
+        }
+
+        It 'fails when the front page cannot be reached' {
+            InModuleScope 'ConnectWiseControlAPI' -Parameters @{ cred = $cred } {
+                param($cred)
+                Mock Invoke-WebRequest { throw 'Connection refused' }
+                Mock Invoke-CWCWebRequest {}
+                Connect-CWC -Server 's.example.com' -Credentials $cred -OneTimeCode '123456' -ErrorAction SilentlyContinue -ErrorVariable err
+                "$err" | Should -Match 'Failed to connect'
+                Should -Invoke Invoke-CWCWebRequest -Times 0
+                $script:CWCServerConnection | Should -BeNullOrEmpty
+            }
+        }
+
+        It 'fails when the account cannot use the API after login' {
+            Set-FakeMfaServer
+            InModuleScope 'ConnectWiseControlAPI' -Parameters @{ cred = $cred } {
+                param($cred)
+                $script:ProbeFails = $True
+                Connect-CWC -Server 's.example.com' -Credentials $cred -OneTimeCode '123456' -ErrorAction SilentlyContinue -ErrorVariable err
+                "$err" | Should -Match 'at least one permission'
+                $script:CWCServerConnection | Should -BeNullOrEmpty
+            }
+        }
+    }
+
+    Context 'Login with -Mfa (prompt)' {
+        It 'does not prompt when the server accepts the login without a code' {
+            Set-FakeMfaServer -LoginResults @(1)
+            InModuleScope 'ConnectWiseControlAPI' -Parameters @{ cred = $cred } {
+                param($cred)
+                Mock Read-Host {}
+                Connect-CWC -Server 's.example.com' -Credentials $cred -Mfa -ErrorAction Stop
+                Should -Invoke Read-Host -Times 0
+                ($script:LoginBodies[0].Body | ConvertFrom-Json)[2] | Should -BeNullOrEmpty
+                $script:CWCServerConnection.AuthType | Should -Be 'Mfa'
+            }
+        }
+
+        It 'prompts for the code when the server asks for one, then logs in with it' {
+            Set-FakeMfaServer -LoginResults @(11, 1)
+            InModuleScope 'ConnectWiseControlAPI' -Parameters @{ cred = $cred } {
+                param($cred)
+                Mock Read-Host { ConvertTo-SecureString ' 654321 ' -AsPlainText -Force }
+                Connect-CWC -Server 's.example.com' -Credentials $cred -Mfa -ErrorAction Stop
+                Should -Invoke Read-Host -Times 1 -ParameterFilter { $AsSecureString }
+                $script:LoginBodies.Count | Should -Be 2
+                ($script:LoginBodies[0].Body | ConvertFrom-Json)[2] | Should -BeNullOrEmpty
+                ($script:LoginBodies[1].Body | ConvertFrom-Json)[2] | Should -Be '654321'
+                $script:CWCServerConnection.AuthType | Should -Be 'Mfa'
+            }
+        }
+
+        It 'fails with CWC.MfaRequired when there is no console to prompt on' {
+            Set-FakeMfaServer -LoginResults @(11)
+            InModuleScope 'ConnectWiseControlAPI' -Parameters @{ cred = $cred } {
+                param($cred)
+                Mock Read-Host { throw 'PowerShell is in NonInteractive mode.' }
+                Connect-CWC -Server 's.example.com' -Credentials $cred -Mfa -ErrorAction SilentlyContinue -ErrorVariable err
+                @($err | Where-Object { $_.FullyQualifiedErrorId -like 'CWC.MfaRequired*' }).Count | Should -BeGreaterThan 0
+                $script:LoginBodies.Count | Should -Be 1
+                $script:CWCServerConnection | Should -BeNullOrEmpty
+            }
+        }
+    }
+
+    Context 'Login with -TotpSecret' {
+        It 'sends the computed code and does not store the secret' {
+            Set-FakeMfaServer
+            InModuleScope 'ConnectWiseControlAPI' -Parameters @{ cred = $cred } {
+                param($cred)
+                Mock Get-CWCUnixTime { [int64]31 }   # same step as T=59, with time left
+                Mock Start-Sleep {}
+                $Secret = ConvertTo-SecureString 'ms:GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ' -AsPlainText -Force
+                Connect-CWC -Server 's.example.com' -Credentials $cred -TotpSecret $Secret -ErrorAction Stop
+                ($script:LoginBodies[0].Body | ConvertFrom-Json)[2] | Should -Be '287082'
+                $script:CWCServerConnection.Values | Where-Object { $_ -is [securestring] } | Should -BeNullOrEmpty
+                ($script:CWCServerConnection | ConvertTo-Json -Depth 3) | Should -Not -Match 'GEZDGNBV'
+            }
+        }
+
+        It 'rejects an empty secret' {
+            { Connect-CWC -Server 's.example.com' -Credentials $cred -TotpSecret (New-Object securestring) -ErrorAction Stop } | Should -Throw '*empty*'
+        }
+    }
+
+    Context 'Connection caching' {
+        It 'reuses a cached login that still works, without logging in again' {
+            Set-FakeMfaServer -LoginResults @(1, 1)
+            InModuleScope 'ConnectWiseControlAPI' -Parameters @{ cred = $cred } {
+                param($cred)
+                Connect-CWC -Server 's.example.com' -Credentials $cred -OneTimeCode '123456' -ErrorAction Stop
+                $First = $script:CWCServerConnection
+                Connect-CWC -Server 's.example.com' -Credentials $cred -OneTimeCode '654321' -ErrorAction Stop
+                $script:LoginBodies.Count | Should -Be 1
+                [object]::ReferenceEquals($script:CWCServerConnection, $First) | Should -BeTrue
+                $script:LogoutCalls | Should -Be 0
+            }
+        }
+
+        It 'logs in again when the cached login has expired, and never restores it' {
+            Set-FakeMfaServer -LoginResults @(1, 10)
+            InModuleScope 'ConnectWiseControlAPI' -Parameters @{ cred = $cred } {
+                param($cred)
+                Connect-CWC -Server 's.example.com' -Credentials $cred -OneTimeCode '123456' -ErrorAction Stop
+                $script:ProbeFails = $True
+                Connect-CWC -Server 's.example.com' -Credentials $cred -OneTimeCode '654321' -ErrorAction SilentlyContinue -ErrorVariable err
+                $script:LoginBodies.Count | Should -Be 2
+                @($err | Where-Object { $_.FullyQualifiedErrorId -like 'CWC.MfaCodeRejected*' }).Count | Should -BeGreaterThan 0
+                $script:CWCServerConnection | Should -BeNullOrEmpty
+            }
+        }
+
+        It 'logs in again for a different password' {
+            Set-FakeMfaServer -LoginResults @(1, 1)
+            InModuleScope 'ConnectWiseControlAPI' -Parameters @{ cred = $cred } {
+                param($cred)
+                Connect-CWC -Server 's.example.com' -Credentials $cred -OneTimeCode '123456' -ErrorAction Stop
+                $Other = [PSCredential]::new('mfauser', ('otherpass' | ConvertTo-SecureString -AsPlainText -Force))
+                Connect-CWC -Server 's.example.com' -Credentials $Other -OneTimeCode '654321' -ErrorAction Stop
+                $script:LoginBodies.Count | Should -Be 2
+            }
+        }
+
+        It 'logs out the MFA login it replaces' {
+            Set-FakeMfaServer -LoginResults @(1)
+            InModuleScope 'ConnectWiseControlAPI' -Parameters @{ cred = $cred } {
+                param($cred)
+                Connect-CWC -Server 's.example.com' -Credentials $cred -OneTimeCode '123456' -ErrorAction Stop
+                $Mfa = $script:CWCServerConnection
+                Connect-CWC -Server 's.example.com' -Credentials $cred -ErrorAction Stop
+                $script:LogoutCalls | Should -Be 1
+                $script:CWCServerConnection.AuthType | Should -Be 'Credentials'
+                $script:CWCServerConnection.Headers.authorization | Should -BeLike 'Basic *'
+                [object]::ReferenceEquals($script:CWCServerConnection, $Mfa) | Should -BeFalse
+            }
+        }
+
+        It 'keeps the previous login when a -Force refresh fails' {
+            Set-FakeMfaServer -LoginResults @(1, 10)
+            InModuleScope 'ConnectWiseControlAPI' -Parameters @{ cred = $cred } {
+                param($cred)
+                Connect-CWC -Server 's.example.com' -Credentials $cred -OneTimeCode '123456' -ErrorAction Stop
+                $First = $script:CWCServerConnection
+                Connect-CWC -Server 's.example.com' -Credentials $cred -OneTimeCode '654321' -Force -ErrorAction SilentlyContinue
+                [object]::ReferenceEquals($script:CWCServerConnection, $First) | Should -BeTrue
+                $script:LogoutCalls | Should -Be 0
+            }
+        }
+    }
+
+    Context 'Messages' {
+        It 'points MFA accounts to the MFA parameters when Basic auth is rejected' {
+            InModuleScope 'ConnectWiseControlAPI' -Parameters @{ cred = $cred } {
+                param($cred)
+                Mock Invoke-WebRequest { [PSCustomObject]@{ Content = '' } }
+                Mock Invoke-CWCWebRequest { Write-Error 'Needs permission' -ErrorId 'CWC.Http500' }
+                Connect-CWC -Server 's.example.com' -Credentials $cred -ErrorAction SilentlyContinue -ErrorVariable err -WarningAction SilentlyContinue
+                "$err" | Should -Match '-Mfa, -OneTimeCode or'
+            }
+        }
+    }
+}
+
 Describe 'Get-CWCSession' {
 
     BeforeEach { Set-CWCTestConnection }

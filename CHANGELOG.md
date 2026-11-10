@@ -23,6 +23,15 @@ Planned as 0.5.0.0 (the module manifest already carries this version; 0.4.0.0 is
   (`Invoke-CWCCommand` queues only on API-secret connections; output is not retrieved); other functions
   return an error naming the required auth method. `-Origin` overrides the Origin header for servers
   with `RESTfulAllowedOrigin` set
+- MFA login (#12): `Connect-CWC -Credentials` with `-Mfa` (asks for the one-time code; works with
+  authenticator-app, email and SMS codes), `-OneTimeCode` or `-TotpSecret` (computes the authenticator
+  code for unattended scripts; the secret is not stored). Signs in through
+  `AuthenticationService.TryLogin` and uses the login cookie; no Basic auth, and the password is not kept.
+  A cached MFA login is checked with one call and replaced when it has expired; a replaced MFA login is
+  logged out. Errors carry ErrorIds `CWC.MfaRequired`, `CWC.MfaCodeRejected`, `CWC.LoginFailed`,
+  `CWC.LoginThrottled`. Logins are never retried. Requests that fail on an MFA connection with a
+  permission or anti-forgery error say the login may have expired
+- Failed requests no longer keep the login cookie on the request object stored in `$Error`
 - `Connect-CWC` reuses a cached connection only for the same server, auth method and identity (user or
   secret); anything else reconnects, even without `-Force`. Before, the old connection was silently kept
   and later commands went to the previous server or ran as the previous user. If connecting to a
@@ -32,7 +41,8 @@ Planned as 0.5.0.0 (the module manifest already carries this version; 0.4.0.0 is
   `Add-CWCSessionNote`, `Send-CWCSessionMessage`, `Send-CWCToolboxItem`. On credentials connections the
   last three queue session events (AddedNote 32, QueuedMessage 45, QueuedTool 47) and take `-Group`
 - Live smoke test script `Tests/Live/Invoke-CWCLiveSmokeTest.ps1` (read-only by default; `-AllowWrites`
-  acts on one chosen test session and cleans up its notes; `-MfaUserName` probes the MFA login flow)
+  acts on one chosen test session and cleans up its notes; `-MfaUserName` tests the MFA login, optionally with a TOTP secret; `-MfaNegativeProbes` records the raw
+  failed-login codes)
 - `Get-CWCRemoteWorkforceLaunchURL` (by `-GUID`, pipeline, or `-SessionName`), replacing `Get-CWCLauncURL`
 - `Get-CWCRemoteWorkforceSession` lists the calling user's assigned machines (`GetRemoteWorkforceSessions`)
 - `Initialize-CWCRemoteWorkforceSessionGroup` creates/repairs the extension's session group

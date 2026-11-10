@@ -18,7 +18,7 @@ Create a new Remote Workforce security role
 Adds a note to a session.
 
 ### [Connect-CWC](Docs/Connect-CWC.md)
-Initializes the connection parameters for the module.
+Connects to a ConnectWise Control server.
 
 ### [Enter-CWCSession](Docs/Enter-CWCSession.md)
 Opens the ConnectWise Control Host client joined to a session, like Join in the web UI.
