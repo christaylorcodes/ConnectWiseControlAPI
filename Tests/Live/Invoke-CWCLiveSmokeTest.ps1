@@ -61,7 +61,7 @@ $ErrorActionPreference = 'Stop'
 $PSDefaultParameterValues['*-CWC*:ErrorAction'] = 'Stop'
 # Unload every copy first (e.g. a Gallery install imported earlier), so the script tests this checkout only
 Get-Module ConnectWiseControlAPI | Remove-Module -Force
-$CWCModule = Import-Module (Join-Path $PSScriptRoot '..\..\ConnectWiseControlAPI\ConnectWiseControlAPI.psd1') -Force -PassThru
+$CWCModule = Import-Module (Join-Path $PSScriptRoot '..\..\source\ConnectWiseControlAPI.psd1') -Force -PassThru
 
 $Results = [ordered]@{
     PSVersion   = $PSVersionTable.PSVersion.ToString()

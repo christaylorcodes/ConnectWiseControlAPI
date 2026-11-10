@@ -8,7 +8,7 @@
     platyPS gets wrong for this repo:
       - PowerShell 7.4+ adds the -ProgressAction common parameter to every page; it is removed.
       - The module page lives at the repo root, so its links need the Docs/ prefix.
-    Finally rebuilds ConnectWiseControlAPI/en-US/ConnectWiseControlAPI-help.xml.
+    Finally rebuilds source/en-US/ConnectWiseControlAPI-help.xml.
 
 .EXAMPLE
     ./Build/Update-Help.ps1
@@ -22,7 +22,7 @@ $DocsPath = Join-Path $RepoRoot 'Docs'
 $ModulePagePath = Join-Path $RepoRoot 'ConnectWiseControlAPI_Functions.md'
 
 Import-Module platyPS
-$Module = Import-Module (Join-Path $RepoRoot 'ConnectWiseControlAPI\ConnectWiseControlAPI.psd1') -Force -PassThru
+$Module = Import-Module (Join-Path $RepoRoot 'source\ConnectWiseControlAPI.psd1') -Force -PassThru
 
 $Missing = @($Module.ExportedFunctions.Keys | Where-Object { -not (Test-Path (Join-Path $DocsPath "$_.md")) })
 if ($Missing) { $null = New-MarkdownHelp -Command $Missing -OutputFolder $DocsPath }
@@ -38,7 +38,7 @@ foreach ($Page in Get-ChildItem $DocsPath -Filter '*.md') {
 $Text = [IO.File]::ReadAllText($ModulePagePath)
 [IO.File]::WriteAllText($ModulePagePath, [regex]::Replace($Text, '\]\((?!Docs/)([A-Za-z-]+\.md)\)', '](Docs/$1)'))
 
-$null = New-ExternalHelp -Path $DocsPath -OutputPath (Join-Path $RepoRoot 'ConnectWiseControlAPI\en-US') -Force
+$null = New-ExternalHelp -Path $DocsPath -OutputPath (Join-Path $RepoRoot 'source\en-US') -Force
 
 $Placeholders = Select-String -Path (Join-Path $DocsPath '*.md'), $ModulePagePath -Pattern '\{\{'
 foreach ($Hit in $Placeholders) { Write-Warning "Placeholder left to fill: $($Hit.Filename):$($Hit.LineNumber)" }

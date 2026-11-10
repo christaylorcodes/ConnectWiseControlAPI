@@ -36,7 +36,7 @@ BeforeDiscovery {
 
 BeforeAll {
     $ModuleRoot = Split-Path -Parent $PSScriptRoot
-    Import-Module "$ModuleRoot\ConnectWiseControlAPI\ConnectWiseControlAPI.psd1" -Force
+    Import-Module (& (Join-Path $PSScriptRoot 'TestHelpers\Resolve-TestModuleManifest.ps1')) -Force
 
     # Variables set in BeforeDiscovery do not survive into the Run phase (Pester 5),
     # so the credential check must be re-evaluated here for the run-time code paths.

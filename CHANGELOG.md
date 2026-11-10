@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-Planned as 0.5.0.0 (the module manifest already carries this version; 0.4.0.0 is on the PowerShell Gallery).
+Planned as 0.5.0 (the source manifest carries `0.5.0`; the build needs a 3-part version; 0.4.0.0 is on the PowerShell Gallery).
 
 ### Added
 
@@ -71,6 +71,11 @@ Planned as 0.5.0.0 (the module manifest already carries this version; 0.4.0.0 is
 - CI moved from AppVeyor to GitHub Actions (`.github/workflows/ci.yml`): Pester on PowerShell 7 and Windows
   PowerShell 5.1, PSScriptAnalyzer, `Test-ModuleManifest` and a docs-drift check. `Tests/test-local.ps1` runs the
   same stages locally. `Tests/appveyor.pester.ps1` removed.
+- Repository layout follows the GitHub-Template (Sampler): the module source moved from `ConnectWiseControlAPI/` to
+  `source/` (`Extensions/Remote Workforce` is now `Extensions/RemoteWorkforce`) and `./build.ps1` builds the
+  published module into `output/<ModuleName>/<version>/`. Module-level setup moved from the `.psm1` to
+  `source/prefix.ps1`. The published module is unchanged: same 32 functions, PowerShell 3.0+, same help. CI and
+  `Tests/test-local.ps1` test the built module on PowerShell 7 and Windows PowerShell 5.1.
 - Repo files aligned with the GitHub-Template: `AGENTS.md` (agent guide; `CLAUDE.md` now points to it),
   `pr-validation.yml`, `dependabot.yml`, `copilot-instructions.md`, `.vscode/` settings, `.github/PowerShell-StyleGuide.md`
 - Expanded `.gitignore` to cover OS files, IDEs, build artifacts, and secrets

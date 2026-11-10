@@ -13,6 +13,6 @@ code conventions and contribution rules. It is imported here so it is always loa
 ./Tests/test-local.ps1
 ```
 
-It runs PSScriptAnalyzer, `Test-ModuleManifest`, Pester under PowerShell 7 **and** Windows PowerShell 5.1, and the
-docs-drift check, the same stages as CI. Do not commit until all pass. CI is a safety net only; failures should
+It builds the module (`./build.ps1`), then runs PSScriptAnalyzer, `Test-ModuleManifest`, Pester against the built
+module under PowerShell 7 **and** Windows PowerShell 5.1, and the docs-drift check, the same stages as CI. Do not commit until all pass. CI is a safety net only; failures should
 never first appear there.

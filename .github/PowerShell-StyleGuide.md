@@ -2,8 +2,9 @@
 
 > **ConnectWiseControlAPI exception:** this module runs from RMM agents, so it targets PowerShell 3.0+
 > and must work on Windows PowerShell 5.1 (no ternary, `??`, `&&`/`||` or other 7-only syntax). Only the
-> build and test tooling needs PowerShell 7. This repo also does **not** use Sampler/ModuleBuilder, Pester 6 or
-> PlatyPS 1.x / `docs/help` (it uses Pester 5.7 and `Build/Update-Help.ps1`), and test runners must not set a global
+> build and test tooling needs PowerShell 7. This repo uses the Sampler/ModuleBuilder build and `source/`
+> layout, but **not** Pester 6, the Sampler test task or PlatyPS 1.x / `docs/help` (it uses Pester 5.7 through
+> `Tests/test-local.ps1` and `Build/Update-Help.ps1`), and test runners must not set a global
 > `$ErrorActionPreference = 'Stop'` (it breaks the module's error-path tests). Where this guide disagrees, follow
 > [AGENTS.md](../AGENTS.md); everything else applies as written.
 

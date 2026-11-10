@@ -16,13 +16,13 @@
 BeforeDiscovery {
     # One public function per Public/**/*.ps1 file; the tests below check the manifest and the loaded
     # module against this list, so a new function needs no test edit.
-    $ExpectedFunctions = @(Get-ChildItem -Path (Join-Path (Split-Path -Parent $PSScriptRoot) 'ConnectWiseControlAPI\Public') -Filter '*.ps1' -Recurse |
+    $ExpectedFunctions = @(Get-ChildItem -Path (Join-Path (Split-Path -Parent $PSScriptRoot) 'source\Public') -Filter '*.ps1' -Recurse |
         ForEach-Object BaseName | Sort-Object)
 }
 
 BeforeAll {
     $ModuleRoot = Split-Path -Parent $PSScriptRoot
-    $ManifestPath = Join-Path $ModuleRoot 'ConnectWiseControlAPI\ConnectWiseControlAPI.psd1'
+    $ManifestPath = & (Join-Path $PSScriptRoot 'TestHelpers\Resolve-TestModuleManifest.ps1')
     Import-Module $ManifestPath -Force
 }
 
@@ -66,6 +66,11 @@ Describe 'Module: ConnectWiseControlAPI' {
 
         It 'lists every public function in FunctionsToExport exactly once' -ForEach @(@{ Expected = $ExpectedFunctions }) {
             $Listed = @((Import-PowerShellDataFile -Path $ManifestPath).FunctionsToExport)
+            if ($Listed.Count -eq 1 -and $Listed[0] -eq '*') {
+                # source/ manifest: the build writes the explicit list; the .psm1 exports Public/ via Export-ModuleMember
+                Set-ItResult -Skipped -Because "the source manifest uses '*'; the built manifest is checked instead"
+                return
+            }
             @($Listed | Group-Object | Where-Object Count -gt 1 | ForEach-Object Name) | Should -BeNullOrEmpty
             @($Listed | Sort-Object) | Should -Be $Expected
         }
@@ -95,7 +100,7 @@ Describe 'Module: ConnectWiseControlAPI' {
 
     Context 'Function-to-File Mapping' {
         BeforeAll {
-            $PublicPath = Join-Path $ModuleRoot 'ConnectWiseControlAPI\Public'
+            $PublicPath = Join-Path $ModuleRoot 'source\Public'
             $PublicFiles = Get-ChildItem -Path $PublicPath -Filter '*.ps1' -Recurse |
                 Select-Object -ExpandProperty BaseName
             $ExportedFunctions = (Get-Module 'ConnectWiseControlAPI').ExportedFunctions.Keys
@@ -350,7 +355,7 @@ Describe 'Repository' {
             Set-ItResult -Skipped -Because 'git or the repository is not available'
             return
         }
-        $SourceFolders = 'ConnectWiseControlAPI', 'Tests', 'Docs', 'Build', 'Examples' |
+        $SourceFolders = 'source', 'Tests', 'Docs', 'Build', '.build', 'Examples' |
             ForEach-Object { Join-Path $RepoRoot $_ } | Where-Object { Test-Path $_ }
         $SourceFiles = Get-ChildItem $SourceFolders -Recurse -File |
             ForEach-Object { $_.FullName.Substring($RepoRoot.Length + 1).Replace('\', '/') }
@@ -373,7 +378,7 @@ Describe 'Generated help' {
     # platyPS on PowerShell 7.4+ adds -ProgressAction to every page; Build/Update-Help.ps1 strips it.
     It 'does not document the -ProgressAction common parameter' {
         $Files = @(Get-ChildItem $DocsPath -Filter '*.md' | ForEach-Object FullName) +
-            (Join-Path $RepoRoot 'ConnectWiseControlAPI\en-US\ConnectWiseControlAPI-help.xml')
+            (Join-Path $RepoRoot 'source\en-US\ConnectWiseControlAPI-help.xml')
         @(Select-String -Path $Files -Pattern 'ProgressAction' | ForEach-Object { "$($_.Filename):$($_.LineNumber)" }) |
             Should -BeNullOrEmpty -Because 'run ./Build/Update-Help.ps1 to regenerate the help'
     }

@@ -15,7 +15,7 @@
 
 BeforeAll {
     $ModuleRoot = Split-Path -Parent $PSScriptRoot
-    $ManifestPath = Join-Path $ModuleRoot 'ConnectWiseControlAPI\ConnectWiseControlAPI.psd1'
+    $ManifestPath = & (Join-Path $PSScriptRoot 'TestHelpers\Resolve-TestModuleManifest.ps1')
     Import-Module $ManifestPath -Force
 }
 

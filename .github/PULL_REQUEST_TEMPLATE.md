@@ -37,7 +37,7 @@
 - [ ] PSScriptAnalyzer reports zero errors
 - [ ] CHANGELOG.md updated (if applicable)
 - [ ] Documentation updated (if applicable)
-- [ ] Function added to `FunctionsToExport` in `.psd1` (if new public function)
+- [ ] New public function is in `source/Public/` (the build exports it; no manifest edit) and has comment-based help
 
 ## Screenshots
 

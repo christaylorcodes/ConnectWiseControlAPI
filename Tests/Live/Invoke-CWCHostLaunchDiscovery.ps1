@@ -41,7 +41,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $PSDefaultParameterValues['*-CWC*:ErrorAction'] = 'Stop'
 # $PSScriptRoot is empty in parameter defaults on Windows PowerShell 5.1, so resolve the default here.
-if (-not $ModulePath) { $ModulePath = Join-Path $PSScriptRoot '..\..\ConnectWiseControlAPI\ConnectWiseControlAPI.psd1' }
+if (-not $ModulePath) { $ModulePath = Join-Path $PSScriptRoot '..\..\source\ConnectWiseControlAPI.psd1' }
 Import-Module $ModulePath -Force
 
 $Server = $Server -replace '^https?://', '' -replace '/+$', ''

@@ -7,7 +7,9 @@ the [GitHub-Template](https://github.com/christaylorcodes/GitHub-Template); deli
 ## Project Overview
 
 PowerShell module wrapping the ConnectWise Control (ScreenConnect) web API; published to the PowerShell Gallery and
-used by MSPs. Version lives in `ConnectWiseControlAPI/ConnectWiseControlAPI.psd1` (history in `CHANGELOG.md`).
+used by MSPs. Source lives in `source/` (Sampler layout); `./build.ps1` builds the publishable module into
+`output/<ModuleName>/<version>/`. Version: `ModuleVersion` in `source/ConnectWiseControlAPI.psd1` (history in
+`CHANGELOG.md`).
 Three auth modes via `Connect-CWC` (stored as `AuthType`):
 
 - `-Credentials` (`Credentials`): Basic auth, non-MFA account. Reaches the built-in `Services/*.ashx` and extensions.
@@ -22,23 +24,28 @@ Three auth modes via `Connect-CWC` (stored as `AuthType`):
 ## Quick Start
 
 ```powershell
-Import-Module ./ConnectWiseControlAPI/ConnectWiseControlAPI.psd1 -Force
+# Development: import straight from source/
+Import-Module ./source/ConnectWiseControlAPI.psd1 -Force
 
-# Everything CI runs: PSScriptAnalyzer, Test-ModuleManifest, Pester on PS 7 *and* Windows PowerShell 5.1, docs drift
+# Build the publishable module (first run resolves build dependencies into output/RequiredModules)
+./build.ps1 -ResolveDependency -Tasks build
+
+# Everything CI runs: build, PSScriptAnalyzer, Test-ModuleManifest, Pester against the BUILT module on PS 7
+# *and* Windows PowerShell 5.1, docs drift
 ./Tests/test-local.ps1
 
-# One stage
+# One stage (Test uses the last build; add -TestSource to test source/ instead)
 ./Tests/test-local.ps1 -Stage Test
 ./Tests/test-local.ps1 -Stage Analyze, Manifest
 
-# One test file (HTTP is mocked)
+# One test file against source/ (HTTP is mocked). Tests import $env:MODULE_TEST_PATH when set, else source/.
 Invoke-Pester -Path ./Tests/ConnectWiseControlAPI.Private.Tests.ps1
 
 # Regenerate Docs/, ConnectWiseControlAPI_Functions.md and the MAML help (never edit those by hand)
 ./Build/Update-Help.ps1
 ```
 
-Tooling: Pester 5.7.1+, PSScriptAnalyzer, platyPS 0.14.x.
+Tooling: PowerShell 7 for the build; Pester 5.7.1+, PSScriptAnalyzer, platyPS 0.14.x (`RequiredModules.psd1`).
 
 `Tests/ConnectWiseControlAPI.Live.Tests.ps1` skips unless `$env:CWC_SERVER`, `CWC_USER` and `CWC_PASSWORD` are set.
 `Tests/Live/Invoke-CWCLiveSmokeTest.ps1` checks behaviour against a real server (read-only unless `-AllowWrites`).
@@ -49,19 +56,22 @@ Tooling: Pester 5.7.1+, PSScriptAnalyzer, platyPS 0.14.x.
 
 | Job | What it checks |
 | --- | --- |
-| Pester (PowerShell 7) / Pester (Windows PowerShell 5.1) | Full Pester suite under both editions |
-| PSScriptAnalyzer and manifest | Zero analyzer errors; `Test-ModuleManifest` |
+| Build module | `./build.ps1` (Sampler/ModuleBuilder); `Test-ModuleManifest` on source and built manifests |
+| Pester (PowerShell 7) / Pester (Windows PowerShell 5.1) | Full Pester suite against the built module, both editions |
+| PSScriptAnalyzer | Zero analyzer errors in `source/` |
 | Docs drift | `Build/Update-Help.ps1` leaves no diff |
 
 `.github/workflows/pr-validation.yml` warns when a PR doesn't update `CHANGELOG.md`. Publishing to the PowerShell
-Gallery is manual (`Publish-Module`) and needs the owner's explicit go.
+Gallery is manual and needs the owner's explicit go: build, then
+`Publish-Module -Path output/<ModuleName>/<version> -NuGetApiKey <key>` (publish the built folder, not `source/`).
 
 ## Architecture
 
-- **Loading**: the `.psm1` dot-sources every `.ps1` under `Public/` and `Private/` and exports the `Public/`
-  basenames, but a new function must also be added to `FunctionsToExport` in the `.psd1`. The `.psm1` also holds
-  the shared constants: `$script:CWCSessionType`, `$script:CWCSessionEventType` (live-verified numbers) and the
-  Remote Workforce and RESTful API Manager extension IDs.
+- **Loading**: `build.ps1` (ModuleBuilder) merges `source/prefix.ps1`, `Private/` and `Public/` into one `.psm1` and
+  writes `FunctionsToExport` from the `Public/` file names (the source manifest says `'*'`). The source `.psm1` is only
+  for development: it dot-sources the same files and is **not** used by the build, so module-level code belongs in
+  `source/prefix.ps1`. That file holds the TLS setup and the shared constants: `$script:CWCSessionType`,
+  `$script:CWCSessionEventType` (live-verified numbers) and the Remote Workforce and RESTful API Manager extension IDs.
 - **Requests**: every public function calls `Private/Invoke-CWCServiceMethod.ps1`. It builds the endpoint
   (`-Service` → `Services/<Service>.ashx/<Method>`, `-RestApi` / `-ExtensionID` →
   `App_Extensions/<id>/Service.ashx/<Method>`) and sends the arguments as a **positional JSON array** matching the
@@ -79,12 +89,12 @@ Gallery is manual (`Publish-Module`) and needs the owner's explicit go.
 
 ## Adding New Functions
 
-1. Add `Public/<Service>/Verb-CWCNoun.ps1` (approved verb, `CWC` prefix). Use `Get-CWCSession.ps1` as the template.
+1. Add `source/Public/<Service>/Verb-CWCNoun.ps1` (approved verb, `CWC` prefix). Use `Get-CWCSession.ps1` as the
+   template. No manifest edit: the build exports every `Public/` file.
 2. Call `Invoke-CWCServiceMethod`. Check the method name and argument order against the Control server's
    `Services/*.ashx` source. Pass `-Idempotent` only for reads and "set to value" updates.
-3. Add the name to `FunctionsToExport` in the `.psd1`.
-4. Add mocked Pester tests to `Tests/ConnectWiseControlAPI.Public.Tests.ps1`.
-5. Run `./Build/Update-Help.ps1` and commit the generated pages.
+3. Add mocked Pester tests to `Tests/ConnectWiseControlAPI.Public.Tests.ps1`.
+4. Run `./Build/Update-Help.ps1` and commit the generated pages.
 
 ## Code Conventions
 
@@ -103,7 +113,7 @@ Enforced by `.PSScriptAnalyzerSettings.psd1` and `.editorconfig`:
 - Report errors with `Write-Error` (non-terminating) and let callers decide. Return objects, not formatted output.
 - PowerShell files: UTF-8 with BOM, CRLF line endings.
 - `.gitignore` secret patterns are deliberately narrow (`*secret*` once hid `Test-CWCApiSecretConnection.ps1`);
-  a module test fails if any file under `ConnectWiseControlAPI/`, `Tests/`, `Docs/`, `Build/` or `Examples/` is
+  a module test fails if any file under `source/`, `Tests/`, `Docs/`, `Build/`, `.build/` or `Examples/` is
   ignored.
 
 ### Git Commit Style
@@ -113,7 +123,7 @@ Enforced by `.PSScriptAnalyzerSettings.psd1` and `.editorconfig`:
 
 ## PR Requirements
 
-- All CI checks pass (Pester on both editions, analyzer, manifest, docs drift).
+- All CI checks pass (build, Pester on both editions, analyzer, docs drift).
 - Tests cover new or changed behaviour; PSScriptAnalyzer reports zero errors.
 - `CHANGELOG.md` `[Unreleased]` is updated.
 
@@ -130,7 +140,9 @@ Enforced by `.PSScriptAnalyzerSettings.psd1` and `.editorconfig`:
 | Template default | This repo | Why |
 | --- | --- | --- |
 | PowerShell 7.6, Core only | PowerShell 3.0+, runs on 5.1 and 7 | MSPs run it from RMM agents on Windows PowerShell 5.1 |
-| Sampler build, `source/` layout | Module folder at `ConnectWiseControlAPI/` | Planned move; not done yet |
-| Pester 6 | Pester 5.7 | Must run the suite under Windows PowerShell 5.1 |
+| Sampler `test` task, Pester 6 | `Tests/test-local.ps1`, Pester 5.7 | Must run the suite under Windows PowerShell 5.1 |
+| `Tests/Unit/{Module,Public,Private}`, one file per function | Four suite files under `Tests/` | Not split yet |
+| `docs/` (help, examples, media) | `Docs/` (platyPS), `Examples/`, `Media/` at the root | `docs/` = `Docs/` on Windows |
+| Changelog release task | Release notes by hand | The task cannot parse this CHANGELOG's 4-part versions |
 | PlatyPS 1.x → `docs/help` | platyPS 0.14 via `Build/Update-Help.ps1` (+ MAML) | `Get-Help` on 5.1 uses the MAML |
 | Tag-driven publish workflow | Manual `Publish-Module` | Owner publishes by hand |

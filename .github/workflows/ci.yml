@@ -1,8 +1,9 @@
 # GitHub Actions CI for ConnectWiseControlAPI (replaces AppVeyor)
 #
 # Every job calls Tests/test-local.ps1 for one stage, so `./Tests/test-local.ps1` locally runs the same checks.
-# The module must work on Windows PowerShell 5.1 and PowerShell 7, so Pester runs under both.
-# Publishing to the PowerShell Gallery is manual for now (see CHANGELOG / AGENTS.md).
+# The build job (Sampler/ModuleBuilder) produces output/<ModuleName>/<version>/; the Pester jobs test that built
+# module under both Windows PowerShell 5.1 and PowerShell 7, because the module must work on both.
+# Publishing to the PowerShell Gallery is manual for now (see AGENTS.md). No module name is hard-coded here.
 #
 # Security note: never interpolate ${{ github.* }} / ${{ matrix.* }} values directly into a
 # run: script. Pass them through env: instead.
@@ -35,8 +36,35 @@ env:
   PLATYPS_VERSION: 0.14.2
 
 jobs:
+  build:
+    name: Build module
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Build
+        run: ./Tests/test-local.ps1 -Stage Build, Manifest
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: module-build
+          path: |
+            output/
+            !output/RequiredModules/
+          if-no-files-found: error
+          retention-days: 7
+
   test:
     name: Pester (${{ matrix.name }})
+    needs: build
     runs-on: windows-latest
     strategy:
       fail-fast: false
@@ -56,6 +84,12 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Download Build Artifact
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: module-build
+          path: output
+
       - name: Install Pester
         run: |
           [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072
@@ -65,7 +99,7 @@ jobs:
           Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
           Install-Module -Name Pester -RequiredVersion $env:PESTER_VERSION -Scope CurrentUser -Force -SkipPublisherCheck
 
-      - name: Run Pester
+      - name: Run Pester against the built module
         env:
           RESULT_NAME: ${{ matrix.shell }}
         run: |
@@ -80,7 +114,7 @@ jobs:
           retention-days: 30
 
   analyze:
-    name: PSScriptAnalyzer and manifest
+    name: PSScriptAnalyzer
     runs-on: windows-latest
     defaults:
       run:
@@ -97,8 +131,8 @@ jobs:
           Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
           Install-Module -Name PSScriptAnalyzer -RequiredVersion $env:PSSA_VERSION -Scope CurrentUser -Force
 
-      - name: Analyze and validate manifest
-        run: ./Tests/test-local.ps1 -Stage Analyze, Manifest
+      - name: Analyze source
+        run: ./Tests/test-local.ps1 -Stage Analyze
 
   docs:
     name: Docs drift

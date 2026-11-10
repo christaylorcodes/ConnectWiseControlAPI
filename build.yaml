@@ -1,0 +1,53 @@
+####################################################
+#          ModuleBuilder Configuration             #
+####################################################
+# ./build.ps1 -ResolveDependency -Tasks build   -> output/<ModuleName>/<version>/
+# Tests, analysis and docs run through Tests/test-local.ps1 (see AGENTS.md), not Sampler's test task:
+# the Pester suite must also run under Windows PowerShell 5.1.
+
+SourcePath: source
+# Module-level code (TLS setup, shared constants). ModuleBuilder ignores the source .psm1 body.
+Prefix: prefix.ps1
+# Folders under source/ copied as-is into the built module (en-US holds about_* and MAML help)
+CopyPaths:
+  - en-US
+# UTF-8 with BOM: Windows PowerShell 5.1 reads a BOM-less .psm1 as ANSI and would garble any non-ASCII text
+Encoding: UTF8Bom
+VersionedOutputDirectory: true
+
+####################################################
+#              Pipeline Configuration              #
+####################################################
+
+BuildWorkflow:
+  '.':
+    - build
+
+  build:
+    - Clean
+    - Assert_RequiredModule_Versions
+    - Build_ModuleOutput_ModuleBuilder
+
+####################################################
+#       Sampler Pipeline Configuration             #
+####################################################
+
+Sampler:
+  DefaultOutputDirectory: 'output'
+
+ModuleBuildTasks:
+  Sampler:
+    - '*.build.Sampler.ib.tasks'
+  ModuleBuilder:
+    - '*.build.ModuleBuilder.ib.tasks'
+
+TaskHeader: |
+  param($Path)
+  ""
+  "=" * 79
+  Write-Build Cyan "`t`t`t$($Task.Name.replace("_"," ").ToUpper())"
+  Write-Build DarkGray  "$(Get-BuildSynopsis $Task)"
+  "-" * 79
+  Write-Build DarkGray "  $Path"
+  Write-Build DarkGray "  $($Task.InvocationInfo.ScriptName):$($Task.InvocationInfo.ScriptLineNumber)"
+  ""
