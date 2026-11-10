@@ -463,3 +463,91 @@ Describe 'Connection-type mismatch through Invoke-CWCServiceMethod' {
         }
     }
 }
+
+
+# =============================================================================
+# Host client launch (Enter-CWCSession helpers)
+# =============================================================================
+Describe 'New-CWCHostLaunchUrl' {
+
+    It 'builds the web client format and escapes key, token and title like encodeURIComponent' {
+        InModuleScope 'ConnectWiseControlAPI' {
+            $Url = New-CWCHostLaunchUrl -Scheme 'sc-0123456789abcdef' -RelayHost 'relay.example.com' -RelayPort 443 `
+                -SessionID '11111111-2222-3333-4444-555555555555' -PublicKey 'Bg+A/b==' -AccessToken 'T+o/k=' `
+                -SessionType 'Support' -Title "B$([char]0x00FC)ro PC #1"
+            $Url | Should -BeExactly 'sc-0123456789abcdef://relay.example.com:443/11111111-2222-3333-4444-555555555555/Bg%2BA%2Fb%3D%3D/T%2Bo%2Fk%3D//Support/B%C3%BCro%20PC%20%231/None/'
+        }
+    }
+
+    It 'fills participant name, attributes and logon session when given' {
+        InModuleScope 'ConnectWiseControlAPI' {
+            $Url = New-CWCHostLaunchUrl -Scheme 'sc-1' -RelayHost 'h' -RelayPort 80 -SessionID ([guid]::Empty) -PublicKey 'k' `
+                -AccessToken 't' -SessionType 'Access' -ParticipantName 'A B' -Attributes 'SuspendedInput' -LogonSessionID '0'
+            $Url | Should -BeExactly 'sc-1://h:80/00000000-0000-0000-0000-000000000000/k/t/A%20B/Access//SuspendedInput/0'
+        }
+    }
+}
+
+Describe 'Get-CWCHostLaunchContext' {
+
+    BeforeEach {
+        InModuleScope 'ConnectWiseControlAPI' {
+            $script:CWCServerConnection = @{ Server = 'test.example.com'; Headers = @{} }
+        }
+    }
+
+    It 'reads scheme, relay and key from Script.ashx and caches them on the connection' {
+        InModuleScope 'ConnectWiseControlAPI' {
+            Mock Invoke-WebRequest {
+                [PSCustomObject]@{ Content = 'SC={"res":{},"context":{"clp":{"h":"relay.example.com","p":8041,"k":"Bg+A\/b=="},"x":1,"instanceUrlScheme":"sc-0123456789abcdef"}};' }
+            }
+            $Context = Get-CWCHostLaunchContext
+            $Context.Scheme | Should -Be 'sc-0123456789abcdef'
+            $Context.RelayHost | Should -Be 'relay.example.com'
+            $Context.RelayPort | Should -Be 8041
+            $Context.PublicKey | Should -BeExactly 'Bg+A/b=='
+            $null = Get-CWCHostLaunchContext
+            Should -Invoke Invoke-WebRequest -Times 1 -Exactly -ParameterFilter { $Uri -eq 'https://test.example.com/Script.ashx' -and -not $Headers }
+            $script:CWCServerConnection.HostLaunch.Scheme | Should -Be 'sc-0123456789abcdef'
+        }
+    }
+
+    It 'rejects a scheme that is not sc-<id>' {
+        InModuleScope 'ConnectWiseControlAPI' {
+            Mock Invoke-WebRequest { [PSCustomObject]@{ Content = '{"clp":{"h":"h","p":80,"k":"k"},"instanceUrlScheme":"javascript"}' } }
+            { Get-CWCHostLaunchContext -ErrorAction Stop } | Should -Throw '*did not publish client launch settings*'
+            $script:CWCServerConnection.HostLaunch | Should -BeNullOrEmpty
+        }
+    }
+
+    It 'rejects an invalid <Case>' -ForEach @(
+        @{ Case = 'port'; Clp = '{"h":"h","p":70000,"k":"k"}' }
+        @{ Case = 'host'; Clp = '{"h":"h/../x","p":80,"k":"k"}' }
+        @{ Case = 'key'; Clp = '{"h":"h","p":80,"k":""}' }
+    ) {
+        InModuleScope 'ConnectWiseControlAPI' -Parameters @{ Clp = $Clp } {
+            param($Clp)
+            $script:TestClpJson = $Clp
+            Mock Invoke-WebRequest { [PSCustomObject]@{ Content = "{`"clp`":$($script:TestClpJson),`"instanceUrlScheme`":`"sc-1`"}" } }
+            { Get-CWCHostLaunchContext -ErrorAction Stop } | Should -Throw '*incomplete or invalid*'
+        }
+    }
+
+    It 'reports a failed request' {
+        InModuleScope 'ConnectWiseControlAPI' {
+            Mock Invoke-WebRequest { throw 'Connection refused' }
+            { Get-CWCHostLaunchContext -ErrorAction Stop } | Should -Throw '*Could not read the client launch settings*Connection refused*'
+        }
+    }
+}
+
+Describe 'Start-CWCHostClient' {
+
+    It 'throws a fixed message and leaves no trace of the URL in $Error' -Skip:([Environment]::OSVersion.Platform -ne 'Win32NT') {
+        InModuleScope 'ConnectWiseControlAPI' {
+            $Missing = Join-Path ([IO.Path]::GetTempPath()) 'cwc-missing-SECRETTOKEN\client.exe'
+            { Start-CWCHostClient -Url $Missing } | Should -Throw 'Could not start the Control client (*).'
+            ($Error | Out-String) | Should -Not -Match 'SECRETTOKEN'
+        }
+    }
+}

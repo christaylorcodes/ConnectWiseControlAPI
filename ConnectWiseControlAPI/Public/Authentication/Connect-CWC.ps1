@@ -171,9 +171,15 @@ function Connect-CWC {
     catch{
         $script:CWCServerConnection = $PreviousConnection
         Write-Verbose 'Authentication failed.'
-        # Bad credentials are not rejected with a 401: the request runs as an anonymous user and fails
-        # with "Needs permission", so name the likely causes.
-        Write-Error ("Authentication to 'https://$Server' failed. Check the username and password, that the " +
-            "account does not require MFA, and that its role grants at least one permission. $_")
+        if ($_.FullyQualifiedErrorId -like '*WriteErrorException*') {
+            # The server rejected the call. Bad credentials are not rejected with a 401: the request runs
+            # as an anonymous user and fails with "Needs permission", so name the likely causes.
+            Write-Error ("Authentication to 'https://$Server' failed. Check the username and password, that the " +
+                "account does not require MFA, and that its role grants at least one permission. $_")
+        }
+        else {
+            # A local failure (e.g. a PowerShell error) says nothing about the credentials.
+            Write-Error "Connecting to 'https://$Server' failed before authentication could be checked: $_"
+        }
     }
 }

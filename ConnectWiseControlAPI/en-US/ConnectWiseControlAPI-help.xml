@@ -429,6 +429,194 @@
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
+      <command:name>Enter-CWCSession</command:name>
+      <command:verb>Enter</command:verb>
+      <command:noun>CWCSession</command:noun>
+      <maml:description>
+        <maml:para>Opens the ConnectWise Control Host client joined to a session, like Join in the web UI.</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>Gets a Host access token for the session (PageService.GetAccessToken), builds the client launch URL the web client uses (sc-&lt;instance&gt;://...) and opens it with the installed Control client. The join is recorded in the session's audit trail (InitiatedJoin), as a web UI join is.</maml:para>
+      <maml:para>The client must already be installed for the current Windows user: join any session once from the web UI. Launching works on Windows only; on other systems use -UrlOnly and open the URL yourself.</maml:para>
+      <maml:para>Requires Connect-CWC -Credentials and the JoinSession permission in -Group.</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>Enter-CWCSession</maml:name>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="1" aliases="SessionID">
+          <maml:name>GUID</maml:name>
+          <maml:description>
+            <maml:para>Session ID. Accepts SessionID from the pipeline (e.g. from Get-CWCSession).</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Guid</command:parameterValue>
+          <dev:type>
+            <maml:name>Guid</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
+          <maml:name>Type</maml:name>
+          <maml:description>
+            <maml:para>Session type. Defaults to Access.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>Access</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none">
+          <maml:name>Group</maml:name>
+          <maml:description>
+            <maml:para>Session group containing the session. Defaults to 'All Machines' for Access, 'All Sessions' for Support and 'All Meetings' for Meeting.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>UrlOnly</maml:name>
+          <maml:description>
+            <maml:para>Return the launch URL instead of opening the client. The URL holds an access token: treat it like a password. It uses a delegated token that expires in 5 minutes when your role has the CreateDelegatedAccessToken permission; otherwise a regular Host token (with a warning), which is valid for the server's access token lifetime (7 days by default).</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="proga">
+          <maml:name>ProgressAction</maml:name>
+          <maml:description>
+            <maml:para>{{ Fill ProgressAction Description }}</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">ActionPreference</command:parameterValue>
+          <dev:type>
+            <maml:name>ActionPreference</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="1" aliases="SessionID">
+        <maml:name>GUID</maml:name>
+        <maml:description>
+          <maml:para>Session ID. Accepts SessionID from the pipeline (e.g. from Get-CWCSession).</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Guid</command:parameterValue>
+        <dev:type>
+          <maml:name>Guid</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
+        <maml:name>Type</maml:name>
+        <maml:description>
+          <maml:para>Session type. Defaults to Access.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>Access</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none">
+        <maml:name>Group</maml:name>
+        <maml:description>
+          <maml:para>Session group containing the session. Defaults to 'All Machines' for Access, 'All Sessions' for Support and 'All Meetings' for Meeting.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>UrlOnly</maml:name>
+        <maml:description>
+          <maml:para>Return the launch URL instead of opening the client. The URL holds an access token: treat it like a password. It uses a delegated token that expires in 5 minutes when your role has the CreateDelegatedAccessToken permission; otherwise a regular Host token (with a warning), which is valid for the server's access token lifetime (7 days by default).</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="proga">
+        <maml:name>ProgressAction</maml:name>
+        <maml:description>
+          <maml:para>{{ Fill ProgressAction Description }}</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">ActionPreference</command:parameterValue>
+        <dev:type>
+          <maml:name>ActionPreference</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes />
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>System.String</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
+    <maml:alertSet>
+      <maml:alert>
+        <maml:para>The access token is not written to verbose, debug, warning or error output. It does appear in the launched client's command line (as with a web UI join), and PowerShell module or script-block logging, when enabled, can record the API response that carries it. The token is tied to the public IP address this call comes from, so the URL may not work from another network (a different proxy or VPN exit).</maml:para>
+        <maml:para>Author: Chris Taylor</maml:para>
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <dev:code>Enter-CWCSession -GUID 'a1b2c3d4-0000-0000-0000-000000000000'</dev:code>
+        <dev:remarks>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>-------------------------- EXAMPLE 2 --------------------------</maml:title>
+        <dev:code>Get-CWCSession -Type Access -Search 'DESKTOP-01' -Limit 1 | Enter-CWCSession</dev:code>
+        <dev:remarks>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>-------------------------- EXAMPLE 3 --------------------------</maml:title>
+        <dev:code>$Url = Enter-CWCSession -GUID $SessionID -UrlOnly
+open $Url   # macOS</dev:code>
+        <dev:remarks>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>https://github.com/christaylorcodes/ConnectWiseControlAPI</maml:linkText>
+        <maml:uri>https://github.com/christaylorcodes/ConnectWiseControlAPI</maml:uri>
+      </maml:navigationLink>
+    </command:relatedLinks>
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
       <command:name>Find-CWCSession</command:name>
       <command:verb>Find</command:verb>
       <command:noun>CWCSession</command:noun>

@@ -46,6 +46,8 @@ BeforeDiscovery {
         'Send-CWCSessionMessage'
         'Send-CWCToolboxItem'
         'New-CWCMFA'
+        'Remove-CWCHostFromSession'
+        'Enter-CWCSession'
     )
 }
 

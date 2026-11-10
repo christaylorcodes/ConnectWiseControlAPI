@@ -40,6 +40,14 @@ Planned as 0.5.0.0 (the module manifest already carries this version; 0.4.0.0 is
   contributed by turbo-donkey (#28). Takes single `-SessionID`/`-ConnectionID` values and prompts by default
 - `Remove-CWCSession -Uninstall` queues `QueuedUninstallAndDelete` (event 100) so the Access client is
   uninstalled as well; without it the session record is only deleted (`DeletedSession`, event 21)
+- `Enter-CWCSession` opens the Host client joined to a session, like Join in the web UI (#13). It builds
+  the web client's `sc-<instance>://` launch URL from the server's published launch settings and a Host
+  access token, checks that the client is installed for the current user, and logs the join
+  (`InitiatedJoin`). `-UrlOnly` returns the URL instead (for macOS/Linux or custom launchers), using a
+  5-minute delegated token when the role allows it. The token is never written to any output stream.
+  Credentials connections only; launching is Windows only
+- Live discovery script `Tests/Live/Invoke-CWCHostLaunchDiscovery.ps1` (read-only; redacts secrets;
+  `-Launch` opens the client for one test session)
 
 ### Deprecated
 
@@ -63,7 +71,9 @@ Planned as 0.5.0.0 (the module manifest already carries this version; 0.4.0.0 is
 - **Breaking:** `Remove-CWCSession` prompts by default (`ConfirmImpact = 'High'`), confirms each session
   separately and rejects an empty GUID. Unattended scripts must add `-Confirm:$false`
 - `Connect-CWC` reports a failed login with its likely causes. Wrong credentials are not rejected with a
-  401: the request runs as an anonymous user and fails with "Needs permission"
+  401: the request runs as an anonymous user and fails with "Needs permission". A local failure (e.g. a
+  PowerShell error) is reported as such instead of being blamed on the credentials
+- Removed the unloaded `WIP/Invoke-CWCSession.ps1` prototype, superseded by `Enter-CWCSession`
 - `Get-CWCLastContact` returns an error when no connection event is found, instead of the current time
 
 ### Fixed

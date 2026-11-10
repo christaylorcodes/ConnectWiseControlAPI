@@ -214,6 +214,22 @@ Describe 'Connect-CWC' {
                 $script:CWCServerConnection | Should -BeNullOrEmpty
             }
         }
+
+        It 'blames the credentials when the server rejects the validation call' {
+            InModuleScope 'ConnectWiseControlAPI' -Parameters @{ cred = $cred } {
+                param($cred)
+                Mock Invoke-CWCWebRequest { Write-Error 'Needs permission' }
+                { Connect-CWC -Server 'server.example.com' -Credentials $cred -ErrorAction Stop } | Should -Throw "Authentication to*Check the username and password*"
+            }
+        }
+
+        It 'does not blame the credentials for a local failure' {
+            InModuleScope 'ConnectWiseControlAPI' -Parameters @{ cred = $cred } {
+                param($cred)
+                Mock Invoke-CWCWebRequest { Test-CWCMissingHelper }
+                { Connect-CWC -Server 'server.example.com' -Credentials $cred -ErrorAction Stop } | Should -Throw "*failed before authentication could be checked*Test-CWCMissingHelper*"
+            }
+        }
     }
 
     Context 'Connection failure' {
@@ -682,6 +698,150 @@ Describe 'Invoke-CWCWake' {
             }
             Invoke-CWCWake -GUID ([guid]::NewGuid()) -Type 'Access'
         }
+    }
+}
+
+Describe 'Enter-CWCSession' {
+
+    BeforeEach {
+        Set-CWCTestConnection
+        $Id = '11111111-2222-3333-4444-555555555555'
+        Mock -ModuleName 'ConnectWiseControlAPI' Get-CWCHostLaunchContext {
+            @{ Scheme = 'sc-0123456789abcdef'; RelayHost = 'relay.example.com'; RelayPort = 8041; PublicKey = 'KEY+pub/lic==' }
+        }
+        Mock -ModuleName 'ConnectWiseControlAPI' Invoke-CWCWebRequest {
+            param($Arguments)
+            switch -Wildcard ($Arguments.Endpoint) {
+                '*/GetLiveData' {
+                    @{ ResponseInfoMap = @{ HostSessionInfo = @{ Sessions = @(
+                                    @{ SessionID = '11111111-2222-3333-4444-555555555555'; Name = 'PC 01'; SessionType = 2 }
+                                ) } } }
+                }
+                '*/GetAccessToken' { 'TOKEN+primary/abc==' }
+                '*/GetDelegatedAccessToken' { 'TOKEN+delegated/xyz==' }
+                default { $null }
+            }
+        }
+        Mock -ModuleName 'ConnectWiseControlAPI' Test-Path { $true } -ParameterFilter { $LiteralPath -like 'Registry::*' }
+        Mock -ModuleName 'ConnectWiseControlAPI' Start-CWCHostClient {}
+    }
+
+    It 'opens the client with the web client URL format and a primary token' -Skip:([Environment]::OSVersion.Platform -ne 'Win32NT') {
+        $Result = Enter-CWCSession -GUID $Id
+        $Result | Should -BeNullOrEmpty
+        $Expected = 'sc-0123456789abcdef://relay.example.com:8041/11111111-2222-3333-4444-555555555555/' +
+            'KEY%2Bpub%2Flic%3D%3D/TOKEN%2Bprimary%2Fabc%3D%3D//Access/PC%2001/None/'
+        Should -Invoke Start-CWCHostClient -ModuleName 'ConnectWiseControlAPI' -Times 1 -Exactly -ParameterFilter { $Url -eq $Expected }
+        Should -Invoke Invoke-CWCWebRequest -ModuleName 'ConnectWiseControlAPI' -Times 0 -ParameterFilter { $Arguments.Endpoint -like '*/GetDelegatedAccessToken' }
+    }
+
+    It 'checks for the protocol handler of the server scheme' -Skip:([Environment]::OSVersion.Platform -ne 'Win32NT') {
+        Enter-CWCSession -GUID $Id
+        Should -Invoke Test-Path -ModuleName 'ConnectWiseControlAPI' -Times 1 -ParameterFilter { $LiteralPath -eq 'Registry::HKEY_CLASSES_ROOT\sc-0123456789abcdef' }
+    }
+
+    It 'logs the join like the web UI (LogInitiatedJoin, ProcessType Host = 1)' -Skip:([Environment]::OSVersion.Platform -ne 'Win32NT') {
+        Enter-CWCSession -GUID $Id
+        Should -Invoke Invoke-CWCWebRequest -ModuleName 'ConnectWiseControlAPI' -Times 1 -Exactly -ParameterFilter {
+            $Body = $Arguments.Body | ConvertFrom-Json
+            $Arguments.Endpoint -eq 'Services/PageService.ashx/LogInitiatedJoin' -and
+            $Body[0] -eq '11111111-2222-3333-4444-555555555555' -and $Body[1] -eq 1 -and $Body[2] -like '(UrlLaunch) ConnectWiseControlAPI/*'
+        }
+    }
+
+    It 'warns but still opens the client when the join cannot be logged' -Skip:([Environment]::OSVersion.Platform -ne 'Win32NT') {
+        Mock -ModuleName 'ConnectWiseControlAPI' Invoke-CWCWebRequest {
+            param($Arguments)
+            switch -Wildcard ($Arguments.Endpoint) {
+                '*/GetLiveData' { @{ ResponseInfoMap = @{ HostSessionInfo = @{ Sessions = @(@{ SessionID = '11111111-2222-3333-4444-555555555555'; Name = 'PC 01' }) } } } }
+                '*/GetAccessToken' { 'TOKEN+primary/abc==' }
+                '*/LogInitiatedJoin' { throw 'Rate limited' }
+            }
+        }
+        Enter-CWCSession -GUID $Id -WarningVariable Warnings -WarningAction SilentlyContinue -ErrorAction Stop
+        Should -Invoke Start-CWCHostClient -ModuleName 'ConnectWiseControlAPI' -Times 1 -Exactly
+        $Warnings | Should -Match 'could not be logged'
+    }
+
+    It 'never writes the token to verbose, debug or warning output' -Skip:([Environment]::OSVersion.Platform -ne 'Win32NT') {
+        $Output = & {
+            $VerbosePreference = 'Continue'
+            $DebugPreference = 'Continue'
+            Enter-CWCSession -GUID $Id
+        } *>&1 | Out-String
+        $Output | Should -Not -Match 'TOKEN\+|TOKEN%2B'
+    }
+
+    It 'reports a launch failure without the URL' -Skip:([Environment]::OSVersion.Platform -ne 'Win32NT') {
+        Mock -ModuleName 'ConnectWiseControlAPI' Start-CWCHostClient { throw 'Could not start the Control client (Win32Exception).' }
+        { Enter-CWCSession -GUID $Id -ErrorAction Stop } | Should -Throw 'Could not start the Control client*'
+        Should -Invoke Invoke-CWCWebRequest -ModuleName 'ConnectWiseControlAPI' -Times 0 -ParameterFilter { $Arguments.Endpoint -like '*/LogInitiatedJoin' }
+    }
+
+    It 'errors without requesting a token when the client is not installed' -Skip:([Environment]::OSVersion.Platform -ne 'Win32NT') {
+        Mock -ModuleName 'ConnectWiseControlAPI' Test-Path { $false } -ParameterFilter { $LiteralPath -like 'Registry::*' }
+        { Enter-CWCSession -GUID $Id -ErrorAction Stop } | Should -Throw '*not installed*-UrlOnly*'
+        Should -Invoke Start-CWCHostClient -ModuleName 'ConnectWiseControlAPI' -Times 0
+        Should -Invoke Invoke-CWCWebRequest -ModuleName 'ConnectWiseControlAPI' -Times 0 -ParameterFilter { $Arguments.Endpoint -like '*AccessToken' }
+    }
+
+    It '-UrlOnly returns the URL with a short-lived delegated token and does not launch or log' {
+        $Url = Enter-CWCSession -GUID $Id -UrlOnly
+        $Url | Should -BeLike 'sc-0123456789abcdef://relay.example.com:8041/11111111-*/TOKEN%2Bdelegated%2Fxyz%3D%3D//Access/*'
+        Should -Invoke Invoke-CWCWebRequest -ModuleName 'ConnectWiseControlAPI' -Times 1 -Exactly -ParameterFilter {
+            $Body = $Arguments.Body | ConvertFrom-Json
+            $Arguments.Endpoint -like '*/GetDelegatedAccessToken' -and $Body[2] -eq 268435455 -and $Body[3] -eq 300
+        }
+        Should -Invoke Start-CWCHostClient -ModuleName 'ConnectWiseControlAPI' -Times 0
+        Should -Invoke Invoke-CWCWebRequest -ModuleName 'ConnectWiseControlAPI' -Times 0 -ParameterFilter { $Arguments.Endpoint -like '*/LogInitiatedJoin' }
+    }
+
+    It '-UrlOnly falls back to a primary token with a warning' {
+        Mock -ModuleName 'ConnectWiseControlAPI' Invoke-CWCWebRequest {
+            param($Arguments)
+            switch -Wildcard ($Arguments.Endpoint) {
+                '*/GetLiveData' { @{ ResponseInfoMap = @{ HostSessionInfo = @{ Sessions = @(@{ SessionID = '11111111-2222-3333-4444-555555555555'; Name = 'PC 01' }) } } } }
+                '*/GetDelegatedAccessToken' { throw 'Needs permission' }
+                '*/GetAccessToken' { 'TOKEN+primary/abc==' }
+            }
+        }
+        $Url = Enter-CWCSession -GUID $Id -UrlOnly -WarningVariable Warnings -WarningAction SilentlyContinue
+        $Url | Should -BeLike '*/TOKEN%2Bprimary%2Fabc%3D%3D/*'
+        $Warnings | Should -Match 'Treat it like a password'
+        $Warnings | Should -Not -Match 'TOKEN\+|TOKEN%2B'
+    }
+
+    It 'is blocked on an API-secret connection without any request' {
+        Set-CWCTestApiSecretConnection
+        { Enter-CWCSession -GUID $Id -ErrorAction Stop } | Should -Throw '*-ApiSecret*Connect-CWC -Credentials*'
+        Should -Invoke Invoke-CWCWebRequest -ModuleName 'ConnectWiseControlAPI' -Times 0
+        Should -Invoke Get-CWCHostLaunchContext -ModuleName 'ConnectWiseControlAPI' -Times 0
+    }
+
+    It 'errors when not connected' {
+        InModuleScope 'ConnectWiseControlAPI' { $script:CWCServerConnection = $null }
+        { Enter-CWCSession -GUID $Id -ErrorAction Stop } | Should -Throw '*Connect-CWC*'
+    }
+
+    It 'errors without requesting a token when the session is not in the group' {
+        { Enter-CWCSession -GUID ([guid]::NewGuid()) -ErrorAction Stop } | Should -Throw '*was not found among Access sessions*'
+        Should -Invoke Invoke-CWCWebRequest -ModuleName 'ConnectWiseControlAPI' -Times 0 -ParameterFilter { $Arguments.Endpoint -like '*AccessToken' }
+    }
+
+    It 'uses <Group> as the default group for <Type> sessions' -ForEach @(
+        @{ Type = 'Access'; Group = 'All Machines' }
+        @{ Type = 'Support'; Group = 'All Sessions' }
+        @{ Type = 'Meeting'; Group = 'All Meetings' }
+    ) {
+        $null = Enter-CWCSession -GUID $Id -Type $Type -UrlOnly
+        Should -Invoke Invoke-CWCWebRequest -ModuleName 'ConnectWiseControlAPI' -Times 1 -ParameterFilter {
+            $Arguments.Endpoint -like '*/GetLiveData' -and ($Arguments.Body | ConvertFrom-Json)[0].HostSessionInfo.sessionGroupPathParts[0] -eq $Group
+        }
+    }
+
+    It 'accepts SessionID from the pipeline' {
+        $Url = [pscustomobject]@{ SessionID = $Id } | Enter-CWCSession -UrlOnly
+        $Url | Should -BeLike '*/11111111-2222-3333-4444-555555555555/*'
     }
 }
 
