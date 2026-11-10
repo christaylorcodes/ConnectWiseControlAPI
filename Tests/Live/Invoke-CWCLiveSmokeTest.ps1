@@ -81,6 +81,9 @@ function Select-Event {
     $Events | ForEach-Object {
         [ordered]@{
             EventType = $_.EventType
+            # IDs show whether output events (70) point back at their command (44) via CorrelationEventID
+            EventID   = $_.EventID
+            CorrelationEventID = $_.CorrelationEventID
             Time      = $_.Time
             TimeType  = if ($null -ne $_.Time) { $_.Time.GetType().Name } else { $null }
             Host      = $_.Host
@@ -165,6 +168,21 @@ Invoke-Step 'Creds.GetSessionDetail' {
     [ordered]@{ BaseTime = $Detail.BaseTime; Events = @(Select-Event ($Detail.Events | Select-Object -First 15)) }
 }
 Invoke-Step 'Creds.LastContact' { (Get-CWCLastContact -GUID $TestSessionID -Group $Group).ToString('o') }
+
+# A wrong password must fail fast (no retries) with the login hint, and leave the module disconnected.
+Invoke-Step 'Creds.WrongPasswordFailsFast' {
+    $BadCredential = [pscredential]::new($AdminCredential.UserName, (ConvertTo-SecureString 'definitely-wrong-password' -AsPlainText -Force))
+    $Timer = [Diagnostics.Stopwatch]::StartNew()
+    $Message = $null
+    try { Connect-CWC -Server $Server -Credentials $BadCredential -WarningAction SilentlyContinue }
+    catch { $Message = "$_" }
+    $Timer.Stop()
+    $Connected = [bool](& (Get-Module ConnectWiseControlAPI) { $script:CWCServerConnection })
+    if ($Timer.Elapsed.TotalSeconds -gt 10) { throw "Took $([int]$Timer.Elapsed.TotalSeconds) s; retries are still happening" }
+    if ($Connected) { throw 'Still connected after a failed login to a different identity' }
+    [ordered]@{ Seconds = [math]::Round($Timer.Elapsed.TotalSeconds, 1); MentionsLogin = $Message -match 'username and password' }
+}
+Invoke-Step 'Creds.ReconnectAfterWrongPassword' { Connect-CWC -Server $Server -Credentials $AdminCredential; 'connected' }
 #endregion
 
 #region Limited role (#14)
