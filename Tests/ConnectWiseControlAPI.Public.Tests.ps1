@@ -1754,3 +1754,74 @@ Describe 'Remove-CWCHostFromSession' {
             Should -Throw
     }
 }
+
+Describe 'Remove-CWCSessionNote' {
+
+    BeforeEach { Set-CWCTestConnection }
+
+    It 'sends one DeletedEvent (1) per note, correlated to the note, without retry' {
+        InModuleScope 'ConnectWiseControlAPI' {
+            $session = [guid]::NewGuid(); $note1 = [guid]::NewGuid(); $note2 = [guid]::NewGuid()
+            Mock Invoke-CWCWebRequest {
+                param($Arguments, $MaxRetry)
+                $Arguments.Endpoint | Should -Be 'Services/PageService.ashx/AddSessionEvents'
+                $MaxRetry | Should -Be 0
+                $body = $Arguments.Body | ConvertFrom-Json
+                @($body[1]).Count | Should -Be 2
+                $body[1][0].EventType | Should -Be 1
+                $body[1][0].SessionID | Should -Be $session.ToString()
+                @($body[1].CorrelationEventID) | Should -Be @($note1.ToString(), $note2.ToString())
+            }
+            Remove-CWCSessionNote -GUID $session -NoteEventID $note1, $note2 -Confirm:$false
+            Should -Invoke Invoke-CWCWebRequest -Times 1
+        }
+    }
+
+    It '-All removes only notes that are not already deleted' {
+        InModuleScope 'ConnectWiseControlAPI' {
+            $session = [guid]::NewGuid(); $script:live = [guid]::NewGuid(); $script:gone = [guid]::NewGuid()
+            Mock Get-CWCSessionDetail {
+                [PSCustomObject]@{ Events = @(
+                    [PSCustomObject]@{ EventID = "$script:live"; EventType = 32; Data = 'keep?' }
+                    [PSCustomObject]@{ EventID = "$script:gone"; EventType = 32; Data = 'old' }
+                    [PSCustomObject]@{ EventID = "$([guid]::NewGuid())"; EventType = 1; CorrelationEventID = "$script:gone" }
+                    [PSCustomObject]@{ EventID = "$([guid]::NewGuid())"; EventType = 44; Data = 'hostname' }
+                ) }
+            }
+            Mock Invoke-CWCWebRequest {
+                param($Arguments)
+                $body = $Arguments.Body | ConvertFrom-Json
+                @($body[1]).Count | Should -Be 1
+                $body[1][0].CorrelationEventID | Should -Be "$script:live"
+            }
+            Remove-CWCSessionNote -GUID $session -All -Confirm:$false
+            Should -Invoke Invoke-CWCWebRequest -Times 1
+        }
+    }
+
+    It '-All sends nothing when the session has no notes' {
+        InModuleScope 'ConnectWiseControlAPI' {
+            Mock Get-CWCSessionDetail { [PSCustomObject]@{ Events = @() } }
+            Mock Invoke-CWCWebRequest {}
+            Remove-CWCSessionNote -GUID ([guid]::NewGuid()) -All -Confirm:$false
+            Should -Invoke Invoke-CWCWebRequest -Times 0
+        }
+    }
+
+    It 'sends nothing with -WhatIf' {
+        InModuleScope 'ConnectWiseControlAPI' {
+            Mock Invoke-CWCWebRequest {}
+            Remove-CWCSessionNote -GUID ([guid]::NewGuid()) -NoteEventID ([guid]::NewGuid()) -WhatIf
+            Should -Invoke Invoke-CWCWebRequest -Times 0
+        }
+    }
+
+    It 'fails clearly on an API-secret connection' {
+        Set-CWCTestApiSecretConnection
+        InModuleScope 'ConnectWiseControlAPI' {
+            Mock Invoke-WebRequest {}
+            { Remove-CWCSessionNote -GUID ([guid]::NewGuid()) -All -Confirm:$false -ErrorAction Stop } | Should -Throw '*Connect-CWC -Credentials*'
+            Should -Invoke Invoke-WebRequest -Times 0
+        }
+    }
+}

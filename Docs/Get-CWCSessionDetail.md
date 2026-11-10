@@ -13,8 +13,7 @@ Will return information about a session.
 ## SYNTAX
 
 ```
-Get-CWCSessionDetail [-Group <String>] -GUID <Guid> [-Include <String[]>]
- [<CommonParameters>]
+Get-CWCSessionDetail [-Group <String[]>] -GUID <Guid> [-Include <String[]>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -35,7 +34,7 @@ Will return details of the requested session.
 Name of session group to use.
 
 ```yaml
-Type: String
+Type: String[]
 Parameter Sets: (All)
 Aliases:
 

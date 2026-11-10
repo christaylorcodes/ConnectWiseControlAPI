@@ -1,7 +1,8 @@
 function Get-CWCSessionDetail {
     [CmdletBinding()]
     param (
-        [string]$Group = 'All Machines',
+        # Session group name, or the path parts of a nested group (e.g. 'Clients','Acme')
+        [string[]]$Group = 'All Machines',
         [Parameter(Mandatory=$True)]
         [guid]$GUID,
         # Parts of the session details to return (server SessionDetailsItems flags). Omit for everything.
@@ -26,7 +27,7 @@ function Get-CWCSessionDetail {
     }
 
     # GetSessionDetails(group, sessionID[, items]). Without items the server returns All.
-    $DetailArguments = @($Group, $GUID)
+    $DetailArguments = @(@($Group), $GUID)
     if ($Include) {
         $Items = 0
         foreach ($Item in ($Include | Select-Object -Unique)) { $Items = $Items -bor $SessionDetailsItemFlags[$Item] }

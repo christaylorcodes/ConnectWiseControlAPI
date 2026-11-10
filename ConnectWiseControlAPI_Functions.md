@@ -84,6 +84,9 @@ Disconnects one connection (for example a host) from a session.
 ### [Remove-CWCSession](Docs/Remove-CWCSession.md)
 Will end a given session.
 
+### [Remove-CWCSessionNote](Docs/Remove-CWCSessionNote.md)
+Removes notes from a session.
+
 ### [Remove-CWCUser](Docs/Remove-CWCUser.md)
 Removes an internal user.
 

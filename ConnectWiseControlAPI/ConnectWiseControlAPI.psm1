@@ -24,6 +24,7 @@ $script:CWCSessionType = @{ Support = 0; Meeting = 1; Access = 2 }
 # ScreenConnect.SessionEventType values used by this module (verified live from the web client's
 # SC.types.SessionEventType, 2026-11-10)
 $script:CWCSessionEventType = @{
+    DeletedEvent             = 1
     Connected                = 10
     Disconnected             = 11
     DeletedSession           = 21

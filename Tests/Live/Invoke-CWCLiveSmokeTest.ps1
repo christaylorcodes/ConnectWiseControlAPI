@@ -109,13 +109,8 @@ function Remove-SmokeTestNote {
         $_.EventType -eq $NoteType -and "$($_.Data)" -like 'CWC smoke test note*' -and $_.EventID -notin $AlreadyDeleted
     })
     if ($TestNotes.Count -gt 0) {
-        $DeleteEntries = @(foreach ($Note in $TestNotes) {
-            @{ SessionID = "$TestSessionID"; EventType = $DeletedEventType; CorrelationEventID = $Note.EventID }
-        })
-        & (Get-Module ConnectWiseControlAPI) {
-            param($Group, $DeleteEntries)
-            $null = Invoke-CWCServiceMethod -Service PageService -Method AddSessionEvents -Arguments @(@($Group), $DeleteEntries) -ErrorAction Stop
-        } $Group $DeleteEntries
+        # Also exercises Remove-CWCSessionNote live
+        Remove-CWCSessionNote -GUID $TestSessionID -Group $Group -NoteEventID ($TestNotes | ForEach-Object { [guid]$_.EventID }) -Confirm:$false
         Start-Sleep -Seconds 2
     }
 

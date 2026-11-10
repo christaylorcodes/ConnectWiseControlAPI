@@ -26,6 +26,7 @@ BeforeDiscovery {
         'New-CWCAccessToken'
         'Remove-CWCSession'
         'Remove-CWCHostFromSession'
+        'Remove-CWCSessionNote'
         'Update-CWCCustomProperty'
         'Update-CWCSessionName'
         'Get-CWCSecurityConfigurationInfo'
@@ -168,6 +169,7 @@ Describe 'Function Structure' {
         It '<_> supports ShouldProcess' -ForEach @(
             'Remove-CWCSession'
             'Remove-CWCHostFromSession'
+            'Remove-CWCSessionNote'
             'Update-CWCCustomProperty'
             'Update-CWCSessionName'
             'New-CWCUser'
