@@ -24,9 +24,9 @@ This is a PowerShell wrapper for ConnectWise Control
     <a href="ConnectWiseControlAPI_Functions.md">List of Functions</a> •
     <a href="./Examples">Examples</a> •
     <a href="#install">Install</a> •
-    <a href="https://github.com/christaylorcodes/GitHub-Template/blob/main/CONTRIBUTING.md">Contribute</a> •
-    <a href="https://github.com/christaylorcodes/GitHub-Template/blob/main/CONTRIBUTING.md#reporting-bugs">Submit a Bug</a> •
-    <a href="https://github.com/christaylorcodes/GitHub-Template/blob/main/CONTRIBUTING.md#suggesting-enhancements">Request a Feature</a>
+    <a href=".github/CONTRIBUTING.md">Contribute</a> •
+    <a href=".github/CONTRIBUTING.md#reporting-bugs">Submit a Bug</a> •
+    <a href=".github/CONTRIBUTING.md#suggesting-enhancements">Request a Feature</a>
 </p>
 
 <!-- Summary -->
@@ -48,17 +48,43 @@ Install-Module 'ConnectWiseControlAPI'
 
 ## Requirements
 
-* Requires an account without MFA. Use a complex username and password.
-
 * Requires your Control server to use https.
 
-## [Contributing](https://github.com/christaylorcodes/GitHub-Template/blob/main/CONTRIBUTING.md)
+* One of two authentication methods:
 
-If you use this project please give it a star and follow so you can get updated when new features are released. This also lets me know what projects are getting used and what ones I should dedicate more time to. If you want to get more involved please see the [contributing page](https://github.com/christaylorcodes/GitHub-Template/blob/main/CONTRIBUTING.md). Projects need all kinds of help even if you don't know how to code.
+  * **Credentials** (`Connect-CWC -Credentials`): an account without MFA. Use a complex username and
+    password. All functions except `Find-CWCSession` are available, limited by the account's permissions.
+
+  * **API secret** (`Connect-CWC -ApiSecret`): install the **RESTful API Manager** extension and set its
+    `RESTfulAuthenticationSecret` setting to a long random value. Works when every account requires MFA.
+    Available functions: `Find-CWCSession`, `New-CWCSession`, `Get-CWCSessionDetail`,
+    `Update-CWCSessionName`, `Invoke-CWCCommand` (queues the command but does not return its output),
+    `Add-CWCSessionNote`, `Send-CWCSessionMessage`, `Send-CWCToolboxItem`. The secret bypasses
+    Control's role permissions and acts on every session, so protect it like an administrator password.
+    If the extension's `RESTfulAllowedOrigin` setting is set, pass a matching `-Origin`.
+
+    ```powershell
+    $Secret = Read-Host -AsSecureString -Prompt 'RESTful API secret'
+    Connect-CWC -Server 'control.example.com' -ApiSecret $Secret
+    Find-CWCSession -Filter "Name LIKE 'DESKTOP-*'"
+    ```
+
+## Tutorials & Resources
+
+In-depth tutorials on [christaylor.codes](https://christaylor.codes):
+
+- [Introducing ConnectWiseControlAPI](https://christaylor.codes/powershell/msp/connectwisecontrolapi/2023/03/15/introducing-connectwisecontrolapi.html) - Module overview and key features
+- [Getting Started with ConnectWiseControlAPI](https://christaylor.codes/powershell/msp/connectwisecontrolapi/2023/03/22/getting-started-connectwisecontrolapi.html) - Authentication, setup, and first commands
+- [Cleaning Duplicate Control Sessions](https://christaylor.codes/powershell/msp/connectwisecontrolapi/2023/03/29/cleaning-duplicate-control-sessions.html) - Practical session management automation
+- [Building PowerShell API Wrappers](https://christaylor.codes/powershell/development/connectwisecontrolapi/2023/12/05/building-powershell-api-wrappers.html) - Design patterns behind the module
+
+## [Contributing](.github/CONTRIBUTING.md)
+
+If you use this project please give it a star and follow so you can get updated when new features are released. This also lets me know what projects are getting used and what ones I should dedicate more time to. If you want to get more involved please see the [contributing page](.github/CONTRIBUTING.md). Projects need all kinds of help even if you don't know how to code.
 
 Want to share something you created using the module? Submit it to be featured as a Community Package.
 
-## [Donating](https://github.com/christaylorcodes/GitHub-Template/blob/main/DONATE.md)
+## Donating
 
 If you cant take time to contribute maybe you would like to help another way.
 

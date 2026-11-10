@@ -12,7 +12,7 @@
     RootModule        = 'ConnectWiseControlAPI.psm1'
 
     # Version number of this module.
-    ModuleVersion = '0.3.5.0'
+    ModuleVersion = '0.5.0.0'
 
     # Supported PSEditions
     # CompatiblePSEditions = @()
@@ -69,7 +69,7 @@
     # NestedModules = @()
 
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-    FunctionsToExport = @('Get-CWCAuditInfo','Get-CWCAuditLog','Connect-CWC','Get-CWCLauncURL','Add-CWCRemoteWorkforceRequiredRole','New-CWCRemoteWorkforceAssignment','New-CWCMFA','Get-CWCLastContact','Get-CWCSession','Get-CWCSessionDetail','Invoke-CWCCommand','Invoke-CWCWake','New-CWCAccessToken','Remove-CWCSession','Remove-CWCHostFromSession','Update-CWCCustomProperty','Update-CWCSessionName','Get-CWCSecurityConfigurationInfo','New-CWCUser','Remove-CWCUser','Update-CWCUser','Get-CWCSessionGroup')
+    FunctionsToExport = @('Get-CWCAuditInfo','Get-CWCAuditLog','Connect-CWC','Get-CWCLauncURL','Add-CWCRemoteWorkforceRequiredRole','New-CWCRemoteWorkforceAssignment','Get-CWCRemoteWorkforceLaunchURL','Get-CWCRemoteWorkforceSession','Initialize-CWCRemoteWorkforceSessionGroup','Find-CWCSession','New-CWCSession','Add-CWCSessionNote','Send-CWCSessionMessage','Send-CWCToolboxItem','New-CWCMFA','Get-CWCLastContact','Get-CWCSession','Get-CWCSessionDetail','Invoke-CWCCommand','Invoke-CWCWake','New-CWCAccessToken','Remove-CWCSession','Remove-CWCHostFromSession','Update-CWCCustomProperty','Update-CWCSessionName','Get-CWCSecurityConfigurationInfo','New-CWCUser','Remove-CWCUser','Update-CWCUser','Get-CWCSessionGroup')
 
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
     CmdletsToExport   = @()
