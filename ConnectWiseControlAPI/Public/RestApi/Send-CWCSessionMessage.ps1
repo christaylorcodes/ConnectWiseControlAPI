@@ -20,7 +20,9 @@ function Send-CWCSessionMessage {
         Message text.
 
     .PARAMETER From
-        Sender name shown to the guest (API secret connections only).
+        Sender name shown to the guest (API secret connections only). Defaults to 'RESTful API', the
+        extension's default RESTfulUserName. The extension uses this value, not its RESTfulUserName
+        setting, so pass -From to match a renamed setting (or any name you want the guest to see).
 
     .PARAMETER Group
         Session group containing the session (credentials connections only). Defaults to 'All Machines'.
@@ -57,7 +59,7 @@ function Send-CWCSessionMessage {
         # Adding an event is not idempotent: never retried
         if (Test-CWCApiSecretConnection) {
             # SendMessageToSession(Guid sessionID, string byHost, string message)
-            Invoke-CWCServiceMethod -RestApi -Method SendMessageToSession -Arguments @($GUID.ToString(), $From, $Message)
+            $null = Invoke-CWCServiceMethod -RestApi -Method SendMessageToSession -Arguments @($GUID.ToString(), $From, $Message)
         }
         else {
             # The server sets the sender to the connected user's display name.

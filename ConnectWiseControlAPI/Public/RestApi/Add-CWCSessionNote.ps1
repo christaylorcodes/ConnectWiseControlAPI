@@ -50,7 +50,7 @@ function Add-CWCSessionNote {
         # Adding an event is not idempotent: never retried
         if (Test-CWCApiSecretConnection) {
             # AddNoteToSession(Guid sessionID, string noteBody)
-            Invoke-CWCServiceMethod -RestApi -Method AddNoteToSession -Arguments @($GUID.ToString(), $Note)
+            $null = Invoke-CWCServiceMethod -RestApi -Method AddNoteToSession -Arguments @($GUID.ToString(), $Note)
         }
         else {
             Add-CWCSessionEvent -Group $Group -Entry @{ SessionID = $GUID; EventType = $script:CWCSessionEventType.AddedNote; Data = $Note }

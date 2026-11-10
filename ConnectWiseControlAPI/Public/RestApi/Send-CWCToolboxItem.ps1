@@ -9,7 +9,9 @@ function Send-CWCToolboxItem {
         Credentials connections: PageService.AddSessionEvents; the user needs the RunSharedTool
         permission in -Group.
 
-        API secret connections: the RESTful API Manager extension's SendToolboxItemToSession; -Group is ignored.
+        API secret connections: the RESTful API Manager extension's SendToolboxItemToSession. The event
+        is attributed to the extension's RESTfulUserName setting ("RESTful API" unless renamed); -Group
+        is ignored.
 
     .PARAMETER GUID
         Session ID.
@@ -49,7 +51,7 @@ function Send-CWCToolboxItem {
         # Adding an event is not idempotent: never retried
         if (Test-CWCApiSecretConnection) {
             # SendToolboxItemToSession(Guid sessionID, string toolboxItemName)
-            Invoke-CWCServiceMethod -RestApi -Method SendToolboxItemToSession -Arguments @($GUID.ToString(), $Name)
+            $null = Invoke-CWCServiceMethod -RestApi -Method SendToolboxItemToSession -Arguments @($GUID.ToString(), $Name)
         }
         else {
             Add-CWCSessionEvent -Group $Group -Entry @{ SessionID = $GUID; EventType = $script:CWCSessionEventType.QueuedTool; Data = $Name }
