@@ -2,12 +2,6 @@ function Get-CWCSessionGroup {
   [CmdletBinding()]
   param ()
 
-  $Endpoint = 'Services/SessionGroupService.ashx/session-groups'
-
-  $WebRequestArguments = @{
-    Endpoint = $Endpoint
-    Method = 'Get'
-  }
-
-  Invoke-CWCWebRequest -Arguments $WebRequestArguments
+  # Requires the ManageSessionGroups permission on the server.
+  Invoke-CWCServiceMethod -Service SessionGroupService -Method GetSessionGroups -Idempotent
 }

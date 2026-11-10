@@ -5,19 +5,7 @@
         [string]$User
     )
 
-    $Endpoint = 'Services/SecurityService.ashx/DeleteUser'
-
-    $Body = ConvertTo-Json @(
-        $script:InternalUserSource,
-        $User
-    )
-
-    $WebRequestArguments = @{
-        Endpoint = $Endpoint
-        Body = $Body
-        Method = 'Post'
-    }
-    if ($PSCmdlet.ShouldProcess($WebRequestArguments.Body, "Remove-CWCUser")) {
-        Invoke-CWCWebRequest -Arguments $WebRequestArguments
+    if ($PSCmdlet.ShouldProcess($User, 'Delete user')) {
+        Invoke-CWCServiceMethod -Service SecurityService -Method DeleteUser -Arguments @($script:InternalUserSource, $User)
     }
 }

@@ -8,16 +8,14 @@ function Update-CWCSessionName {
         [string]$Group = 'All Machines'
     )
 
-    $Endpoint = 'Services/PageService.ashx/UpdateSessionName'
-
-    $Body = ConvertTo-Json @($Group,$GUID,$NewName)
-
-    $WebRequestArguments = @{
-        Endpoint = $Endpoint
-        Body = $Body
-        Method = 'Post'
-    }
-    if ($PSCmdlet.ShouldProcess($WebRequestArguments.Body, "Update-CWCSessionName")) {
-        Invoke-CWCWebRequest -Arguments $WebRequestArguments
+    if ($PSCmdlet.ShouldProcess("$GUID", "Rename to '$NewName'")) {
+        # Sets a value, so it is safe to retry
+        if (Test-CWCApiSecretConnection) {
+            # RESTful API Manager: UpdateSessionName(Guid sessionID, string newName). -Group is ignored.
+            Invoke-CWCServiceMethod -RestApi -Method UpdateSessionName -Arguments @($GUID.ToString(), $NewName) -Idempotent
+        }
+        else {
+            Invoke-CWCServiceMethod -Service PageService -Method UpdateSessionName -Arguments @($Group, $GUID, $NewName) -Idempotent
+        }
     }
 }

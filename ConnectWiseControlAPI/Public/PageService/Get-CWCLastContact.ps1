@@ -11,12 +11,16 @@
         [string]$Group = 'All Machines'
     )
 
-    # Time conversion
-    $origin = New-Object -Type DateTime -ArgumentList 1970, 1, 1, 0, 0, 0, 0
-    $epoch = $((New-TimeSpan -Start $(Get-Date -Date '01/01/1970') -End $(Get-Date)).TotalSeconds)
+    # Relies on PageService's elapsed-milliseconds event times; the RESTful API Manager returns raw DateTimes.
+    if (Test-CWCApiSecretConnection) {
+        return Write-Error "Get-CWCLastContact is not available when connected with -ApiSecret (RESTful API Manager). Connect with 'Connect-CWC -Credentials' to use it."
+    }
 
-    try { $SessionDetails = Get-CWCSessionDetail -Group $Group -GUID $GUID }
-    catch { return $_ }
+    try { $SessionDetails = Get-CWCSessionDetail -Group $Group -GUID $GUID -Include 'Events', 'Connections' -ErrorAction Stop }
+    catch {
+        Write-Error $_
+        return
+    }
 
     if ($SessionDetails -eq 'null' -or !$SessionDetails) {
         Write-Warning 'Machine not found.'
@@ -30,20 +34,20 @@
 
         # Get connection events
         $LatestEvent = $GuestSessionEvents | Where-Object {
-            $_.EventType -in (10, 11) -and
+            $_.EventType -in ($script:CWCSessionEventType.Connected, $script:CWCSessionEventType.Disconnected) -and
             $_.ConnectionID -NotIn $GuestSessionConnections.ConnectionID
-        } | Sort-Object time | Select-Object -First 1
-        if ($LatestEvent.EventType -eq 10) {
+        } | Sort-Object { [double]$_.Time } | Select-Object -First 1
+        if (-not $LatestEvent) { return Write-Error 'Unable to determine last contact.' }
+        if ($LatestEvent.EventType -eq $script:CWCSessionEventType.Connected) {
             # Currently connected
             if ($Quiet) { return $True }
             else { return Get-Date }
         }
         else {
-            # Time conversion hell :(
-            $TimeDiff = $epoch - ($LatestEvent.Time / 1000)
-            $OfflineTime = $origin.AddSeconds($TimeDiff)
-            $Difference = New-TimeSpan -Start $OfflineTime -End $(Get-Date)
-            if ($Quiet -and $Difference.TotalSeconds -lt $Seconds) { return $True }
+            $LastContactUtc = ConvertFrom-CWCEventTime -SessionEvent $LatestEvent
+            $SecondsSinceContact = ([DateTime]::UtcNow - $LastContactUtc).TotalSeconds
+            $OfflineTime = $LastContactUtc.ToLocalTime()
+            if ($Quiet -and $SecondsSinceContact -lt $Seconds) { return $True }
             elseif ($Quiet) { return $False }
             else { return $OfflineTime }
         }

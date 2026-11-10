@@ -11,74 +11,71 @@
         [switch]$NoWait
     )
 
-    $Endpoint = 'Services/PageService.ashx/AddSessionEvents'
+    $QueuedCommandEventType = $script:CWCSessionEventType.QueuedCommand
+    $RanCommandEventType = $script:CWCSessionEventType.RanCommand
 
-    $origin = New-Object -Type DateTime -ArgumentList 1970, 1, 1, 0, 0, 0, 0
-    $SessionEventType = 44
+    # Format command: directives, then the command; the server expects LF line endings
+    $CommandLines = @()
+    if ($PowerShell) { $CommandLines += '#!ps' }
+    $CommandLines += "#timeout=$TimeOut"
+    $CommandLines += "#maxlength=$MaxLength"
+    $CommandLines += $Command
+    $FormattedCommand = ($CommandLines | Out-String) -replace "`r`n", "`n"
 
-    # Format command
-    $FormattedCommand = @()
-    if ($Powershell) { $FormattedCommand += '#!ps' }
-    $FormattedCommand += "#timeout=$TimeOut"
-    $FormattedCommand += "#maxlength=$MaxLength"
-    $FormattedCommand += $Command
-    $FormattedCommand = $FormattedCommand | Out-String
-    $CommandObject = @{
-        SessionID = $GUID
-        EventType = $SessionEventType
-        Data      = $FormattedCommand
+    # Queueing a command is not idempotent, so it is never retried
+    if (Test-CWCApiSecretConnection) {
+        # RESTful API Manager: SendCommandToSession(Guid sessionID, string command) queues the same
+        # QueuedCommand event. Not scoped by group, so -Group is ignored.
+        $null = Invoke-CWCServiceMethod -RestApi -Method SendCommandToSession -Arguments @($GUID.ToString(), $FormattedCommand)
     }
-    $Body = (ConvertTo-Json @(@($Group), @($CommandObject))).Replace('\r\n', '\n')
-    Write-Verbose $Body
-
-    # Issue command
-    $WebRequestArguments = @{
-        Endpoint = $Endpoint
-        Body     = $Body
-        Method   = 'Post'
+    else {
+        $CommandEvent = @{
+            SessionID = $GUID
+            EventType = $QueuedCommandEventType
+            Data      = $FormattedCommand
+        }
+        $null = Invoke-CWCServiceMethod -Service PageService -Method AddSessionEvents -Arguments @(@($Group), @($CommandEvent))
     }
-    $null = Invoke-CWCWebRequest -Arguments $WebRequestArguments
     if ($NoWait) { return }
 
-    # Get Session
-    try { $SessionDetails = Get-CWCSessionDetail -Group $Group -GUID $GUID }
-    catch { return $_ }
+    # The extension's GetSessionDetailsBySessionID returns raw SessionDetails (event Time is a DateTime),
+    # not PageService's elapsed-milliseconds shape the output polling below depends on.
+    if (Test-CWCApiSecretConnection) {
+        Write-Warning 'Command queued. Output is not retrieved when connected with -ApiSecret; use -NoWait to suppress this warning.'
+        return
+    }
 
-    #Get time command was executed
-    $epoch = $((New-TimeSpan -Start $(Get-Date -Date '01/01/1970') -End $(Get-Date)).TotalSeconds)
-    $ExecuteTime = $epoch - ((($SessionDetails.events | Where-Object { $_.EventType -eq 44 })[-1]).Time / 1000)
-    $ExecuteDate = $origin.AddSeconds($ExecuteTime)
-
-    # Look for results of command
-    $Looking = $True
-    $TimeOutDateTime = (Get-Date).AddMilliseconds($TimeOut)
-    $Body = ConvertTo-Json @($Group, $GUID)
-    while ($Looking) {
-        try { $SessionDetails = Get-CWCSessionDetail -Group $Group -GUID $GUID }
-        catch { return $_ }
-
-        $ConnectionsWithData = @()
-        Foreach ($Connection in $SessionDetails.Events) {
-            $ConnectionsWithData += $Connection | Where-Object { $_.EventType -eq 70 }
+    # Poll for the command's output: the first RanCommand event newer than the queued command.
+    $TimeOutDateTime = (Get-Date).AddMilliseconds($TimeOut).AddSeconds(1)
+    $QueuedAtUtc = $null
+    do {
+        # Events only: this polls every second against a rate-limited endpoint.
+        try { $SessionDetails = Get-CWCSessionDetail -Group $Group -GUID $GUID -Include 'Events' -ErrorAction Stop }
+        catch {
+            Write-Error $_
+            return
         }
 
-        $Events = ($ConnectionsWithData | Where-Object { $_.EventType -eq 70 -and $_.Time })
-        foreach ($Event in $Events) {
-            $epoch = $((New-TimeSpan -Start $(Get-Date -Date '01/01/1970') -End $(Get-Date)).TotalSeconds)
-            $CheckTime = $epoch - ($Event.Time / 1000)
-            $CheckDate = $origin.AddSeconds($CheckTime)
-            if ($CheckDate -gt $ExecuteDate) {
-                $Looking = $False
-                $Output = $Event.Data -split '[\r\n]' | Where-Object { $_ -and $_ -ne "C:\WINDOWS\system32>$Command" }
-                Write-Verbose $Event.Data
-                return $Output
+        if (-not $QueuedAtUtc) {
+            # The most recent queued command (smallest elapsed time) is the one just sent
+            $QueuedEvent = $SessionDetails.Events | Where-Object { $_.EventType -eq $QueuedCommandEventType } |
+                Sort-Object { [double]$_.Time } | Select-Object -First 1
+            if ($QueuedEvent) { $QueuedAtUtc = ConvertFrom-CWCEventTime -SessionEvent $QueuedEvent }
+        }
+
+        if ($QueuedAtUtc) {
+            $OutputEvent = $SessionDetails.Events | Where-Object {
+                $_.EventType -eq $RanCommandEventType -and $_.Time -and
+                (ConvertFrom-CWCEventTime -SessionEvent $_) -gt $QueuedAtUtc
+            } | Select-Object -First 1
+            if ($OutputEvent) {
+                Write-Verbose $OutputEvent.Data
+                return $OutputEvent.Data -split '[\r\n]' | Where-Object { $_ -and $_ -ne "C:\WINDOWS\system32>$Command" }
             }
         }
 
         Start-Sleep -Seconds 1
-        if ($(Get-Date) -gt $TimeOutDateTime.AddSeconds(1)) {
-            $Looking = $False
-            Write-Warning 'Command timed out.'
-        }
-    }
+    } while ((Get-Date) -le $TimeOutDateTime)
+
+    Write-Warning 'Command timed out.'
 }

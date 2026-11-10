@@ -8,25 +8,20 @@ function Invoke-CWCWake {
         [string]$Type
     )
 
-    $Endpoint = 'Services/PageService.ashx/AddEventToSessions'
+    # PageService.AddEventToSessions no longer exists on the server; wake is queued as a session event.
+    $SessionEventType = $script:CWCSessionEventType.QueuedWake
 
-    $SessionEventType = 43
+    if ($Type -eq 'Support') { $Group = 'All Sessions' }
+    else { $Group = 'All Machines' }
 
-    switch($Type){
-        'Support' { $Group = 'All Sessions' }
-        'Access' { $Group = 'All Machines' }
-        default { return Write-Error "Unknown Type, $Type" }
-    }
+    $EventEntries = @(
+        foreach ($SessionID in $GUID) {
+            @{
+                SessionID = $SessionID
+                EventType = $SessionEventType
+            }
+        }
+    )
 
-    $Body = ConvertTo-Json @($Group,@($GUID),$SessionEventType,'')
-    Write-Verbose $Body
-
-    # Issue command
-    $WebRequestArguments = @{
-        Endpoint = $Endpoint
-        Body = $Body
-        Method = 'Post'
-    }
-
-    Invoke-CWCWebRequest -Arguments $WebRequestArguments
+    Invoke-CWCServiceMethod -Service PageService -Method AddSessionEvents -Arguments @(@($Group), $EventEntries)
 }

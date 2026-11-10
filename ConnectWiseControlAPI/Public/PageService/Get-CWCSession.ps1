@@ -10,36 +10,18 @@ function Get-CWCSession {
         [int]$Limit
     )
 
-    $Endpoint = 'Services/PageService.ashx/GetLiveData'
-
-    switch ($Type) {
-        'Support' { $Number = 0 }
-        'Meeting' { $Number = 1 }
-        'Access' { $Number = 2 }
-        default { return Write-Error "Unknown Type, $Type" }
-    }
-
-    $Body = ConvertTo-Json @(
-        @{
-            HostSessionInfo  = @{
-                'sessionType'           = $Number
-                'sessionGroupPathParts' = @($Group)
-                'filter'                = $Search
-                'findSessionID'         = $FindSessionID
-                'sessionLimit'          = $Limit
-            }            
-            ActionCenterInfo = @{}
+    # GetLiveData(requestInfoMap, version)
+    $RequestInfoMap = @{
+        HostSessionInfo  = @{
+            'sessionType'           = $script:CWCSessionType[$Type]
+            'sessionGroupPathParts' = @($Group)
+            'filter'                = $Search
+            'findSessionID'         = $FindSessionID
+            'sessionLimit'          = $Limit
         }
-        0
-    ) -Depth 5
-    Write-Verbose $Body
-
-    $WebRequestArguments = @{
-        Endpoint = $Endpoint
-        Body     = $Body
-        Method   = 'Post'
+        ActionCenterInfo = @{}
     }
 
-    $Data = Invoke-CWCWebRequest -Arguments $WebRequestArguments
+    $Data = Invoke-CWCServiceMethod -Service PageService -Method GetLiveData -Arguments @($RequestInfoMap, 0) -Idempotent
     $Data.ResponseInfoMap.HostSessionInfo.Sessions
 }

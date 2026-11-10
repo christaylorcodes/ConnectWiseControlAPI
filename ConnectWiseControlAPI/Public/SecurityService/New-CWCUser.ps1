@@ -11,9 +11,7 @@
         [boolean]$ForcePassChange = $true
     )
 
-    $Endpoint = 'Services/SecurityService.ashx/SaveUser'
-
-    $Body = ConvertTo-Json @(
+    $SaveUserArguments = @(
         $script:InternalUserSource,
         $null,
         $Credentials.UserName,
@@ -27,12 +25,7 @@
         $ForcePassChange
     )
 
-    $WebRequestArguments = @{
-        Endpoint = $Endpoint
-        Body = $Body
-        Method = 'Post'
-    }
-    if ($PSCmdlet.ShouldProcess($WebRequestArguments.Body, "New-CWCUser")) {
-        Invoke-CWCWebRequest -Arguments $WebRequestArguments
+    if ($PSCmdlet.ShouldProcess($Credentials.UserName, "New-CWCUser")) {
+        Invoke-CWCServiceMethod -Service SecurityService -Method SaveUser -Arguments $SaveUserArguments -Sensitive
     }
 }

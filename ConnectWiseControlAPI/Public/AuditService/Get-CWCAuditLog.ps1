@@ -1,31 +1,25 @@
 function Get-CWCAuditLog {
     [CmdletBinding()]
     param (
-        [datetime]$StartDate,
-        [datetime]$EndDate,
+        [datetime]$StartDate = (Get-Date).AddDays(-1),
+        [datetime]$EndDate = (Get-Date),
         [string]$SessionName,
+        # Deprecated: QueryAuditLog no longer accepts this argument. Kept so existing scripts don't break.
         [switch]$IncludeSessionCaptures,
         [int[]]$EventTypes,
         [int[]]$SecurityTypes
     )
 
-    $Endpoint = 'Services/AuditService.ashx/QueryAuditLog'
+    if ($IncludeSessionCaptures) {
+        Write-Warning '-IncludeSessionCaptures is no longer supported by the Control server and is ignored.'
+    }
 
-    $Body = ConvertTo-Json @(
-        $(Get-Date $StartDate -Format 'yyyy-MM-ddTHH:mm:ss.ffffZ'),
-        $(Get-Date $EndDate -Format 'yyyy-MM-ddTHH:mm:ss.ffffZ'),
+    # Server signature: QueryAuditLog(minTime, maxTime, sessionName, sessionEventTypes[], securityEventTypes[])
+    Invoke-CWCServiceMethod -Service AuditService -Method QueryAuditLog -Idempotent -Arguments @(
+        $StartDate.ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ss.fffZ'),
+        $EndDate.ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ss.fffZ'),
         $SessionName,
-        $IncludeSessionCaptures.IsPresent
         $EventTypes,
         $SecurityTypes
     )
-    Write-Verbose $Body
-
-    $WebRequestArguments = @{
-        Endpoint = $Endpoint
-        Body     = $Body
-        Method   = 'Post'
-    }
-
-    Invoke-CWCWebRequest -Arguments $WebRequestArguments
 }
