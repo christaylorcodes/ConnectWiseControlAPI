@@ -50,7 +50,9 @@ param(
 $ErrorActionPreference = 'Stop'
 # Module functions report failures with non-terminating Write-Error; make them fail the step.
 $PSDefaultParameterValues['*-CWC*:ErrorAction'] = 'Stop'
-Import-Module (Join-Path $PSScriptRoot '..\..\ConnectWiseControlAPI\ConnectWiseControlAPI.psd1') -Force
+# Unload every copy first (e.g. a Gallery install imported earlier), so the script tests this checkout only
+Get-Module ConnectWiseControlAPI | Remove-Module -Force
+$CWCModule = Import-Module (Join-Path $PSScriptRoot '..\..\ConnectWiseControlAPI\ConnectWiseControlAPI.psd1') -Force -PassThru
 
 $Results = [ordered]@{
     PSVersion   = $PSVersionTable.PSVersion.ToString()
@@ -73,7 +75,7 @@ function Invoke-Step {
     }
 }
 
-function Disconnect-Test { $Module = Get-Module ConnectWiseControlAPI; & $Module { $script:CWCServerConnection = $null } }
+function Disconnect-Test { & $CWCModule { $script:CWCServerConnection = $null } }
 
 # Events with only the fields we need; Data/Host trimmed so output stays small.
 function Select-Event {
@@ -142,7 +144,7 @@ Invoke-Step 'Creds.Connect' { Connect-CWC -Server $Server -Credentials $AdminCre
 
 Invoke-Step 'Creds.SessionEventTypeEnum' {
     # The enum only exists in the web client's scripts; grab the text around each mention.
-    $Connection = & (Get-Module ConnectWiseControlAPI) { $script:CWCServerConnection }
+    $Connection = & $CWCModule { $script:CWCServerConnection }
     $Front = Invoke-WebRequest -Uri "https://$Server" -WebSession $Connection.WebSession -UseBasicParsing
     $ScriptUrls = [regex]::Matches($Front.Content, '<script[^>]+src="([^"]+)"') | ForEach-Object { $_.Groups[1].Value } |
         Where-Object { $_ -notmatch '^https?://' -or $_ -match [regex]::Escape($Server) }
@@ -177,7 +179,7 @@ Invoke-Step 'Creds.WrongPasswordFailsFast' {
     try { Connect-CWC -Server $Server -Credentials $BadCredential -WarningAction SilentlyContinue }
     catch { $Message = "$_" }
     $Timer.Stop()
-    $Connected = [bool](& (Get-Module ConnectWiseControlAPI) { $script:CWCServerConnection })
+    $Connected = [bool](& $CWCModule { $script:CWCServerConnection })
     if ($Timer.Elapsed.TotalSeconds -gt 10) { throw "Took $([int]$Timer.Elapsed.TotalSeconds) s; retries are still happening" }
     if ($Connected) { throw 'Still connected after a failed login to a different identity' }
     [ordered]@{ Seconds = [math]::Round($Timer.Elapsed.TotalSeconds, 1); MentionsLogin = $Message -match 'username and password' }
