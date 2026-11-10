@@ -14,7 +14,8 @@ indent_size = 4
 
 # Markdown files
 [*.md]
-trim_trailing_whitespace = false  # Markdown uses trailing spaces for line breaks
+# Markdown uses trailing spaces for line breaks
+trim_trailing_whitespace = false
 max_line_length = off
 
 # YAML files (GitHub workflows, config files)
@@ -31,9 +32,12 @@ indent_size = 2
 
 # PowerShell files
 [*.{ps1,psm1,psd1}]
-charset = utf-8-bom  # PowerShell prefers BOM for UTF-8
+# EditorConfig does not allow inline comments after values.
+# PowerShell prefers UTF-8 with BOM (Windows PowerShell reads BOM-less files as ANSI)
+charset = utf-8-bom
 indent_size = 4
-end_of_line = crlf   # Windows line endings for PowerShell
+# Windows line endings for PowerShell
+end_of_line = crlf
 
 # Batch files (Windows)
 [*.{bat,cmd}]

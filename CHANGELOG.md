@@ -68,6 +68,11 @@ Planned as 0.5.0.0 (the module manifest already carries this version; 0.4.0.0 is
 
 ### Changed
 
+- CI moved from AppVeyor to GitHub Actions (`.github/workflows/ci.yml`): Pester on PowerShell 7 and Windows
+  PowerShell 5.1, PSScriptAnalyzer, `Test-ModuleManifest` and a docs-drift check. `Tests/test-local.ps1` runs the
+  same stages locally. `Tests/appveyor.pester.ps1` removed.
+- Repo files aligned with the GitHub-Template: `AGENTS.md` (agent guide; `CLAUDE.md` now points to it),
+  `pr-validation.yml`, `dependabot.yml`, `copilot-instructions.md`, `.vscode/` settings, `.github/PowerShell-StyleGuide.md`
 - Expanded `.gitignore` to cover OS files, IDEs, build artifacts, and secrets
 - Updated `README.md` links to use local community files instead of external GitHub-Template references
 - `Connect-CWC` validates credentials with `PageService/GetEligibleHosts` (any permission) instead of

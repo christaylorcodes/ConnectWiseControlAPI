@@ -27,12 +27,12 @@
 
 <!-- How did you verify? Paste Pester output or describe. -->
 
-- [ ] `Invoke-Pester` passes
+- [ ] `./Tests/test-local.ps1` passes (analyzer, manifest, Pester on PS 7 and 5.1, docs drift)
 - [ ] Tested against a live Control server (if applicable)
 
 ## Checklist
 
-- [ ] Code follows project conventions ([CLAUDE.md](../CLAUDE.md))
+- [ ] Code follows project conventions ([AGENTS.md](../AGENTS.md))
 - [ ] Tests cover new/changed behavior
 - [ ] PSScriptAnalyzer reports zero errors
 - [ ] CHANGELOG.md updated (if applicable)

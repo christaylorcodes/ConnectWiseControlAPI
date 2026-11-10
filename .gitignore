@@ -7,6 +7,7 @@ Scratch*.ps1
 output/
 coverage.xml
 testResults.xml
+testResults-*.xml
 nul
 
 # ---- Operating Systems ----

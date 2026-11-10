@@ -92,8 +92,10 @@
             CheckOperator                   = $true
             CheckPipe                       = $true
             CheckPipeForRedundantWhitespace = $false
-            CheckSeparator                  = $true
-            CheckParameter                  = $false
+            CheckSeparator                          = $true
+            CheckParameter                          = $false
+            # Let PSAlignAssignmentStatement own hashtable alignment (otherwise aligned '=' is flagged here)
+            IgnoreAssignmentOperatorInsideHashTable = $true
         }
 
         PSAlignAssignmentStatement = @{
@@ -110,14 +112,14 @@
             MaximumLineLength = 120
         }
 
-        # Module targets PS 5.1+ for MSP audience compatibility
-        # Dev environment runs PS 7+ but published module must work on 5.1
+        # The module manifest says PowerShell 3.0 and MSPs run it on Windows PowerShell 5.1 (RMM agents).
+        # Build and test tooling runs on PowerShell 7, but the module itself must stay 3.0/5.1-compatible.
         PSUseCompatibleSyntax = @{
             Enable         = $true
             TargetVersions = @(
+                '3.0',
                 '5.1',
-                '7.2',
-                '7.4'
+                '7.6'
             )
         }
 
