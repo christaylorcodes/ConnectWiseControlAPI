@@ -1,46 +1,31 @@
 function Add-CWCRemoteWorkforceRequiredRole {
-    [CmdletBinding()]
+    <#
+    .SYNOPSIS
+        Creates the security role required by the Remote Workforce extension.
+
+    .DESCRIPTION
+        Calls the Remote Workforce extension's EnsureRemoteWorkforceSecurityRoleExists endpoint.
+        The extension creates its role (name from the extension's RoleName setting, "Remote Workforce"
+        by default) with View Session Group, Join Session and Host Session Without Consent scoped to the
+        extension's session group, then marks the role as created in the extension settings.
+
+        Idempotent: if the role already exists nothing is changed. Requires the Administer permission.
+
+    .EXAMPLE
+        Add-CWCRemoteWorkforceRequiredRole
+
+    .NOTES
+        Requires the Remote Workforce extension (2c4f522f-b39a-413a-8807-dc52a2fce13e), Control 23.6+.
+        Pair with Initialize-CWCRemoteWorkforceSessionGroup.
+        Author: Chris Taylor
+
+    .LINK
+        https://github.com/christaylorcodes/ConnectWiseControlAPI
+    #>
+    [CmdletBinding(SupportsShouldProcess)]
     param()
 
-    $Endpoint = 'Services/SecurityService.ashx/SaveRole'
-
-    $SessionGroups = @('My Assigned Machines')
-    $RoleName = 'Remote Workforce'
-
-    $Body = ConvertTo-Json -Depth 10 @(
-        "",
-        $RoleName,
-        @(),
-        @(
-            @{
-                "AccessControlType" = 0
-                "Name" = "ViewSessionGroup"
-                "SessionGroupFilter" = 7
-                "SessionGroupPath" = $SessionGroups
-                "OwnershipFilter" = 0
-            },
-            @{
-                "AccessControlType" = 0
-                "Name" = "JoinSession"
-                "SessionGroupFilter" = 7
-                "SessionGroupPath" = $SessionGroups
-                "OwnershipFilter" = 0
-            },
-            @{
-                "AccessControlType" = 0
-                "Name" = "HostSessionWithoutConsent"
-                "SessionGroupFilter" = 7
-                "SessionGroupPath" = $SessionGroups
-                "OwnershipFilter" = 0
-            }
-        )
-    )
-    Write-Verbose $Body
-
-    $WebRequestArguments = @{
-        Endpoint = $Endpoint
-        Body = $Body
-        Method = 'Post'
+    if ($PSCmdlet.ShouldProcess('Remote Workforce security role', 'Add-CWCRemoteWorkforceRequiredRole')) {
+        Invoke-CWCServiceMethod -ExtensionID $script:CWCRemoteWorkforceExtensionID -Method EnsureRemoteWorkforceSecurityRoleExists -Arguments @() -Idempotent
     }
-    Invoke-CWCWebRequest -Arguments $WebRequestArguments
 }
