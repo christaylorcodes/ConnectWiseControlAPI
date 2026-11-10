@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Community Support
+    url: https://join.mspgeek.com/
+    about: Ask questions and discuss with the MSPGeek community on Slack
+  - name: Documentation
+    url: https://github.com/christaylorcodes/ConnectWiseControlAPI/blob/master/README.md
+    about: Check out our documentation
+  - name: Contributing Guide
+    url: https://github.com/christaylorcodes/ConnectWiseControlAPI/blob/master/.github/CONTRIBUTING.md
+    about: Learn how to contribute to this project

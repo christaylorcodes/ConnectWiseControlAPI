@@ -1,0 +1,48 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# Top-most EditorConfig file
+root = true
+
+# Default settings for all files
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+# Markdown files
+[*.md]
+trim_trailing_whitespace = false  # Markdown uses trailing spaces for line breaks
+max_line_length = off
+
+# YAML files (GitHub workflows, config files)
+[*.{yml,yaml}]
+indent_size = 2
+
+# JSON files
+[*.json]
+indent_size = 2
+
+# XML files (MAML help, config)
+[*.xml]
+indent_size = 2
+
+# PowerShell files
+[*.{ps1,psm1,psd1}]
+charset = utf-8-bom  # PowerShell prefers BOM for UTF-8
+indent_size = 4
+end_of_line = crlf   # Windows line endings for PowerShell
+
+# Batch files (Windows)
+[*.{bat,cmd}]
+end_of_line = crlf
+
+# Documentation files
+[*.{txt,rst}]
+max_line_length = off
+
+# License and changelog files
+[{LICENSE,CHANGELOG,CONTRIBUTING,CODE_OF_CONDUCT,SECURITY}]
+max_line_length = off
