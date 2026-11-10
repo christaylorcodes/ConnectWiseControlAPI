@@ -13,7 +13,7 @@ Will update a custom property for a session.
 ## SYNTAX
 
 ```
-Update-CWCCustomProperty -GUID <Guid> -Property <Int32> [-Value <String>] [-Group <String[]>] [-WhatIf] [-Confirm] [<CommonParameters>]
+Update-CWCCustomProperty [-GUID] <Guid> [-Property] <Int32> [[-Value] <String>] [[-Group] <String[]>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -45,7 +45,37 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: Named
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Property
+The property number of the property you want to change.
+
+```yaml
+Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Value
+The value you want to set the property to.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -60,23 +90,8 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: Named
+Position: 4
 Default value: All Machines
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Confirm
-Prompts you for confirmation before running the cmdlet.
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases: cf
-
-Required: False
-Position: Named
-Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -96,28 +111,13 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Property
-The property number of the property you want to change.
+### -Confirm
+Prompts you for confirmation before running the cmdlet.
 
 ```yaml
-Type: Int32
+Type: SwitchParameter
 Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Value
-The value you want to set the property to.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
+Aliases: cf
 
 Required: False
 Position: Named

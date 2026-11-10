@@ -126,7 +126,8 @@ function Enter-CWCSession {
                 ) -ErrorAction Stop
             }
             catch {
-                $DelegatedTokenUnavailable = $True
+                # Only a permission failure holds for the rest of the pipeline; anything else is retried per item.
+                if ("$($_.Exception.Message)" -match 'SecurityException|permission') { $DelegatedTokenUnavailable = $True }
                 Write-Verbose "Delegated access token not available: $($_.Exception.Message)"
                 Write-Warning ("Could not get a short-lived delegated token (needs CreateDelegatedAccessToken); the URL uses a regular " +
                     "Host token valid for the server's access token lifetime. Treat it like a password.")

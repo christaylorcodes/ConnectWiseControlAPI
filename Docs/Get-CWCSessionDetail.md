@@ -13,7 +13,7 @@ Will return information about a session.
 ## SYNTAX
 
 ```
-Get-CWCSessionDetail [-Group <String[]>] -GUID <Guid> [-Include <String[]>] [<CommonParameters>]
+Get-CWCSessionDetail [[-Group] <String[]>] [-GUID] <Guid> [[-Include] <String[]>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -39,7 +39,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: Named
+Position: 1
 Default value: All Machines
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -54,7 +54,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: Named
+Position: 2
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -69,7 +69,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: Named
+Position: 3
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

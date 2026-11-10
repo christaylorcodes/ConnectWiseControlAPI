@@ -31,8 +31,8 @@ Get the audit logs for Computer1 for the last day.
 
 ## PARAMETERS
 
-### -EndDate
-End of the time range. Defaults to now. Local times are converted to UTC.
+### -StartDate
+Start of the time range. Defaults to 24 hours ago. Local times are converted to UTC.
 
 ```yaml
 Type: DateTime
@@ -46,11 +46,26 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -EventTypes
-Session event type numbers to include (for example 44 for QueuedCommand, 70 for RanCommand).
+### -EndDate
+End of the time range. Defaults to now. Local times are converted to UTC.
 
 ```yaml
-Type: Int32[]
+Type: DateTime
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -SessionName
+Only return entries for sessions with this name.
+
+```yaml
+Type: String
 Parameter Sets: (All)
 Aliases:
 
@@ -76,8 +91,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -SecurityTypes
-Security event type numbers to include.
+### -EventTypes
+Session event type numbers to include (for example 44 for QueuedCommand, 70 for RanCommand).
 
 ```yaml
 Type: Int32[]
@@ -91,31 +106,16 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -SessionName
-Only return entries for sessions with this name.
+### -SecurityTypes
+Security event type numbers to include.
 
 ```yaml
-Type: String
+Type: Int32[]
 Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 2
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -StartDate
-Start of the time range. Defaults to 24 hours ago. Local times are converted to UTC.
-
-```yaml
-Type: DateTime
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 0
+Position: 5
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

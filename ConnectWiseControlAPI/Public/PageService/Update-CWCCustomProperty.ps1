@@ -1,4 +1,33 @@
 function Update-CWCCustomProperty {
+    <#
+    .SYNOPSIS
+        Sets one custom property of a session.
+
+    .DESCRIPTION
+        Calls PageService.UpdateSessionCustomPropertyValue.
+
+    .PARAMETER GUID
+        Session ID.
+
+    .PARAMETER Property
+        The property number of the property to change.
+
+    .PARAMETER Value
+        New value.
+
+    .PARAMETER Group
+        Session group containing the session: a name, or the path parts of a nested group. Defaults to
+        'All Machines'.
+
+    .EXAMPLE
+        Update-CWCCustomProperty -GUID $SessionID -Property 1 -Value 'Acme'
+
+    .NOTES
+        Author: Chris Taylor
+
+    .LINK
+        https://github.com/christaylorcodes/ConnectWiseControlAPI
+    #>
     [CmdletBinding(SupportsShouldProcess)]
     param(
         [Parameter(Mandatory=$True)]

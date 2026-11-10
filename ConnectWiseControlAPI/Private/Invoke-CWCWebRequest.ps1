@@ -78,9 +78,20 @@
                 }
             }
 
-            # Retry on HTTP 500 when the caller allows it (no response yields 0)
+            # The server's error body, e.g. {"errorType":"SecurityException","message":"Needs permission"}
             $StatusCode = [int]$_.Exception.Response.StatusCode
-            if ($StatusCode -eq 500 -and $Retry -lt $MaxRetry) {
+            $ServerMessage = $_.ErrorDetails.Message
+            if (-not $ServerMessage -and $_.Exception.Response -and $PSVersionTable.PSVersion.Major -lt 6) {
+                # Fallback for Windows PowerShell when ErrorDetails is empty; the stream may be unreadable.
+                try { $ServerMessage = (New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())).ReadToEnd() }
+                catch { $ServerMessage = $null }
+            }
+
+            # Retry on HTTP 500 when the caller allows it (no response yields 0). Control also answers
+            # permission failures (including a wrong password) with 500 + SecurityException: retrying
+            # those only delays the error.
+            $IsPermissionFailure = "$ServerMessage" -match 'SecurityException'
+            if ($StatusCode -eq 500 -and -not $IsPermissionFailure -and $Retry -lt $MaxRetry) {
                 $Retry++
                 # Exponential backoff: 2, 4, 8 ... seconds
                 $Wait = [math]::Pow(2, $Retry)
@@ -89,17 +100,10 @@
                 continue
             }
 
-            # Build the error message, keeping the server's error body (e.g. {"errorType":"SecurityException","message":"Needs permission"})
+            # Build the error message, keeping the server's error body
             $ErrorMessage = @()
-            if ($StatusCode -eq 500 -and $MaxRetry -gt 0) { $ErrorMessage += "Max retries hit ($MaxRetry). Status: 500" }
+            if ($StatusCode -eq 500 -and $Retry -gt 0) { $ErrorMessage += "Max retries hit ($MaxRetry). Status: 500" }
             elseif ($StatusCode -gt 0) { $ErrorMessage += "HTTP $StatusCode" }
-
-            $ServerMessage = $_.ErrorDetails.Message
-            if (-not $ServerMessage -and $_.Exception.Response -and $PSVersionTable.PSVersion.Major -lt 6) {
-                # Fallback for Windows PowerShell when ErrorDetails is empty; the stream may be unreadable.
-                try { $ServerMessage = (New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())).ReadToEnd() }
-                catch { $ServerMessage = $null }
-            }
             if ($ServerMessage) { $ErrorMessage += $ServerMessage }
             else { $ErrorMessage += "$_" }
 

@@ -812,7 +812,7 @@ open $Url   # macOS</dev:code>
     <command:syntax>
       <command:syntaxItem>
         <maml:name>Get-CWCAuditLog</maml:name>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
           <maml:name>StartDate</maml:name>
           <maml:description>
             <maml:para>Start of the time range. Defaults to 24 hours ago. Local times are converted to UTC.</maml:para>
@@ -824,7 +824,7 @@ open $Url   # macOS</dev:code>
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
           <maml:name>EndDate</maml:name>
           <maml:description>
             <maml:para>End of the time range. Defaults to now. Local times are converted to UTC.</maml:para>
@@ -836,7 +836,7 @@ open $Url   # macOS</dev:code>
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none">
           <maml:name>SessionName</maml:name>
           <maml:description>
             <maml:para>Only return entries for sessions with this name.</maml:para>
@@ -848,7 +848,7 @@ open $Url   # macOS</dev:code>
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none">
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="4" aliases="none">
           <maml:name>EventTypes</maml:name>
           <maml:description>
             <maml:para>Session event type numbers to include (for example 44 for QueuedCommand, 70 for RanCommand).</maml:para>
@@ -860,7 +860,7 @@ open $Url   # macOS</dev:code>
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="4" aliases="none">
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="5" aliases="none">
           <maml:name>SecurityTypes</maml:name>
           <maml:description>
             <maml:para>Security event type numbers to include.</maml:para>
@@ -887,6 +887,18 @@ open $Url   # macOS</dev:code>
     </command:syntax>
     <command:parameters>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
+        <maml:name>StartDate</maml:name>
+        <maml:description>
+          <maml:para>Start of the time range. Defaults to 24 hours ago. Local times are converted to UTC.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">DateTime</command:parameterValue>
+        <dev:type>
+          <maml:name>DateTime</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
         <maml:name>EndDate</maml:name>
         <maml:description>
           <maml:para>End of the time range. Defaults to now. Local times are converted to UTC.</maml:para>
@@ -899,13 +911,13 @@ open $Url   # macOS</dev:code>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none">
-        <maml:name>EventTypes</maml:name>
+        <maml:name>SessionName</maml:name>
         <maml:description>
-          <maml:para>Session event type numbers to include (for example 44 for QueuedCommand, 70 for RanCommand).</maml:para>
+          <maml:para>Only return entries for sessions with this name.</maml:para>
         </maml:description>
-        <command:parameterValue required="true" variableLength="false">Int32[]</command:parameterValue>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
-          <maml:name>Int32[]</maml:name>
+          <maml:name>String</maml:name>
           <maml:uri />
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
@@ -923,9 +935,9 @@ open $Url   # macOS</dev:code>
         <dev:defaultValue>False</dev:defaultValue>
       </command:parameter>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="4" aliases="none">
-        <maml:name>SecurityTypes</maml:name>
+        <maml:name>EventTypes</maml:name>
         <maml:description>
-          <maml:para>Security event type numbers to include.</maml:para>
+          <maml:para>Session event type numbers to include (for example 44 for QueuedCommand, 70 for RanCommand).</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">Int32[]</command:parameterValue>
         <dev:type>
@@ -934,26 +946,14 @@ open $Url   # macOS</dev:code>
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
-        <maml:name>SessionName</maml:name>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="5" aliases="none">
+        <maml:name>SecurityTypes</maml:name>
         <maml:description>
-          <maml:para>Only return entries for sessions with this name.</maml:para>
+          <maml:para>Security event type numbers to include.</maml:para>
         </maml:description>
-        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <command:parameterValue required="true" variableLength="false">Int32[]</command:parameterValue>
         <dev:type>
-          <maml:name>String</maml:name>
-          <maml:uri />
-        </dev:type>
-        <dev:defaultValue>None</dev:defaultValue>
-      </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
-        <maml:name>StartDate</maml:name>
-        <maml:description>
-          <maml:para>Start of the time range. Defaults to 24 hours ago. Local times are converted to UTC.</maml:para>
-        </maml:description>
-        <command:parameterValue required="true" variableLength="false">DateTime</command:parameterValue>
-        <dev:type>
-          <maml:name>DateTime</maml:name>
+          <maml:name>Int32[]</maml:name>
           <maml:uri />
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
@@ -1010,7 +1010,7 @@ open $Url   # macOS</dev:code>
     <command:syntax>
       <command:syntaxItem>
         <maml:name>Get-CWCLastContact</maml:name>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none">
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>GUID</maml:name>
           <maml:description>
             <maml:para>The GUID/SessionID for the machine you wish to connect to. You can retrieve session info with the 'Get-CWCSessions' cmdlets</maml:para>
@@ -1023,30 +1023,6 @@ open $Url   # macOS</dev:code>
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="4" aliases="none">
-          <maml:name>Seconds</maml:name>
-          <maml:description>
-            <maml:para>Used with the Quiet switch. The number of seconds a machine needs to be offline before returning $False.</maml:para>
-          </maml:description>
-          <command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
-          <dev:type>
-            <maml:name>Int32</maml:name>
-            <maml:uri />
-          </dev:type>
-          <dev:defaultValue>0</dev:defaultValue>
-        </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="5" aliases="none">
-          <maml:name>Group</maml:name>
-          <maml:description>
-            <maml:para>Name of session group to use.</maml:para>
-          </maml:description>
-          <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
-          <dev:type>
-            <maml:name>String[]</maml:name>
-            <maml:uri />
-          </dev:type>
-          <dev:defaultValue>All Machines</dev:defaultValue>
-        </command:parameter>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>Quiet</maml:name>
           <maml:description>
@@ -1058,10 +1034,34 @@ open $Url   # macOS</dev:code>
           </dev:type>
           <dev:defaultValue>False</dev:defaultValue>
         </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Seconds</maml:name>
+          <maml:description>
+            <maml:para>Used with the Quiet switch. The number of seconds a machine needs to be offline before returning $False.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
+          <dev:type>
+            <maml:name>Int32</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>0</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Group</maml:name>
+          <maml:description>
+            <maml:para>Name of session group to use.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+          <dev:type>
+            <maml:name>String[]</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>All Machines</dev:defaultValue>
+        </command:parameter>
       </command:syntaxItem>
     </command:syntax>
     <command:parameters>
-      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none">
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>GUID</maml:name>
         <maml:description>
           <maml:para>The GUID/SessionID for the machine you wish to connect to. You can retrieve session info with the 'Get-CWCSessions' cmdlets</maml:para>
@@ -1086,7 +1086,7 @@ open $Url   # macOS</dev:code>
         </dev:type>
         <dev:defaultValue>False</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="4" aliases="none">
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>Seconds</maml:name>
         <maml:description>
           <maml:para>Used with the Quiet switch. The number of seconds a machine needs to be offline before returning $False.</maml:para>
@@ -1098,7 +1098,7 @@ open $Url   # macOS</dev:code>
         </dev:type>
         <dev:defaultValue>0</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="5" aliases="none">
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>Group</maml:name>
         <maml:description>
           <maml:para>Name of session group to use.</maml:para>
@@ -1578,7 +1578,7 @@ open $Url   # macOS</dev:code>
     <command:syntax>
       <command:syntaxItem>
         <maml:name>Get-CWCSession</maml:name>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
           <maml:name>Type</maml:name>
           <maml:description>
             <maml:para>The type of session Support/Access/Meeting</maml:para>
@@ -1590,7 +1590,7 @@ open $Url   # macOS</dev:code>
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
           <maml:name>Group</maml:name>
           <maml:description>
             <maml:para>Name of session group to use.</maml:para>
@@ -1602,7 +1602,7 @@ open $Url   # macOS</dev:code>
           </dev:type>
           <dev:defaultValue>All Machines</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none">
           <maml:name>Search</maml:name>
           <maml:description>
             <maml:para>Limit results with search pattern.</maml:para>
@@ -1614,19 +1614,7 @@ open $Url   # macOS</dev:code>
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-          <maml:name>Limit</maml:name>
-          <maml:description>
-            <maml:para>Limit the number of results returned.</maml:para>
-          </maml:description>
-          <command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
-          <dev:type>
-            <maml:name>Int32</maml:name>
-            <maml:uri />
-          </dev:type>
-          <dev:defaultValue>0</dev:defaultValue>
-        </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="4" aliases="none">
           <maml:name>FindSessionID</maml:name>
           <maml:description>
             <maml:para>Session ID to locate in the results, so the session is included even when -Limit would cut it off.</maml:para>
@@ -1638,10 +1626,22 @@ open $Url   # macOS</dev:code>
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="5" aliases="none">
+          <maml:name>Limit</maml:name>
+          <maml:description>
+            <maml:para>Limit the number of results returned.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
+          <dev:type>
+            <maml:name>Int32</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>0</dev:defaultValue>
+        </command:parameter>
       </command:syntaxItem>
     </command:syntax>
     <command:parameters>
-      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
         <maml:name>Type</maml:name>
         <maml:description>
           <maml:para>The type of session Support/Access/Meeting</maml:para>
@@ -1653,7 +1653,7 @@ open $Url   # macOS</dev:code>
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
         <maml:name>Group</maml:name>
         <maml:description>
           <maml:para>Name of session group to use.</maml:para>
@@ -1665,7 +1665,7 @@ open $Url   # macOS</dev:code>
         </dev:type>
         <dev:defaultValue>All Machines</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none">
         <maml:name>Search</maml:name>
         <maml:description>
           <maml:para>Limit results with search pattern.</maml:para>
@@ -1677,19 +1677,7 @@ open $Url   # macOS</dev:code>
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-        <maml:name>Limit</maml:name>
-        <maml:description>
-          <maml:para>Limit the number of results returned.</maml:para>
-        </maml:description>
-        <command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
-        <dev:type>
-          <maml:name>Int32</maml:name>
-          <maml:uri />
-        </dev:type>
-        <dev:defaultValue>0</dev:defaultValue>
-      </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="4" aliases="none">
         <maml:name>FindSessionID</maml:name>
         <maml:description>
           <maml:para>Session ID to locate in the results, so the session is included even when -Limit would cut it off.</maml:para>
@@ -1700,6 +1688,18 @@ open $Url   # macOS</dev:code>
           <maml:uri />
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="5" aliases="none">
+        <maml:name>Limit</maml:name>
+        <maml:description>
+          <maml:para>Limit the number of results returned.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
+        <dev:type>
+          <maml:name>Int32</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>0</dev:defaultValue>
       </command:parameter>
     </command:parameters>
     <command:inputTypes />
@@ -1744,7 +1744,7 @@ open $Url   # macOS</dev:code>
     <command:syntax>
       <command:syntaxItem>
         <maml:name>Get-CWCSessionDetail</maml:name>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
           <maml:name>Group</maml:name>
           <maml:description>
             <maml:para>Name of session group to use.</maml:para>
@@ -1756,7 +1756,7 @@ open $Url   # macOS</dev:code>
           </dev:type>
           <dev:defaultValue>All Machines</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
           <maml:name>GUID</maml:name>
           <maml:description>
             <maml:para>GUID of the machine to retrieve session details.</maml:para>
@@ -1768,7 +1768,7 @@ open $Url   # macOS</dev:code>
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none">
           <maml:name>Include</maml:name>
           <maml:description>
             <maml:para>Parts of the session details to return: SessionInfo, GuestScreenshotContent, Events, Connections. Omit to return everything, including the guest screenshot. Ignored on -ApiSecret connections.</maml:para>
@@ -1783,7 +1783,7 @@ open $Url   # macOS</dev:code>
       </command:syntaxItem>
     </command:syntax>
     <command:parameters>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
         <maml:name>Group</maml:name>
         <maml:description>
           <maml:para>Name of session group to use.</maml:para>
@@ -1795,7 +1795,7 @@ open $Url   # macOS</dev:code>
         </dev:type>
         <dev:defaultValue>All Machines</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
         <maml:name>GUID</maml:name>
         <maml:description>
           <maml:para>GUID of the machine to retrieve session details.</maml:para>
@@ -1807,7 +1807,7 @@ open $Url   # macOS</dev:code>
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none">
         <maml:name>Include</maml:name>
         <maml:description>
           <maml:para>Parts of the session details to return: SessionInfo, GuestScreenshotContent, Events, Connections. Omit to return everything, including the guest screenshot. Ignored on -ApiSecret connections.</maml:para>
@@ -2005,7 +2005,7 @@ open $Url   # macOS</dev:code>
     <command:syntax>
       <command:syntaxItem>
         <maml:name>Invoke-CWCCommand</maml:name>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none">
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
           <maml:name>GUID</maml:name>
           <maml:description>
             <maml:para>The GUID identifier for the machine you wish to connect to. You can retrieve session info with the 'Get-CWCSessions' cmdlets</maml:para>
@@ -2017,7 +2017,7 @@ open $Url   # macOS</dev:code>
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="4" aliases="none">
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
           <maml:name>Command</maml:name>
           <maml:description>
             <maml:para>The command you wish to issue to the machine.</maml:para>
@@ -2029,7 +2029,7 @@ open $Url   # macOS</dev:code>
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="5" aliases="none">
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none">
           <maml:name>TimeOut</maml:name>
           <maml:description>
             <maml:para>The amount of time in milliseconds that a command can execute. The default is 10000 milliseconds.</maml:para>
@@ -2041,7 +2041,19 @@ open $Url   # macOS</dev:code>
           </dev:type>
           <dev:defaultValue>10000</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="6" aliases="none">
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="4" aliases="none">
+          <maml:name>MaxLength</maml:name>
+          <maml:description>
+            <maml:para>Maximum number of characters of command output to return. Defaults to 10000.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
+          <dev:type>
+            <maml:name>Int32</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="5" aliases="none">
           <maml:name>Group</maml:name>
           <maml:description>
             <maml:para>Name of session group to use.</maml:para>
@@ -2075,22 +2087,10 @@ open $Url   # macOS</dev:code>
           </dev:type>
           <dev:defaultValue>False</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-          <maml:name>MaxLength</maml:name>
-          <maml:description>
-            <maml:para>Maximum number of characters of command output to return. Defaults to 10000.</maml:para>
-          </maml:description>
-          <command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
-          <dev:type>
-            <maml:name>Int32</maml:name>
-            <maml:uri />
-          </dev:type>
-          <dev:defaultValue>None</dev:defaultValue>
-        </command:parameter>
       </command:syntaxItem>
     </command:syntax>
     <command:parameters>
-      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none">
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
         <maml:name>GUID</maml:name>
         <maml:description>
           <maml:para>The GUID identifier for the machine you wish to connect to. You can retrieve session info with the 'Get-CWCSessions' cmdlets</maml:para>
@@ -2102,7 +2102,7 @@ open $Url   # macOS</dev:code>
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="4" aliases="none">
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
         <maml:name>Command</maml:name>
         <maml:description>
           <maml:para>The command you wish to issue to the machine.</maml:para>
@@ -2114,7 +2114,7 @@ open $Url   # macOS</dev:code>
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="5" aliases="none">
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none">
         <maml:name>TimeOut</maml:name>
         <maml:description>
           <maml:para>The amount of time in milliseconds that a command can execute. The default is 10000 milliseconds.</maml:para>
@@ -2125,6 +2125,18 @@ open $Url   # macOS</dev:code>
           <maml:uri />
         </dev:type>
         <dev:defaultValue>10000</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="4" aliases="none">
+        <maml:name>MaxLength</maml:name>
+        <maml:description>
+          <maml:para>Maximum number of characters of command output to return. Defaults to 10000.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
+        <dev:type>
+          <maml:name>Int32</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>PowerShell</maml:name>
@@ -2138,7 +2150,7 @@ open $Url   # macOS</dev:code>
         </dev:type>
         <dev:defaultValue>False</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="6" aliases="none">
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="5" aliases="none">
         <maml:name>Group</maml:name>
         <maml:description>
           <maml:para>Name of session group to use.</maml:para>
@@ -2161,18 +2173,6 @@ open $Url   # macOS</dev:code>
           <maml:uri />
         </dev:type>
         <dev:defaultValue>False</dev:defaultValue>
-      </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-        <maml:name>MaxLength</maml:name>
-        <maml:description>
-          <maml:para>Maximum number of characters of command output to return. Defaults to 10000.</maml:para>
-        </maml:description>
-        <command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
-        <dev:type>
-          <maml:name>Int32</maml:name>
-          <maml:uri />
-        </dev:type>
-        <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
     </command:parameters>
     <command:inputTypes />
@@ -2227,7 +2227,7 @@ open $Url   # macOS</dev:code>
     <command:syntax>
       <command:syntaxItem>
         <maml:name>Invoke-CWCWake</maml:name>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
           <maml:name>GUID</maml:name>
           <maml:description>
             <maml:para>The GUID identifier for the session you wish to end. Accepts an array of GUIDs</maml:para>
@@ -2239,7 +2239,7 @@ open $Url   # macOS</dev:code>
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
           <maml:name>Type</maml:name>
           <maml:description>
             <maml:para>The type of session Support/Access</maml:para>
@@ -2254,7 +2254,7 @@ open $Url   # macOS</dev:code>
       </command:syntaxItem>
     </command:syntax>
     <command:parameters>
-      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
         <maml:name>GUID</maml:name>
         <maml:description>
           <maml:para>The GUID identifier for the session you wish to end. Accepts an array of GUIDs</maml:para>
@@ -2266,7 +2266,7 @@ open $Url   # macOS</dev:code>
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
         <maml:name>Type</maml:name>
         <maml:description>
           <maml:para>The type of session Support/Access</maml:para>
@@ -2951,7 +2951,19 @@ open $Url   # macOS</dev:code>
     <command:syntax>
       <command:syntaxItem>
         <maml:name>New-CWCUser</maml:name>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
+          <maml:name>Credentials</maml:name>
+          <maml:description>
+            <maml:para>PSCredential object for the new user you want to create.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">PSCredential</command:parameterValue>
+          <dev:type>
+            <maml:name>PSCredential</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
           <maml:name>OTP</maml:name>
           <maml:description>
             <maml:para>The OTP key used for MFA. Can be generated with `New-CWCMFA`</maml:para>
@@ -2963,7 +2975,7 @@ open $Url   # macOS</dev:code>
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none">
           <maml:name>DisplayName</maml:name>
           <maml:description>
             <maml:para>The display name of the new user</maml:para>
@@ -2975,7 +2987,7 @@ open $Url   # macOS</dev:code>
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="4" aliases="none">
           <maml:name>Email</maml:name>
           <maml:description>
             <maml:para>Email address of the user</maml:para>
@@ -2987,7 +2999,7 @@ open $Url   # macOS</dev:code>
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="5" aliases="none">
           <maml:name>SecurityGroups</maml:name>
           <maml:description>
             <maml:para>An array of security groups the user is a part of</maml:para>
@@ -2999,7 +3011,7 @@ open $Url   # macOS</dev:code>
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="6" aliases="none">
           <maml:name>ForcePassChange</maml:name>
           <maml:description>
             <maml:para>Force the user to change their password at next login</maml:para>
@@ -3010,17 +3022,6 @@ open $Url   # macOS</dev:code>
             <maml:uri />
           </dev:type>
           <dev:defaultValue>True</dev:defaultValue>
-        </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="cf">
-          <maml:name>Confirm</maml:name>
-          <maml:description>
-            <maml:para>Prompts you for confirmation before running the cmdlet.</maml:para>
-          </maml:description>
-          <dev:type>
-            <maml:name>SwitchParameter</maml:name>
-            <maml:uri />
-          </dev:type>
-          <dev:defaultValue>False</dev:defaultValue>
         </command:parameter>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="wi">
           <maml:name>WhatIf</maml:name>
@@ -3033,22 +3034,33 @@ open $Url   # macOS</dev:code>
           </dev:type>
           <dev:defaultValue>False</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-          <maml:name>Credentials</maml:name>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="cf">
+          <maml:name>Confirm</maml:name>
           <maml:description>
-            <maml:para>PSCredential object for the new user you want to create.</maml:para>
+            <maml:para>Prompts you for confirmation before running the cmdlet.</maml:para>
           </maml:description>
-          <command:parameterValue required="true" variableLength="false">PSCredential</command:parameterValue>
           <dev:type>
-            <maml:name>PSCredential</maml:name>
+            <maml:name>SwitchParameter</maml:name>
             <maml:uri />
           </dev:type>
-          <dev:defaultValue>None</dev:defaultValue>
+          <dev:defaultValue>False</dev:defaultValue>
         </command:parameter>
       </command:syntaxItem>
     </command:syntax>
     <command:parameters>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
+        <maml:name>Credentials</maml:name>
+        <maml:description>
+          <maml:para>PSCredential object for the new user you want to create.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">PSCredential</command:parameterValue>
+        <dev:type>
+          <maml:name>PSCredential</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
         <maml:name>OTP</maml:name>
         <maml:description>
           <maml:para>The OTP key used for MFA. Can be generated with `New-CWCMFA`</maml:para>
@@ -3060,7 +3072,7 @@ open $Url   # macOS</dev:code>
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none">
         <maml:name>DisplayName</maml:name>
         <maml:description>
           <maml:para>The display name of the new user</maml:para>
@@ -3072,7 +3084,7 @@ open $Url   # macOS</dev:code>
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="4" aliases="none">
         <maml:name>Email</maml:name>
         <maml:description>
           <maml:para>Email address of the user</maml:para>
@@ -3084,7 +3096,7 @@ open $Url   # macOS</dev:code>
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="5" aliases="none">
         <maml:name>SecurityGroups</maml:name>
         <maml:description>
           <maml:para>An array of security groups the user is a part of</maml:para>
@@ -3096,7 +3108,7 @@ open $Url   # macOS</dev:code>
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="6" aliases="none">
         <maml:name>ForcePassChange</maml:name>
         <maml:description>
           <maml:para>Force the user to change their password at next login</maml:para>
@@ -3107,18 +3119,6 @@ open $Url   # macOS</dev:code>
           <maml:uri />
         </dev:type>
         <dev:defaultValue>True</dev:defaultValue>
-      </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="cf">
-        <maml:name>Confirm</maml:name>
-        <maml:description>
-          <maml:para>Prompts you for confirmation before running the cmdlet.</maml:para>
-        </maml:description>
-        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
-        <dev:type>
-          <maml:name>SwitchParameter</maml:name>
-          <maml:uri />
-        </dev:type>
-        <dev:defaultValue>False</dev:defaultValue>
       </command:parameter>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="wi">
         <maml:name>WhatIf</maml:name>
@@ -3132,17 +3132,17 @@ open $Url   # macOS</dev:code>
         </dev:type>
         <dev:defaultValue>False</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-        <maml:name>Credentials</maml:name>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="cf">
+        <maml:name>Confirm</maml:name>
         <maml:description>
-          <maml:para>PSCredential object for the new user you want to create.</maml:para>
+          <maml:para>Prompts you for confirmation before running the cmdlet.</maml:para>
         </maml:description>
-        <command:parameterValue required="true" variableLength="false">PSCredential</command:parameterValue>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
         <dev:type>
-          <maml:name>PSCredential</maml:name>
+          <maml:name>SwitchParameter</maml:name>
           <maml:uri />
         </dev:type>
-        <dev:defaultValue>None</dev:defaultValue>
+        <dev:defaultValue>False</dev:defaultValue>
       </command:parameter>
     </command:parameters>
     <command:inputTypes />
@@ -3348,7 +3348,7 @@ Remove-CWCHostFromSession -SessionID $SessionID -ConnectionID $HostConnection.Co
     <command:syntax>
       <command:syntaxItem>
         <maml:name>Remove-CWCSession</maml:name>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
           <maml:name>GUID</maml:name>
           <maml:description>
             <maml:para>The GUID identifier for the session you wish to end. Accepts an array of GUIDs.</maml:para>
@@ -3360,29 +3360,7 @@ Remove-CWCHostFromSession -SessionID $SessionID -ConnectionID $HostConnection.Co
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="cf">
-          <maml:name>Confirm</maml:name>
-          <maml:description>
-            <maml:para>Prompts you for confirmation before running the cmdlet.</maml:para>
-          </maml:description>
-          <dev:type>
-            <maml:name>SwitchParameter</maml:name>
-            <maml:uri />
-          </dev:type>
-          <dev:defaultValue>False</dev:defaultValue>
-        </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="wi">
-          <maml:name>WhatIf</maml:name>
-          <maml:description>
-            <maml:para>Shows what would happen if the cmdlet runs. The cmdlet is not run.</maml:para>
-          </maml:description>
-          <dev:type>
-            <maml:name>SwitchParameter</maml:name>
-            <maml:uri />
-          </dev:type>
-          <dev:defaultValue>False</dev:defaultValue>
-        </command:parameter>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
           <maml:name>Group</maml:name>
           <maml:description>
             <maml:para>Session group containing the session(s). Defaults to 'All Machines' where a default exists.</maml:para>
@@ -3405,10 +3383,32 @@ Remove-CWCHostFromSession -SessionID $SessionID -ConnectionID $HostConnection.Co
           </dev:type>
           <dev:defaultValue>False</dev:defaultValue>
         </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="wi">
+          <maml:name>WhatIf</maml:name>
+          <maml:description>
+            <maml:para>Shows what would happen if the cmdlet runs. The cmdlet is not run.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="cf">
+          <maml:name>Confirm</maml:name>
+          <maml:description>
+            <maml:para>Prompts you for confirmation before running the cmdlet.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
       </command:syntaxItem>
     </command:syntax>
     <command:parameters>
-      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
         <maml:name>GUID</maml:name>
         <maml:description>
           <maml:para>The GUID identifier for the session you wish to end. Accepts an array of GUIDs.</maml:para>
@@ -3420,10 +3420,22 @@ Remove-CWCHostFromSession -SessionID $SessionID -ConnectionID $HostConnection.Co
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="cf">
-        <maml:name>Confirm</maml:name>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
+        <maml:name>Group</maml:name>
         <maml:description>
-          <maml:para>Prompts you for confirmation before running the cmdlet.</maml:para>
+          <maml:para>Session group containing the session(s). Defaults to 'All Machines' where a default exists.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+        <dev:type>
+          <maml:name>String[]</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>Uninstall</maml:name>
+        <maml:description>
+          <maml:para>Queue an uninstall of the Access client and delete the session (QueuedUninstallAndDelete) instead of only deleting the session record.</maml:para>
         </maml:description>
         <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
         <dev:type>
@@ -3444,22 +3456,10 @@ Remove-CWCHostFromSession -SessionID $SessionID -ConnectionID $HostConnection.Co
         </dev:type>
         <dev:defaultValue>False</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-        <maml:name>Group</maml:name>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="cf">
+        <maml:name>Confirm</maml:name>
         <maml:description>
-          <maml:para>Session group containing the session(s). Defaults to 'All Machines' where a default exists.</maml:para>
-        </maml:description>
-        <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
-        <dev:type>
-          <maml:name>String[]</maml:name>
-          <maml:uri />
-        </dev:type>
-        <dev:defaultValue>None</dev:defaultValue>
-      </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-        <maml:name>Uninstall</maml:name>
-        <maml:description>
-          <maml:para>Queue an uninstall of the Access client and delete the session (QueuedUninstallAndDelete) instead of only deleting the session record.</maml:para>
+          <maml:para>Prompts you for confirmation before running the cmdlet.</maml:para>
         </maml:description>
         <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
         <dev:type>
@@ -3745,7 +3745,7 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
     <command:syntax>
       <command:syntaxItem>
         <maml:name>Remove-CWCUser</maml:name>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
           <maml:name>User</maml:name>
           <maml:description>
             <maml:para>The user to remove.</maml:para>
@@ -3756,17 +3756,6 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
             <maml:uri />
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
-        </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="cf">
-          <maml:name>Confirm</maml:name>
-          <maml:description>
-            <maml:para>Prompts you for confirmation before running the cmdlet.</maml:para>
-          </maml:description>
-          <dev:type>
-            <maml:name>SwitchParameter</maml:name>
-            <maml:uri />
-          </dev:type>
-          <dev:defaultValue>False</dev:defaultValue>
         </command:parameter>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="wi">
           <maml:name>WhatIf</maml:name>
@@ -3779,22 +3768,21 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
           </dev:type>
           <dev:defaultValue>False</dev:defaultValue>
         </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="cf">
+          <maml:name>Confirm</maml:name>
+          <maml:description>
+            <maml:para>Prompts you for confirmation before running the cmdlet.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
       </command:syntaxItem>
     </command:syntax>
     <command:parameters>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="cf">
-        <maml:name>Confirm</maml:name>
-        <maml:description>
-          <maml:para>Prompts you for confirmation before running the cmdlet.</maml:para>
-        </maml:description>
-        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
-        <dev:type>
-          <maml:name>SwitchParameter</maml:name>
-          <maml:uri />
-        </dev:type>
-        <dev:defaultValue>False</dev:defaultValue>
-      </command:parameter>
-      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
         <maml:name>User</maml:name>
         <maml:description>
           <maml:para>The user to remove.</maml:para>
@@ -3810,6 +3798,18 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
         <maml:name>WhatIf</maml:name>
         <maml:description>
           <maml:para>Shows what would happen if the cmdlet runs. The cmdlet is not run.</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="cf">
+        <maml:name>Confirm</maml:name>
+        <maml:description>
+          <maml:para>Prompts you for confirmation before running the cmdlet.</maml:para>
         </maml:description>
         <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
         <dev:type>
@@ -4218,7 +4218,7 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
     <command:syntax>
       <command:syntaxItem>
         <maml:name>Update-CWCCustomProperty</maml:name>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
           <maml:name>GUID</maml:name>
           <maml:description>
             <maml:para>The GUID/SessionID for the machine you wish to connect to. You can retrieve session info with the 'Get-CWCSessions' cmdlets</maml:para>
@@ -4231,7 +4231,31 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
+          <maml:name>Property</maml:name>
+          <maml:description>
+            <maml:para>The property number of the property you want to change.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
+          <dev:type>
+            <maml:name>Int32</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none">
+          <maml:name>Value</maml:name>
+          <maml:description>
+            <maml:para>The value you want to set the property to.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="4" aliases="none">
           <maml:name>Group</maml:name>
           <maml:description>
             <maml:para>Look for the session in these groups.</maml:para>
@@ -4242,17 +4266,6 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
             <maml:uri />
           </dev:type>
           <dev:defaultValue>All Machines</dev:defaultValue>
-        </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="cf">
-          <maml:name>Confirm</maml:name>
-          <maml:description>
-            <maml:para>Prompts you for confirmation before running the cmdlet.</maml:para>
-          </maml:description>
-          <dev:type>
-            <maml:name>SwitchParameter</maml:name>
-            <maml:uri />
-          </dev:type>
-          <dev:defaultValue>False</dev:defaultValue>
         </command:parameter>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="wi">
           <maml:name>WhatIf</maml:name>
@@ -4265,34 +4278,21 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
           </dev:type>
           <dev:defaultValue>False</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-          <maml:name>Property</maml:name>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="cf">
+          <maml:name>Confirm</maml:name>
           <maml:description>
-            <maml:para>The property number of the property you want to change.</maml:para>
+            <maml:para>Prompts you for confirmation before running the cmdlet.</maml:para>
           </maml:description>
-          <command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
           <dev:type>
-            <maml:name>Int32</maml:name>
+            <maml:name>SwitchParameter</maml:name>
             <maml:uri />
           </dev:type>
-          <dev:defaultValue>None</dev:defaultValue>
-        </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-          <maml:name>Value</maml:name>
-          <maml:description>
-            <maml:para>The value you want to set the property to.</maml:para>
-          </maml:description>
-          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
-          <dev:type>
-            <maml:name>String</maml:name>
-            <maml:uri />
-          </dev:type>
-          <dev:defaultValue>None</dev:defaultValue>
+          <dev:defaultValue>False</dev:defaultValue>
         </command:parameter>
       </command:syntaxItem>
     </command:syntax>
     <command:parameters>
-      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
         <maml:name>GUID</maml:name>
         <maml:description>
           <maml:para>The GUID/SessionID for the machine you wish to connect to. You can retrieve session info with the 'Get-CWCSessions' cmdlets</maml:para>
@@ -4305,7 +4305,31 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
+        <maml:name>Property</maml:name>
+        <maml:description>
+          <maml:para>The property number of the property you want to change.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
+        <dev:type>
+          <maml:name>Int32</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none">
+        <maml:name>Value</maml:name>
+        <maml:description>
+          <maml:para>The value you want to set the property to.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="4" aliases="none">
         <maml:name>Group</maml:name>
         <maml:description>
           <maml:para>Look for the session in these groups.</maml:para>
@@ -4316,18 +4340,6 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
           <maml:uri />
         </dev:type>
         <dev:defaultValue>All Machines</dev:defaultValue>
-      </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="cf">
-        <maml:name>Confirm</maml:name>
-        <maml:description>
-          <maml:para>Prompts you for confirmation before running the cmdlet.</maml:para>
-        </maml:description>
-        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
-        <dev:type>
-          <maml:name>SwitchParameter</maml:name>
-          <maml:uri />
-        </dev:type>
-        <dev:defaultValue>False</dev:defaultValue>
       </command:parameter>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="wi">
         <maml:name>WhatIf</maml:name>
@@ -4341,29 +4353,17 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
         </dev:type>
         <dev:defaultValue>False</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-        <maml:name>Property</maml:name>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="cf">
+        <maml:name>Confirm</maml:name>
         <maml:description>
-          <maml:para>The property number of the property you want to change.</maml:para>
+          <maml:para>Prompts you for confirmation before running the cmdlet.</maml:para>
         </maml:description>
-        <command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
         <dev:type>
-          <maml:name>Int32</maml:name>
+          <maml:name>SwitchParameter</maml:name>
           <maml:uri />
         </dev:type>
-        <dev:defaultValue>None</dev:defaultValue>
-      </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-        <maml:name>Value</maml:name>
-        <maml:description>
-          <maml:para>The value you want to set the property to.</maml:para>
-        </maml:description>
-        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
-        <dev:type>
-          <maml:name>String</maml:name>
-          <maml:uri />
-        </dev:type>
-        <dev:defaultValue>None</dev:defaultValue>
+        <dev:defaultValue>False</dev:defaultValue>
       </command:parameter>
     </command:parameters>
     <command:inputTypes />
@@ -4402,7 +4402,7 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
     <command:syntax>
       <command:syntaxItem>
         <maml:name>Update-CWCSessionName</maml:name>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
           <maml:name>GUID</maml:name>
           <maml:description>
             <maml:para>The GUID/SessionID for the machine you wish to connect to. You can retrieve session info with the 'Get-CWCSessions' cmdlets</maml:para>
@@ -4415,7 +4415,7 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
           <maml:name>NewName</maml:name>
           <maml:description>
             <maml:para>The new name for the session.</maml:para>
@@ -4427,7 +4427,7 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none">
           <maml:name>Group</maml:name>
           <maml:description>
             <maml:para>Group to look for the session in.</maml:para>
@@ -4438,17 +4438,6 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
             <maml:uri />
           </dev:type>
           <dev:defaultValue>All Machines</dev:defaultValue>
-        </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="cf">
-          <maml:name>Confirm</maml:name>
-          <maml:description>
-            <maml:para>Prompts you for confirmation before running the cmdlet.</maml:para>
-          </maml:description>
-          <dev:type>
-            <maml:name>SwitchParameter</maml:name>
-            <maml:uri />
-          </dev:type>
-          <dev:defaultValue>False</dev:defaultValue>
         </command:parameter>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="wi">
           <maml:name>WhatIf</maml:name>
@@ -4461,10 +4450,21 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
           </dev:type>
           <dev:defaultValue>False</dev:defaultValue>
         </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="cf">
+          <maml:name>Confirm</maml:name>
+          <maml:description>
+            <maml:para>Prompts you for confirmation before running the cmdlet.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
       </command:syntaxItem>
     </command:syntax>
     <command:parameters>
-      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
         <maml:name>GUID</maml:name>
         <maml:description>
           <maml:para>The GUID/SessionID for the machine you wish to connect to. You can retrieve session info with the 'Get-CWCSessions' cmdlets</maml:para>
@@ -4477,7 +4477,7 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
         <maml:name>NewName</maml:name>
         <maml:description>
           <maml:para>The new name for the session.</maml:para>
@@ -4489,7 +4489,7 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none">
         <maml:name>Group</maml:name>
         <maml:description>
           <maml:para>Group to look for the session in.</maml:para>
@@ -4501,10 +4501,10 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
         </dev:type>
         <dev:defaultValue>All Machines</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="cf">
-        <maml:name>Confirm</maml:name>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="wi">
+        <maml:name>WhatIf</maml:name>
         <maml:description>
-          <maml:para>Prompts you for confirmation before running the cmdlet.</maml:para>
+          <maml:para>Shows what would happen if the cmdlet runs. The cmdlet is not run.</maml:para>
         </maml:description>
         <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
         <dev:type>
@@ -4513,10 +4513,10 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
         </dev:type>
         <dev:defaultValue>False</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="wi">
-        <maml:name>WhatIf</maml:name>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="cf">
+        <maml:name>Confirm</maml:name>
         <maml:description>
-          <maml:para>Shows what would happen if the cmdlet runs. The cmdlet is not run.</maml:para>
+          <maml:para>Prompts you for confirmation before running the cmdlet.</maml:para>
         </maml:description>
         <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
         <dev:type>
@@ -4559,7 +4559,7 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
     <command:syntax>
       <command:syntaxItem>
         <maml:name>Update-CWCUser</maml:name>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
           <maml:name>UserToUpdate</maml:name>
           <maml:description>
             <maml:para>The user account you want to update.</maml:para>
@@ -4572,6 +4572,30 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
+          <maml:name>NewUserName</maml:name>
+          <maml:description>
+            <maml:para>The new username of the user you are updating.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none">
+          <maml:name>Password</maml:name>
+          <maml:description>
+            <maml:para>The wanted password of the user.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">SecureString</command:parameterValue>
+          <dev:type>
+            <maml:name>SecureString</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="4" aliases="none">
           <maml:name>OTP</maml:name>
           <maml:description>
             <maml:para>The wanted MFA option for the user.</maml:para>
@@ -4583,7 +4607,7 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none">
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="5" aliases="none">
           <maml:name>DisplayName</maml:name>
           <maml:description>
             <maml:para>The wanted display name for the user.</maml:para>
@@ -4595,7 +4619,7 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="4" aliases="none">
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="6" aliases="none">
           <maml:name>Email</maml:name>
           <maml:description>
             <maml:para>The wanted email address for the user.</maml:para>
@@ -4607,7 +4631,7 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="5" aliases="none">
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="7" aliases="none">
           <maml:name>SecurityGroups</maml:name>
           <maml:description>
             <maml:para>The wanted security groups the user should be a member of.</maml:para>
@@ -4619,7 +4643,7 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="6" aliases="none">
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="8" aliases="none">
           <maml:name>ForcePassChange</maml:name>
           <maml:description>
             <maml:para>Force the user to change their password at next logon.</maml:para>
@@ -4630,17 +4654,6 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
             <maml:uri />
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
-        </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="cf">
-          <maml:name>Confirm</maml:name>
-          <maml:description>
-            <maml:para>Prompts you for confirmation before running the cmdlet.</maml:para>
-          </maml:description>
-          <dev:type>
-            <maml:name>SwitchParameter</maml:name>
-            <maml:uri />
-          </dev:type>
-          <dev:defaultValue>False</dev:defaultValue>
         </command:parameter>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="wi">
           <maml:name>WhatIf</maml:name>
@@ -4653,82 +4666,57 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
           </dev:type>
           <dev:defaultValue>False</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-          <maml:name>NewUserName</maml:name>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="cf">
+          <maml:name>Confirm</maml:name>
           <maml:description>
-            <maml:para>The new username of the user you are updating.</maml:para>
+            <maml:para>Prompts you for confirmation before running the cmdlet.</maml:para>
           </maml:description>
-          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
-            <maml:name>String</maml:name>
+            <maml:name>SwitchParameter</maml:name>
             <maml:uri />
           </dev:type>
-          <dev:defaultValue>None</dev:defaultValue>
-        </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-          <maml:name>Password</maml:name>
-          <maml:description>
-            <maml:para>The wanted password of the user.</maml:para>
-          </maml:description>
-          <command:parameterValue required="true" variableLength="false">SecureString</command:parameterValue>
-          <dev:type>
-            <maml:name>SecureString</maml:name>
-            <maml:uri />
-          </dev:type>
-          <dev:defaultValue>None</dev:defaultValue>
+          <dev:defaultValue>False</dev:defaultValue>
         </command:parameter>
       </command:syntaxItem>
     </command:syntax>
     <command:parameters>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="cf">
-        <maml:name>Confirm</maml:name>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
+        <maml:name>UserToUpdate</maml:name>
         <maml:description>
-          <maml:para>Prompts you for confirmation before running the cmdlet.</maml:para>
-        </maml:description>
-        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
-        <dev:type>
-          <maml:name>SwitchParameter</maml:name>
-          <maml:uri />
-        </dev:type>
-        <dev:defaultValue>False</dev:defaultValue>
-      </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none">
-        <maml:name>DisplayName</maml:name>
-        <maml:description>
-          <maml:para>The wanted display name for the user.</maml:para>
+          <maml:para>The user account you want to update.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
           <maml:name>String</maml:name>
-          <maml:uri />
-        </dev:type>
-        <dev:defaultValue>None</dev:defaultValue>
-      </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="4" aliases="none">
-        <maml:name>Email</maml:name>
-        <maml:description>
-          <maml:para>The wanted email address for the user.</maml:para>
-        </maml:description>
-        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
-        <dev:type>
-          <maml:name>String</maml:name>
-          <maml:uri />
-        </dev:type>
-        <dev:defaultValue>None</dev:defaultValue>
-      </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="6" aliases="none">
-        <maml:name>ForcePassChange</maml:name>
-        <maml:description>
-          <maml:para>Force the user to change their password at next logon.</maml:para>
-        </maml:description>
-        <command:parameterValue required="true" variableLength="false">Boolean</command:parameterValue>
-        <dev:type>
-          <maml:name>Boolean</maml:name>
           <maml:uri />
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
+        <maml:name>NewUserName</maml:name>
+        <maml:description>
+          <maml:para>The new username of the user you are updating.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none">
+        <maml:name>Password</maml:name>
+        <maml:description>
+          <maml:para>The wanted password of the user.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">SecureString</command:parameterValue>
+        <dev:type>
+          <maml:name>SecureString</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="4" aliases="none">
         <maml:name>OTP</maml:name>
         <maml:description>
           <maml:para>The wanted MFA option for the user.</maml:para>
@@ -4741,6 +4729,30 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="5" aliases="none">
+        <maml:name>DisplayName</maml:name>
+        <maml:description>
+          <maml:para>The wanted display name for the user.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="6" aliases="none">
+        <maml:name>Email</maml:name>
+        <maml:description>
+          <maml:para>The wanted email address for the user.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="7" aliases="none">
         <maml:name>SecurityGroups</maml:name>
         <maml:description>
           <maml:para>The wanted security groups the user should be a member of.</maml:para>
@@ -4752,14 +4764,14 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
-        <maml:name>UserToUpdate</maml:name>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="8" aliases="none">
+        <maml:name>ForcePassChange</maml:name>
         <maml:description>
-          <maml:para>The user account you want to update.</maml:para>
+          <maml:para>Force the user to change their password at next logon.</maml:para>
         </maml:description>
-        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <command:parameterValue required="true" variableLength="false">Boolean</command:parameterValue>
         <dev:type>
-          <maml:name>String</maml:name>
+          <maml:name>Boolean</maml:name>
           <maml:uri />
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
@@ -4776,29 +4788,17 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
         </dev:type>
         <dev:defaultValue>False</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-        <maml:name>NewUserName</maml:name>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="cf">
+        <maml:name>Confirm</maml:name>
         <maml:description>
-          <maml:para>The new username of the user you are updating.</maml:para>
+          <maml:para>Prompts you for confirmation before running the cmdlet.</maml:para>
         </maml:description>
-        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
         <dev:type>
-          <maml:name>String</maml:name>
+          <maml:name>SwitchParameter</maml:name>
           <maml:uri />
         </dev:type>
-        <dev:defaultValue>None</dev:defaultValue>
-      </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-        <maml:name>Password</maml:name>
-        <maml:description>
-          <maml:para>The wanted password of the user.</maml:para>
-        </maml:description>
-        <command:parameterValue required="true" variableLength="false">SecureString</command:parameterValue>
-        <dev:type>
-          <maml:name>SecureString</maml:name>
-          <maml:uri />
-        </dev:type>
-        <dev:defaultValue>None</dev:defaultValue>
+        <dev:defaultValue>False</dev:defaultValue>
       </command:parameter>
     </command:parameters>
     <command:inputTypes>

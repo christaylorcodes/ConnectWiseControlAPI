@@ -13,8 +13,8 @@ Will issue a command against a given machine and return the results.
 ## SYNTAX
 
 ```
-Invoke-CWCCommand [-GUID] <Guid> [[-Command] <String>] [[-TimeOut] <Int32>] [-MaxLength <Int32>] [-PowerShell]
- [[-Group] <String[]>] [-NoWait] [<CommonParameters>]
+Invoke-CWCCommand [-GUID] <Guid> [[-Command] <String>] [[-TimeOut] <Int32>] [[-MaxLength] <Int32>]
+ [-PowerShell] [[-Group] <String[]>] [-NoWait] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -48,7 +48,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: 3
+Position: 1
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -63,7 +63,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 4
+Position: 2
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -79,8 +79,23 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 5
+Position: 3
 Default value: 10000
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -MaxLength
+Maximum number of characters of command output to return. Defaults to 10000.
+
+```yaml
+Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 4
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -109,7 +124,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 6
+Position: 5
 Default value: All Machines
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -120,21 +135,6 @@ Will not wait for the output of the command.
 
 ```yaml
 Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -MaxLength
-Maximum number of characters of command output to return. Defaults to 10000.
-
-```yaml
-Type: Int32
 Parameter Sets: (All)
 Aliases:
 

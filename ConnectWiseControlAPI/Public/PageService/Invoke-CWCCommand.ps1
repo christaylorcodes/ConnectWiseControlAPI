@@ -1,4 +1,46 @@
-﻿function Invoke-CWCCommand {
+function Invoke-CWCCommand {
+    <#
+    .SYNOPSIS
+        Runs a command on a session's machine and returns its output.
+
+    .DESCRIPTION
+        Queues a QueuedCommand event (44) and polls the session's events until the matching RanCommand
+        output (70) arrives or -TimeOut passes.
+
+        API secret connections queue the command through the RESTful API Manager extension; the output is
+        not retrieved (a warning says so unless -NoWait is used).
+
+    .PARAMETER GUID
+        Session ID.
+
+    .PARAMETER Command
+        Command line to run (cmd.exe unless -PowerShell is used).
+
+    .PARAMETER TimeOut
+        Milliseconds the command may run, and how long to wait for its output. Defaults to 10000.
+
+    .PARAMETER MaxLength
+        Maximum number of characters of output to return. Defaults to 10000.
+
+    .PARAMETER PowerShell
+        Run the command in PowerShell.
+
+    .PARAMETER Group
+        Session group containing the session: a name, or the path parts of a nested group. Defaults to
+        'All Machines'.
+
+    .PARAMETER NoWait
+        Queue the command and return without waiting for output.
+
+    .EXAMPLE
+        Invoke-CWCCommand -GUID $SessionID -Command 'Get-Service Spooler' -PowerShell -TimeOut 30000
+
+    .NOTES
+        Author: Chris Taylor
+
+    .LINK
+        https://github.com/christaylorcodes/ConnectWiseControlAPI
+    #>
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $True)]
@@ -46,6 +88,7 @@
     # round-trip time of each poll doesn't shift them.
     $TimeOutDateTime = (Get-Date).AddMilliseconds($TimeOut).AddSeconds(1)
     $QueuedAtServerMs = $null
+    $QueuedEventID = $null
     $PollDelaySeconds = 1
     do {
         # Events only, with a growing delay (1, 2, 3 ... 5 s): GetSessionDetails is rate limited.
@@ -58,17 +101,26 @@
         $BaseTime = [double]$SessionDetails.BaseTime
 
         if ($null -eq $QueuedAtServerMs) {
-            # The most recent queued command (smallest elapsed time) is the one just sent
-            $QueuedEvent = $SessionDetails.Events | Where-Object { $_.EventType -eq $QueuedCommandEventType } |
-                Sort-Object { [double]$_.Time } | Select-Object -First 1
-            if ($QueuedEvent) { $QueuedAtServerMs = $BaseTime - [double]$QueuedEvent.Time }
+            # Our queued command: the most recent (smallest elapsed time) whose text is exactly what we
+            # sent, so a command queued by someone else at the same time isn't taken for ours.
+            $QueuedEvent = $SessionDetails.Events | Where-Object {
+                $_.EventType -eq $QueuedCommandEventType -and "$($_.Data)" -eq $FormattedCommand
+            } | Sort-Object { [double]$_.Time } | Select-Object -First 1
+            if ($QueuedEvent) {
+                $QueuedAtServerMs = $BaseTime - [double]$QueuedEvent.Time
+                $QueuedEventID = "$($QueuedEvent.EventID)"
+            }
         }
 
         if ($null -ne $QueuedAtServerMs) {
-            $OutputEvent = $SessionDetails.Events | Where-Object {
-                $_.EventType -eq $RanCommandEventType -and $null -ne $_.Time -and
-                ($BaseTime - [double]$_.Time) -gt $QueuedAtServerMs
-            } | Sort-Object { [double]$_.Time } -Descending | Select-Object -First 1
+            $RanEvents = @($SessionDetails.Events | Where-Object { $_.EventType -eq $RanCommandEventType -and $null -ne $_.Time })
+            # Output that names our command (CorrelationEventID) wins; otherwise the first output after it.
+            $OutputEvent = $RanEvents | Where-Object { $QueuedEventID -and "$($_.CorrelationEventID)" -eq $QueuedEventID } |
+                Select-Object -First 1
+            if (-not $OutputEvent) {
+                $OutputEvent = $RanEvents | Where-Object { ($BaseTime - [double]$_.Time) -gt $QueuedAtServerMs } |
+                    Sort-Object { [double]$_.Time } -Descending | Select-Object -First 1
+            }
             if ($OutputEvent) {
                 Write-Verbose $OutputEvent.Data
                 return $OutputEvent.Data -split '[\r\n]' | Where-Object { $_ -and $_ -ne "C:\WINDOWS\system32>$Command" }

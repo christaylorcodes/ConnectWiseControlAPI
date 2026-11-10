@@ -13,7 +13,8 @@ Will return a list of sessions.
 ## SYNTAX
 
 ```
-Get-CWCSession -Type <Object> [-Group <String[]>] [-Search <String>] [-FindSessionID <String>] [-Limit <Int32>] [<CommonParameters>]
+Get-CWCSession [-Type] <Object> [[-Group] <String[]>] [[-Search] <String>] [[-FindSessionID] <String>]
+ [[-Limit] <Int32>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -39,7 +40,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: Named
+Position: 1
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -54,7 +55,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: Named
+Position: 2
 Default value: All Machines
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -69,7 +70,22 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: Named
+Position: 3
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -FindSessionID
+Session ID to locate in the results, so the session is included even when -Limit would cut it off.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 4
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -84,23 +100,8 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: Named
+Position: 5
 Default value: 0
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -FindSessionID
-Session ID to locate in the results, so the session is included even when -Limit would cut it off.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

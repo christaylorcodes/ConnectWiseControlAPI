@@ -1,4 +1,31 @@
 function Update-CWCSessionName {
+    <#
+    .SYNOPSIS
+        Renames a session.
+
+    .DESCRIPTION
+        Credentials connections: PageService.UpdateSessionName. API secret connections: the RESTful API
+        Manager extension's UpdateSessionName (-Group is ignored).
+
+    .PARAMETER GUID
+        Session ID.
+
+    .PARAMETER NewName
+        New session name.
+
+    .PARAMETER Group
+        Session group containing the session: a name, or the path parts of a nested group. Defaults to
+        'All Machines'.
+
+    .EXAMPLE
+        Update-CWCSessionName -GUID $SessionID -NewName 'ACME-FrontDesk'
+
+    .NOTES
+        Author: Chris Taylor
+
+    .LINK
+        https://github.com/christaylorcodes/ConnectWiseControlAPI
+    #>
     [CmdletBinding(SupportsShouldProcess)]
     param(
         [Parameter(Mandatory=$True)]

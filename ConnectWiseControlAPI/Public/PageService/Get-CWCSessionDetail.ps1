@@ -1,4 +1,35 @@
 function Get-CWCSessionDetail {
+    <#
+    .SYNOPSIS
+        Returns the details of a session: session info, events, connections and guest screenshot.
+
+    .DESCRIPTION
+        Credentials connections: PageService.GetSessionDetails. Event Time values are milliseconds elapsed
+        since the event, relative to the response's BaseTime. The call is rate limited by the server.
+
+        API secret connections: the RESTful API Manager extension's GetSessionDetailsBySessionID, which
+        returns the server's raw session details; -Group and -Include are ignored.
+
+    .PARAMETER Group
+        Session group containing the session: a name, or the path parts of a nested group. Defaults to
+        'All Machines'.
+
+    .PARAMETER GUID
+        Session ID.
+
+    .PARAMETER Include
+        Parts to return: SessionInfo, GuestScreenshotContent, Events, Connections. Omit for everything,
+        including the guest screenshot. Request only what you need when polling.
+
+    .EXAMPLE
+        (Get-CWCSessionDetail -GUID $SessionID -Include Events).Events | Where-Object EventType -eq 32
+
+    .NOTES
+        Author: Chris Taylor
+
+    .LINK
+        https://github.com/christaylorcodes/ConnectWiseControlAPI
+    #>
     [CmdletBinding()]
     param (
         # Session group name, or the path parts of a nested group (e.g. 'Clients','Acme')

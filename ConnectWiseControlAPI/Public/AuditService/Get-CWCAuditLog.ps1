@@ -1,4 +1,38 @@
 function Get-CWCAuditLog {
+    <#
+    .SYNOPSIS
+        Returns audit log entries for a time range.
+
+    .DESCRIPTION
+        Calls AuditService.QueryAuditLog. Times are converted to UTC.
+
+    .PARAMETER StartDate
+        Start of the time range. Defaults to 24 hours ago.
+
+    .PARAMETER EndDate
+        End of the time range. Defaults to now.
+
+    .PARAMETER SessionName
+        Only return entries for sessions with this name.
+
+    .PARAMETER IncludeSessionCaptures
+        Deprecated. The server no longer accepts this option; it is ignored with a warning.
+
+    .PARAMETER EventTypes
+        Session event type numbers to include.
+
+    .PARAMETER SecurityTypes
+        Security event type numbers to include.
+
+    .EXAMPLE
+        Get-CWCAuditLog -StartDate (Get-Date).AddDays(-7) -SessionName 'DESKTOP-01'
+
+    .NOTES
+        Author: Chris Taylor
+
+    .LINK
+        https://github.com/christaylorcodes/ConnectWiseControlAPI
+    #>
     [CmdletBinding()]
     param (
         [datetime]$StartDate = (Get-Date).AddDays(-1),

@@ -1,4 +1,35 @@
-﻿function Get-CWCLastContact {
+function Get-CWCLastContact {
+    <#
+    .SYNOPSIS
+        Returns when a machine was last connected, or whether it connected recently.
+
+    .DESCRIPTION
+        Reads the session's connect/disconnect events. Returns the current time if the guest is connected
+        now, otherwise the time of its last disconnect. With -Quiet, returns $True when the guest is
+        connected or was connected within -Seconds, else $False.
+
+    .PARAMETER GUID
+        Session ID.
+
+    .PARAMETER Quiet
+        Return $True or $False instead of a date.
+
+    .PARAMETER Seconds
+        Used with -Quiet: how recent the last contact must be to count.
+
+    .PARAMETER Group
+        Session group containing the session: a name, or the path parts of a nested group. Defaults to
+        'All Machines'.
+
+    .EXAMPLE
+        Get-CWCLastContact -GUID $SessionID -Quiet -Seconds 300
+
+    .NOTES
+        Author: Chris Taylor
+
+    .LINK
+        https://github.com/christaylorcodes/ConnectWiseControlAPI
+    #>
     [CmdletBinding()]
     [OutputType([boolean], ParameterSetName = ('Quiet'))]
     [OutputType([datetime])]

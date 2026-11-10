@@ -7,8 +7,8 @@ function Remove-CWCSessionNote {
         Deletes notes (AddedNote events) by adding a DeletedEvent correlated to each note, the same way
         the Control web UI removes a note. The user needs the RemoveNote permission in -Group.
 
-        -NoteEventID removes specific notes; -All removes every note still on the session. Notes that
-        are already deleted are skipped.
+        -NoteEventID removes the given notes (without checking them first). -All reads the session and
+        removes every note still on it, skipping notes that are already deleted.
 
     .PARAMETER GUID
         Session ID.
