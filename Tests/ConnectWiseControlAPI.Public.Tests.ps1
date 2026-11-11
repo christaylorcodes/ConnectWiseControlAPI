@@ -307,21 +307,37 @@ Describe 'ErrorId survives a failed read' {
         $SessionID = [guid]::NewGuid()
     }
 
-    It '<Name> reports CWC.NotConnected when not connected' -ForEach @(
-        @{ Name = 'Get-CWCLastContact'; Call = { param($ID) Get-CWCLastContact -GUID $ID -ErrorAction Stop } }
+    # The error must stay non-terminating here: with -ErrorAction Stop even Write-Error $_ kept the ErrorId, so a
+    # test that used Stop would pass against the broken code.
+    It '<Name> reports CWC.NotConnected as its own non-terminating error' -ForEach @(
+        @{ Name = 'Get-CWCLastContact'; Call = { param($ID, $Quiet) Get-CWCLastContact -GUID $ID @Quiet } }
         @{ Name = 'Invoke-CWCCommand'; Call = {
-                param($ID) Invoke-CWCCommand -GUID $ID -Command 'hostname' -ErrorAction Stop
+                param($ID, $Quiet) Invoke-CWCCommand -GUID $ID -Command 'hostname' @Quiet
             }
         }
         @{ Name = 'Remove-CWCSessionNote'; Call = {
-                param($ID) Remove-CWCSessionNote -GUID $ID -All -Confirm:$false -ErrorAction Stop
+                param($ID, $Quiet) Remove-CWCSessionNote -GUID $ID -All -Confirm:$false @Quiet
             }
         }
     ) {
-        $Caught = $null
-        try { & $Call $SessionID } catch { $Caught = $_ }
-        $Caught | Should -Not -BeNullOrEmpty
-        $Caught.FullyQualifiedErrorId | Should -BeLike 'CWC.NotConnected,*'
+        # -ErrorVariable +Name appends to an existing list, so the records come back to this scope
+        $Reported = New-Object System.Collections.ArrayList
+        & $Call $SessionID @{ ErrorAction = 'SilentlyContinue'; ErrorVariable = '+Reported' }
+        $Ids = @($Reported | ForEach-Object { $_.FullyQualifiedErrorId } | Where-Object { $_ })
+        $Ids | Should -Not -BeNullOrEmpty
+        # The last record is the one the function itself wrote
+        $Ids[-1] | Should -Be "CWC.NotConnected,$Name"
+        $Ids | Where-Object { $_ -like '*WriteErrorException*' } | Should -BeNullOrEmpty
+    }
+
+    It '<Name> does not throw with -ErrorAction Ignore' -ForEach @(
+        @{ Name = 'Get-CWCLastContact'; Call = { param($ID) Get-CWCLastContact -GUID $ID -ErrorAction Ignore } }
+        @{ Name = 'Invoke-CWCCommand'; Call = {
+                param($ID) Invoke-CWCCommand -GUID $ID -Command 'hostname' -ErrorAction Ignore
+            }
+        }
+    ) {
+        { & $Call $SessionID } | Should -Not -Throw
     }
 }
 

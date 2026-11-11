@@ -15,14 +15,16 @@ release has 32.
 ### Breaking changes
 
 - `Remove-CWCSession`, `Remove-CWCSessionNote` and `Remove-CWCHostFromSession` ask for confirmation by default.
-  Unattended scripts must add `-Confirm:$false`; without it they fail and remove nothing
+  Unattended scripts must add `-Confirm:$false`. Without it, a session started with `-NonInteractive` fails at
+  the prompt and removes nothing; other unattended hosts may wait at the prompt or take its default answer (Yes)
 - `Connect-CWC` without `-Force` switches to a different server, sign-in method or user instead of keeping the
   old connection
 - `Get-CWCLastContact` returns an error when no connection event is found, instead of the current time
 - `Get-CWCAuditLog` `-StartDate`/`-EndDate` default to the last 24 hours
 - `Get-CWCSession -Type Support` and `-Type Meeting` without `-Group` read the `All Sessions` and `All Meetings`
   groups. Before, they read `All Machines`, which holds Access sessions
-- HTTP 500 errors are retried only for calls that are safe to repeat
+- A read or "set to value" update that gets HTTP 500 is retried 3 times (after 2, 4 and 8 seconds) before it
+  fails. 0.4.0.0 failed at once. Commands, wakes, deletes and user creation are never retried
 
 Details are in the sections below.
 
@@ -91,10 +93,10 @@ Details are in the sections below.
   deprecated (the server no longer accepts it) and now only emits a warning
 - All API calls go through one internal helper that builds the endpoint and serializes arguments the same
   way everywhere (single items, empty lists and nested event entries)
-- HTTP 500 retries are limited to calls that are safe to repeat (reads, "set to value" updates). Before,
-  a 500 returned after the server had acted could queue a second command, wake, delete or user. Retries
-  now wait 2, 4 and 8 seconds (3 retries); the old 2-32 ms waits gave a struggling server no time to
-  recover. A final 500 error now includes the server's error message
+- HTTP 500 answers are retried for calls that are safe to repeat (reads, "set to value" updates): 3 retries,
+  waiting 2, 4 and 8 seconds. Calls that act (commands, wakes, deletes, user creation) are never retried, so
+  one request cannot act twice. 0.4.0.0 had retry code that never ran. A final 500 error includes the server's
+  error message
 - Session event type numbers are kept in one table, verified against a live server's web client
 - **Breaking:** `Remove-CWCSession` prompts by default (`ConfirmImpact = 'High'`), confirms each session
   separately and rejects an empty GUID. Unattended scripts must add `-Confirm:$false`
@@ -172,10 +174,12 @@ Changes to the repository. They do not change the published module.
 - Repo files aligned with the GitHub-Template: `AGENTS.md` (agent guide; `CLAUDE.md` points to it), community
   files (CONTRIBUTING, CODE_OF_CONDUCT, SECURITY, issue and PR templates), `pr-validation.yml`, `dependabot.yml`,
   `copilot-instructions.md`, `.vscode/` settings, `.editorconfig`, `.gitattributes`, an expanded `.gitignore`,
-  `.PSScriptAnalyzerSettings.psd1` and `.github/PowerShell-StyleGuide.md`
+  `.PSScriptAnalyzerSettings.psd1` and `.github/PowerShell-StyleGuide.md`. `README.md` links point at the local
+  community files. This `CHANGELOG.md` is new
 - Live test scripts: `Tests/Live/Invoke-CWCLiveSmokeTest.ps1` (read-only by default; `-AllowWrites` acts on one
-  chosen test session and cleans up its notes; `-MfaUserName` and `-TotpTestRole` test the MFA and TOTP logins)
-  and `Tests/Live/Invoke-CWCHostLaunchDiscovery.ps1` (read-only; redacts secrets)
+  chosen test session and cleans up its notes; `-MfaUserName` and `-TotpTestRole` test the MFA and TOTP logins;
+  `-MfaNegativeProbes` records the raw failed-login codes) and `Tests/Live/Invoke-CWCHostLaunchDiscovery.ps1`
+  (read-only; redacts secrets; `-Launch` opens the client for one test session)
 - Removed the unloaded `WIP/Invoke-CWCSession.ps1` prototype, superseded by `Enter-CWCSession`
 
 ## [0.4.0.0]

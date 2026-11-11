@@ -49,18 +49,23 @@ SIGNING IN
 
 ERRORS
     Most commands report failures as non-terminating errors. Add
-    -ErrorAction Stop to catch them. Errors from API calls carry an ErrorId at
-    the start of
-    $_.FullyQualifiedErrorId:
+    -ErrorAction Stop to catch them. Errors from API calls carry an ErrorId
+    at the start of $_.FullyQualifiedErrorId:
 
         CWC.NotConnected       Connect-CWC has not been run
         CWC.AuthModeMismatch   The command needs the other kind of connection
         CWC.Http<status>       The server answered with that HTTP status
         CWC.NoResponse         The server did not answer
+
+    An MFA sign-in (-Mfa, -OneTimeCode or -TotpSecret) can also report:
+
         CWC.MfaRequired        The account needs a one-time code
         CWC.MfaCodeRejected    The one-time code was wrong or has expired
         CWC.LoginFailed        The sign-in was rejected
         CWC.LoginThrottled     Too many sign-in attempts; wait before retrying
+
+    A failed sign-in without MFA, or with -ApiSecret, has no CWC ErrorId;
+    read its message.
 
     Example:
 
@@ -74,8 +79,10 @@ ERRORS
 
 REMOVING THINGS
     Remove-CWCSession, Remove-CWCSessionNote and Remove-CWCHostFromSession ask
-    for confirmation. In an unattended script add -Confirm:$false; without it
-    the command fails and removes nothing.
+    for confirmation. In an unattended script add -Confirm:$false. Without it,
+    a session started with -NonInteractive fails at the prompt and removes
+    nothing. Other unattended hosts may wait at the prompt, or take its
+    default answer (Yes) when they read answers from redirected input.
 
 UPGRADING FROM 0.4
     Check these before updating scripts written for 0.4.0.0:
@@ -90,8 +97,9 @@ UPGRADING FROM 0.4
     - Get-CWCSession -Type Support and -Type Meeting without -Group read the
       'All Sessions' and 'All Meetings' groups. Before, they read
       'All Machines'.
-    - A request that fails with HTTP 500 is repeated only when repeating is
-      safe.
+    - A read or "set to value" update that gets HTTP 500 is retried 3 times
+      (after 2, 4 and 8 seconds) before it fails. 0.4 failed at once.
+      Commands, wakes, deletes and user creation are never retried.
 
 SEE ALSO
     Connect-CWC
