@@ -7,9 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.5.0] - 2026-11-10
-
-Versions now have three parts (`0.5.0`); the build needs that. The previous release was 0.4.0.0.
+Planned as 0.5.0. Versions now have three parts (`0.5.0`); the build needs that. The previous release was 0.4.0.0.
 
 ### Breaking changes
 
@@ -209,8 +207,7 @@ Published to the PowerShell Gallery from commit 889b56b; the repository manifest
 
 ---
 
-[Unreleased]: https://github.com/christaylorcodes/ConnectWiseControlAPI/compare/v0.5.0...HEAD
-[0.5.0]: https://github.com/christaylorcodes/ConnectWiseControlAPI/compare/889b56b...v0.5.0
+[Unreleased]: https://github.com/christaylorcodes/ConnectWiseControlAPI/compare/889b56b...HEAD
 [0.4.0.0]: https://github.com/christaylorcodes/ConnectWiseControlAPI/commit/889b56b
 [0.3.5.0]: https://www.powershellgallery.com/packages/ConnectWiseControlAPI/0.3.5.0
 [0.3.4.0]: https://www.powershellgallery.com/packages/ConnectWiseControlAPI/0.3.4.0
