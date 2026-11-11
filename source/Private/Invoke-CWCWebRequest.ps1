@@ -12,7 +12,7 @@
     # Errors carry an ErrorId so callers can tell them apart without parsing text:
     # CWC.NotConnected, CWC.AuthModeMismatch, CWC.Http<status> (the server answered), CWC.NoResponse.
     if (!$script:CWCServerConnection) {
-        return Write-Error "Not connected to a Control server. Run 'Connect-CWC' first." -ErrorId 'CWC.NotConnected' -Category ConnectionError
+        return Write-Error "Not connected to a ScreenConnect server. Run 'Connect-CWC' first." -ErrorId 'CWC.NotConnected' -Category ConnectionError
     }
 
     # The two auth methods reach different endpoints: an API secret is only accepted by the
@@ -98,7 +98,7 @@
                 catch { $ServerMessage = $null }
             }
 
-            # Retry on HTTP 500 when the caller allows it (no response yields 0). Control answers
+            # Retry on HTTP 500 when the caller allows it (no response yields 0). ScreenConnect answers
             # application exceptions with 500 + {"errorType": ...}: permission failures (including a wrong
             # password), bad arguments, missing sessions. Those fail the same way again, so only retry a
             # 500 without an errorType (a server fault) or one that names a rate limit or timeout.

@@ -28,7 +28,7 @@ function Get-CWCRemoteWorkforceLaunchURL {
         Get-CWCRemoteWorkforceLaunchURL -SessionName 'DESKTOP-01'
 
     .NOTES
-        Requires the Remote Workforce extension (2c4f522f-b39a-413a-8807-dc52a2fce13e), Control 23.6+.
+        Requires the Remote Workforce extension (2c4f522f-b39a-413a-8807-dc52a2fce13e), ScreenConnect 23.6+.
         Author: Chris Taylor
 
     .LINK

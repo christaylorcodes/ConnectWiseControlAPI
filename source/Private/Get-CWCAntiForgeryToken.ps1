@@ -1,7 +1,7 @@
 function Get-CWCAntiForgeryToken {
     <#
     .SYNOPSIS
-        Returns the anti-forgery token from the Control front page HTML, or $null.
+        Returns the anti-forgery token from the ScreenConnect front page HTML, or $null.
 
     .DESCRIPTION
         Matches only a token-shaped value, so a change in the page's JSON key order can't break the

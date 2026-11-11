@@ -14,10 +14,10 @@
     written. Run once on PS 7 and once on Windows PowerShell 5.1.
 
 .EXAMPLE
-    ./Tests/Live/Invoke-CWCHostLaunchDiscovery.ps1 -Server control.example.com
+    ./Tests/Live/Invoke-CWCHostLaunchDiscovery.ps1 -Server screenconnect.example.com
 
 .EXAMPLE
-    ./Tests/Live/Invoke-CWCHostLaunchDiscovery.ps1 -Server control.example.com -Launch -TestSessionID <guid>
+    ./Tests/Live/Invoke-CWCHostLaunchDiscovery.ps1 -Server screenconnect.example.com -Launch -TestSessionID <guid>
 #>
 [CmdletBinding()]
 param(
@@ -114,7 +114,7 @@ function Get-CharacterClass {
     }
 }
 
-$Credential = Get-Credential -Message 'Non-MFA Control account (needs JoinSession)'
+$Credential = Get-Credential -Message 'Non-MFA ScreenConnect account (needs JoinSession)'
 
 Invoke-Step 'Connect' {
     Connect-CWC -Server $Server -Credentials $Credential -Force
@@ -262,7 +262,7 @@ if ($Launch) {
     Invoke-Step 'Launch.Open' {
         $Before = [DateTime]::UtcNow
         $Output = & { Enter-CWCSession @EnterParameters -Verbose } 4>&1 3>&1 | ForEach-Object { Protect-Text "$_" }
-        $Answer = Read-Host 'Did the Control client open and join the test session? (y/n)'
+        $Answer = Read-Host 'Did the ScreenConnect client open and join the test session? (y/n)'
         Start-Sleep -Seconds 2
         $ElapsedMs = ([DateTime]::UtcNow - $Before).TotalMilliseconds + 1000
         $DetailParameters = @{ GUID = $TestSessionID; Include = 'Events' }

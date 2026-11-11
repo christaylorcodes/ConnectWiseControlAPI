@@ -7,7 +7,7 @@ function Find-CWCSession {
         Calls the RESTful API Manager extension. Searches all sessions of every type; results are not
         limited by role permissions or session groups.
 
-        -Filter uses Control's session filter syntax, the same syntax as session group filters,
+        -Filter uses ScreenConnect's session filter syntax, the same syntax as session group filters,
         e.g. "Name LIKE 'DESKTOP-*'" or "CustomProperty1 = 'Acme'".
 
     .PARAMETER Filter

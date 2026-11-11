@@ -2,13 +2,13 @@
   <br>
   <img src=".\Media\control-horiz-master.webp" alt="logo" width = 75% ></a>
   <br>
-  ConnectWise Control API
+  ConnectWiseControlAPI
   <br>
 </h1>
 
 <h4 align="center">
 
-This is a PowerShell wrapper for ConnectWise Control
+A PowerShell wrapper for the ConnectWise ScreenConnect (formerly ConnectWise Control) web API
 
 </h4>
 
@@ -31,7 +31,10 @@ This is a PowerShell wrapper for ConnectWise Control
 
 <!-- Summary -->
 
-This module makes it easy to leverage PowerShell to automate tasks in Control.
+This module makes it easy to leverage PowerShell to automate tasks in ScreenConnect.
+
+ConnectWise renamed Control back to ScreenConnect. The module keeps its name and its `CWC` command names, so
+existing scripts keep working.
 
 <!-- Summary -->
 
@@ -45,10 +48,23 @@ Install-Module 'ConnectWiseControlAPI'
 
 >If you are having issues accessing the PowerShell Gallery check out my [repair script](https://github.com/christaylorcodes/Initialize-PSGallery)
 
+### Upgrading from 0.4
+
+0.5.0 changes some behaviour. Check your scripts before you update:
+
+* `Remove-CWCSession`, `Remove-CWCSessionNote` and `Remove-CWCHostFromSession` ask for confirmation by default.
+  Unattended scripts must add `-Confirm:$false`; without it they fail and remove nothing.
+* `Connect-CWC` without `-Force` now switches to a different server, sign-in method or user. Before, it kept the
+  old connection.
+* `Get-CWCLastContact` returns an error when it finds no connection event. Before, it returned the current time.
+* `Get-CWCAuditLog` covers the last 24 hours unless you pass `-StartDate` and `-EndDate`.
+* A request that fails with HTTP 500 is repeated only when repeating is safe (reads and "set to value" updates).
+
+The full list is in the [changelog](CHANGELOG.md).
 
 ## Requirements
 
-* Requires your Control server to use https.
+* Requires your ScreenConnect server to use https.
 
 * One of three authentication methods:
 
@@ -64,10 +80,10 @@ Install-Module 'ConnectWiseControlAPI'
     (a still-valid login is reused with one check call).
 
     ```powershell
-    Connect-CWC -Server 'control.example.com' -Credentials (Get-Credential) -Mfa
+    Connect-CWC -Server 'screenconnect.example.com' -Credentials (Get-Credential) -Mfa
 
     # Unattended, with Microsoft.PowerShell.SecretManagement
-    Connect-CWC -Server 'control.example.com' -Credentials (Get-Secret 'CWC-Login') -TotpSecret (Get-Secret 'CWC-TOTP')
+    Connect-CWC -Server 'screenconnect.example.com' -Credentials (Get-Secret 'CWC-Login') -TotpSecret (Get-Secret 'CWC-TOTP')
     ```
 
   * **API secret** (`Connect-CWC -ApiSecret`): install the **RESTful API Manager** extension and set its
@@ -75,12 +91,12 @@ Install-Module 'ConnectWiseControlAPI'
     Available functions: `Find-CWCSession`, `New-CWCSession`, `Get-CWCSessionDetail`,
     `Update-CWCSessionName`, `Invoke-CWCCommand` (queues the command but does not return its output),
     `Add-CWCSessionNote`, `Send-CWCSessionMessage`, `Send-CWCToolboxItem`. The secret bypasses
-    Control's role permissions and acts on every session, so protect it like an administrator password.
+    ScreenConnect's role permissions and acts on every session, so protect it like an administrator password.
     If the extension's `RESTfulAllowedOrigin` setting is set, pass a matching `-Origin`.
 
     ```powershell
     $Secret = Read-Host -AsSecureString -Prompt 'RESTful API secret'
-    Connect-CWC -Server 'control.example.com' -ApiSecret $Secret
+    Connect-CWC -Server 'screenconnect.example.com' -ApiSecret $Secret
     Find-CWCSession -Filter "Name LIKE 'DESKTOP-*'"
     ```
 

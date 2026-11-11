@@ -83,7 +83,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### ConnectWise Control session objects
+### ConnectWise ScreenConnect session objects
 ## NOTES
 Version:        1.0
 Author:         Chris Taylor

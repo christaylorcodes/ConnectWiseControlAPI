@@ -45,7 +45,7 @@ function Get-CWCAuditLog {
     )
 
     if ($IncludeSessionCaptures) {
-        Write-Warning '-IncludeSessionCaptures is no longer supported by the Control server and is ignored.'
+        Write-Warning '-IncludeSessionCaptures is no longer supported by the ScreenConnect server and is ignored.'
     }
 
     # Server signature: QueryAuditLog(minTime, maxTime, sessionName, sessionEventTypes[], securityEventTypes[])

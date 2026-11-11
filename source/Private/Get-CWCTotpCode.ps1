@@ -5,7 +5,7 @@ function Get-CWCTotpCode {
 
     .DESCRIPTION
         Pure function: the time is passed in, so callers and tests control it. Accepts the seed as
-        Control stores it for authenticator apps ("ms:<Base32>", e.g. from New-CWCMFA) or as bare Base32;
+        ScreenConnect stores it for authenticator apps ("ms:<Base32>", e.g. from New-CWCMFA) or as bare Base32;
         case, spaces, dashes and '=' padding are ignored.
 
         The decoded key bytes are zeroed afterwards. The plain-text seed string taken from the
@@ -18,7 +18,7 @@ function Get-CWCTotpCode {
         Seconds since 1970-01-01 UTC.
 
     .PARAMETER Digits
-        Code length. Control uses 6.
+        Code length. ScreenConnect uses 6.
     #>
     [CmdletBinding()]
     [OutputType([string])]

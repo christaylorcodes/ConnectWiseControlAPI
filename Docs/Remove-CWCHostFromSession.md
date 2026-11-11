@@ -18,7 +18,7 @@ Remove-CWCHostFromSession [-SessionID] <Guid> [-ConnectionID] <Guid> [-Group] <S
 
 ## DESCRIPTION
 Queues a QueuedForceDisconnect session event (type 48) for the given connection, the same
-action as disconnecting a participant in the Control web UI.
+action as disconnecting a participant in the ScreenConnect web UI.
 Connection IDs are listed in
 (Get-CWCSessionDetail -GUID \<session\> -Include Connections).Connections.
 

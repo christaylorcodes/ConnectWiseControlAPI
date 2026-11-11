@@ -7,7 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-Planned as 0.5.0 (the source manifest carries `0.5.0`; the build needs a 3-part version; 0.4.0.0 is on the PowerShell Gallery).
+## [0.5.0] - 2026-11-10
+
+Versions now have three parts (`0.5.0`); the build needs that. The previous release was 0.4.0.0.
+
+### Breaking changes
+
+- `Remove-CWCSession`, `Remove-CWCSessionNote` and `Remove-CWCHostFromSession` ask for confirmation by default.
+  Unattended scripts must add `-Confirm:$false`; without it they fail and remove nothing
+- `Connect-CWC` without `-Force` switches to a different server, sign-in method or user instead of keeping the
+  old connection
+- `Get-CWCLastContact` returns an error when no connection event is found, instead of the current time
+- `Get-CWCAuditLog` `-StartDate`/`-EndDate` default to the last 24 hours
+- HTTP 500 errors are retried only for calls that are safe to repeat
+
+Details are in the sections below.
+
+### Product name
+
+- ConnectWise renamed Control back to ScreenConnect. Help, messages, examples and the Gallery description now say
+  ScreenConnect. The module name, the `CWC` command names and the `CWC.*` ErrorIds are unchanged
+- `New-CWCMFA -DisplayName` defaults to `ScreenConnect` (was `CW Control`); this is only the label shown in the
+  authenticator app
+- Removed `HelpInfoURI` from the manifest. It pointed at a help file, not an updatable-help location, so
+  `Update-Help` could not use it. The help ships with the module
 
 ### Added
 
@@ -110,14 +133,14 @@ Planned as 0.5.0 (the source manifest carries `0.5.0`; the build needs a 3-part 
 
 ### Fixed
 
-Endpoint calls audited against the Control server's `Services/*.ashx` source:
+Endpoint calls audited against the ScreenConnect server's `Services/*.ashx` source:
 
 - `Invoke-CWCWake` called `PageService.AddEventToSessions`, which no longer exists; it now queues wake
   events (type 43) through `AddSessionEvents`
 - `Get-CWCAuditLog` sent 6 arguments to `QueryAuditLog`, which takes 5 (the capture flag landed in the
   event-type slot); local times were also sent with a `Z` suffix and are now converted to UTC
 - `Get-CWCSessionGroup` now calls the documented `GetSessionGroups` (POST) method instead of the
-  undocumented `session-groups` GET route (both return the same data on Control 26.7.6; not a bug fix)
+  undocumented `session-groups` GET route (both return the same data on ScreenConnect 26.7.6; not a bug fix)
 - `Add-CWCRemoteWorkforceRequiredRole` now calls the extension's own
   `EnsureRemoteWorkforceSecurityRoleExists` instead of building the role with `CreateRole`: it is
   idempotent, honors the extension's `RoleName`/`SessionGroupName` settings, and sets `IsRoleCreated`
@@ -155,7 +178,7 @@ Published to the PowerShell Gallery from commit 889b56b; the repository manifest
 - `Get-CWCSession` uses the `GetLiveData` endpoint (#23)
 - Error handling on PowerShell 7 no longer calls `GetResponseStream` (#15)
 
-## [0.3.5.0] - 2026-02-03
+## [0.3.5.0] - 2023-01-24
 
 ### Fixed
 
@@ -173,7 +196,7 @@ Published to the PowerShell Gallery from commit 889b56b; the repository manifest
 - `ShouldProcess` added to `Add-CWCRemoteWorkforceRequiredRole`
 - UTC/local time mixing fixed in epoch calculations in `Get-CWCLastContact`
 
-## [0.3.4.0] - 2024-01-01
+## [0.3.4.0] - 2022-12-20
 
 ### Added
 
@@ -186,7 +209,8 @@ Published to the PowerShell Gallery from commit 889b56b; the repository manifest
 
 ---
 
-[Unreleased]: https://github.com/christaylorcodes/ConnectWiseControlAPI/compare/889b56b...HEAD
+[Unreleased]: https://github.com/christaylorcodes/ConnectWiseControlAPI/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/christaylorcodes/ConnectWiseControlAPI/compare/889b56b...v0.5.0
 [0.4.0.0]: https://github.com/christaylorcodes/ConnectWiseControlAPI/commit/889b56b
-[0.3.5.0]: https://github.com/christaylorcodes/ConnectWiseControlAPI/compare/v0.3.4.0...v0.3.5.0
-[0.3.4.0]: https://github.com/christaylorcodes/ConnectWiseControlAPI/releases/tag/v0.3.4.0
+[0.3.5.0]: https://www.powershellgallery.com/packages/ConnectWiseControlAPI/0.3.5.0
+[0.3.4.0]: https://www.powershellgallery.com/packages/ConnectWiseControlAPI/0.3.4.0

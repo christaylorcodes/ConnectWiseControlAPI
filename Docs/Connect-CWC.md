@@ -8,7 +8,7 @@ schema: 2.0.0
 # Connect-CWC
 
 ## SYNOPSIS
-Connects to a ConnectWise Control server.
+Connects to a ConnectWise ScreenConnect server.
 
 ## SYNTAX
 
@@ -42,7 +42,7 @@ Connect-CWC -Server <String> -ApiSecret <SecureString> [-Origin <String>] [-Forc
 ## DESCRIPTION
 Three ways to sign in:
 
--Credentials alone (default): Basic auth with a Control user account that does not use MFA.
+-Credentials alone (default): Basic auth with a ScreenConnect user account that does not use MFA.
 Gives access to every function in the module, limited by that user's permissions. Never expires.
 
 -Credentials with -Mfa, -OneTimeCode or -TotpSecret: signs in the way the web page does, with a one-time
@@ -64,21 +64,21 @@ expired.
 
 ### Example 1
 ```powershell
-PS C:\> Connect-CWC -Server 'control.example.com' -Credentials (Get-Credential)
+PS C:\> Connect-CWC -Server 'screenconnect.example.com' -Credentials (Get-Credential)
 ```
 
 Connects with an account that does not use MFA.
 
 ### Example 2
 ```powershell
-PS C:\> Connect-CWC -Server 'control.example.com' -Credentials (Get-Credential) -Mfa
+PS C:\> Connect-CWC -Server 'screenconnect.example.com' -Credentials (Get-Credential) -Mfa
 ```
 
 Connects with an account that requires MFA and asks for the one-time code.
 
 ### Example 3
 ```powershell
-PS C:\> Connect-CWC -Server 'control.example.com' -Credentials $Credential -OneTimeCode (Read-Host 'One-time code')
+PS C:\> Connect-CWC -Server 'screenconnect.example.com' -Credentials $Credential -OneTimeCode (Read-Host 'One-time code')
 ```
 
 Connects with an account that requires MFA, using a code you supply.
@@ -87,7 +87,7 @@ Reading it with Read-Host keeps it out of the command history.
 ### Example 4
 ```powershell
 PS C:\> $Credential = Get-Secret -Name 'CWC-Login'
-PS C:\> Connect-CWC -Server 'control.example.com' -Credentials $Credential -TotpSecret (Get-Secret -Name 'CWC-TOTP')
+PS C:\> Connect-CWC -Server 'screenconnect.example.com' -Credentials $Credential -TotpSecret (Get-Secret -Name 'CWC-TOTP')
 ```
 
 Unattended login for an account that requires MFA.
@@ -97,7 +97,7 @@ it has expired it logs in again.
 ### Example 5
 ```powershell
 PS C:\> $Secret = Read-Host -AsSecureString -Prompt 'RESTful API secret'
-PS C:\> Connect-CWC -Server 'control.example.com' -ApiSecret $Secret
+PS C:\> Connect-CWC -Server 'screenconnect.example.com' -ApiSecret $Secret
 ```
 
 Connects with the RESTful API Manager extension's secret.
@@ -105,7 +105,7 @@ Connects with the RESTful API Manager extension's secret.
 ## PARAMETERS
 
 ### -Server
-Control server hostname, e.g. control.example.com. A leading http(s):// is removed. HTTPS is always used.
+ScreenConnect server hostname, e.g. screenconnect.example.com. A leading http(s):// is removed. HTTPS is always used.
 
 ```yaml
 Type: String
@@ -120,7 +120,7 @@ Accept wildcard characters: False
 ```
 
 ### -Credentials
-Username and password of a Control user account.
+Username and password of a ScreenConnect user account.
 
 ```yaml
 Type: PSCredential
@@ -170,7 +170,7 @@ Accept wildcard characters: False
 ### -TotpSecret
 The account's authenticator-app (TOTP) secret, for unattended scripts.
 The current code is computed from it at each login; the secret itself is not stored.
-Accepts the value Control stores for authenticator apps ("ms:" followed by Base32, as New-CWCMFA creates)
+Accepts the value ScreenConnect stores for authenticator apps ("ms:" followed by Base32, as New-CWCMFA creates)
 or bare Base32. Not for email or SMS codes.
 
 Keep it in a secret store, e.g. Microsoft.PowerShell.SecretManagement: -TotpSecret (Get-Secret ...).
@@ -253,7 +253,7 @@ Functions available with -ApiSecret: Get-CWCSessionDetail, Update-CWCSessionName
 Send-CWCSessionMessage, Send-CWCToolboxItem.
 Only calls that are safe to repeat (reads, "set to value" updates) are retried on HTTP 500.
 
-The API secret is not tied to a Control user: the extension does not apply role permissions or session
+The API secret is not tied to a ScreenConnect user: the extension does not apply role permissions or session
 group scoping, so it can act on every session. Treat it like an administrator password.
 Requires the RESTful API Manager extension (2d558935-686a-4bd0-9991-07539f5fe749).
 

@@ -11,7 +11,7 @@ function New-CWCRemoteWorkforceAssignment {
         One or more session IDs.
 
     .PARAMETER Username
-        Control user name of the assignee.
+        ScreenConnect user name of the assignee.
 
     .PARAMETER DisplayName
         Display name of the assignee.

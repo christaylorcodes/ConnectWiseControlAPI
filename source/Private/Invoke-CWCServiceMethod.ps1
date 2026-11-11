@@ -1,7 +1,7 @@
 function Invoke-CWCServiceMethod {
     <#
     .SYNOPSIS
-        Calls one Control web service method. Every public function's API call goes through here.
+        Calls one ScreenConnect web service method. Every public function's API call goes through here.
 
     .DESCRIPTION
         Builds the endpoint, serializes the method arguments as a JSON array and passes the request to

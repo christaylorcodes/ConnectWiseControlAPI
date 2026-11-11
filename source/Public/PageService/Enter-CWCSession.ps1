@@ -1,11 +1,11 @@
 function Enter-CWCSession {
     <#
     .SYNOPSIS
-        Opens the ConnectWise Control Host client joined to a session, like Join in the web UI.
+        Opens the ConnectWise ScreenConnect Host client joined to a session, like Join in the web UI.
 
     .DESCRIPTION
         Gets a Host access token for the session (PageService.GetAccessToken), builds the client launch
-        URL the web client uses (sc-<instance>://...) and opens it with the installed Control client.
+        URL the web client uses (sc-<instance>://...) and opens it with the installed ScreenConnect client.
         The join is recorded in the session's audit trail (InitiatedJoin), as a web UI join is.
 
         The client must already be installed for the current Windows user: join any session once from
@@ -87,14 +87,14 @@ function Enter-CWCSession {
 
     process {
         if (-not $script:CWCServerConnection) {
-            return Write-Error "Not connected to a Control server. Run 'Connect-CWC' first." -ErrorId 'CWC.NotConnected' -Category ConnectionError
+            return Write-Error "Not connected to a ScreenConnect server. Run 'Connect-CWC' first." -ErrorId 'CWC.NotConnected' -Category ConnectionError
         }
         # Checked up front: the launch settings below are read without going through the request helper.
         if (Test-CWCApiSecretConnection) {
             return Write-Error (Get-CWCAuthModeMessage -Command $MyInvocation.MyCommand.Name -Required Credentials) -ErrorId 'CWC.AuthModeMismatch' -Category InvalidOperation
         }
         if (-not $UrlOnly -and [Environment]::OSVersion.Platform -ne 'Win32NT') {
-            return Write-Error 'Launching the Control client is supported on Windows only. Use -UrlOnly to get the launch URL and open it yourself.'
+            return Write-Error 'Launching the ScreenConnect client is supported on Windows only. Use -UrlOnly to get the launch URL and open it yourself.'
         }
 
         # Local copies: values chosen for one pipeline item must not stick to the next.
@@ -110,7 +110,7 @@ function Enter-CWCSession {
         if (-not $LaunchContext) { return }
 
         if (-not $UrlOnly -and -not (Test-Path -LiteralPath "Registry::HKEY_CLASSES_ROOT\$($LaunchContext.Scheme)")) {
-            return Write-Error ("The Control client for $($script:CWCServerConnection.Server) is not installed for this Windows user " +
+            return Write-Error ("The ScreenConnect client for $($script:CWCServerConnection.Server) is not installed for this Windows user " +
                 "(no handler for $($LaunchContext.Scheme)://). Join any session once from the web UI to install it, or use -UrlOnly.")
         }
 
@@ -162,7 +162,7 @@ function Enter-CWCSession {
 
         if ($UrlOnly) { return $Url }
 
-        Write-Verbose "Opening the Control client for session $GUID."
+        Write-Verbose "Opening the ScreenConnect client for session $GUID."
         try { Start-CWCHostClient -Url $Url }
         catch { return Write-Error "$($_.Exception.Message)" }
         finally { $Url = $null }

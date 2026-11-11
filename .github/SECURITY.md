@@ -77,7 +77,7 @@ When using this module, please:
      store, apart from the account password where you can, and replace it if the computer is compromised
 
 2. **Use HTTPS**
-   - The module requires your Control server to use HTTPS
+   - The module requires your ScreenConnect server to use HTTPS
    - TLS 1.2 is enforced by the module
 
 3. **Keep Updated**

@@ -2,14 +2,14 @@
 
 <#
 .SYNOPSIS
-    Live integration tests against a real ConnectWise Control server.
+    Live integration tests against a real ConnectWise ScreenConnect server.
 
 .DESCRIPTION
     Read-only tests that verify actual API connectivity, authentication,
     and response parsing against a live CWC instance. No data is modified.
 
     Requires environment variables:
-        $env:CWC_SERVER   - CWC server hostname (e.g. 'control.example.com')
+        $env:CWC_SERVER   - CWC server hostname (e.g. 'screenconnect.example.com')
         $env:CWC_USER     - Username for Basic auth
         $env:CWC_PASSWORD  - Password for Basic auth
 
@@ -25,7 +25,7 @@
         Invoke-Pester Tests\ConnectWiseControlAPI.Live.Tests.ps1 -Output Detailed
 
     Set environment variables first:
-        $env:CWC_SERVER = 'control.example.com'
+        $env:CWC_SERVER = 'screenconnect.example.com'
         $env:CWC_USER = 'apiuser'
         $env:CWC_PASSWORD = 'password'
 #>

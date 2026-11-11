@@ -8,23 +8,30 @@ schema: 2.0.0
 # New-CWCMFA
 
 ## SYNOPSIS
-Will generate an MFA code to use with user creation.
+Creates a new authenticator-app (TOTP) secret for a ScreenConnect user.
 
 ## SYNTAX
 
 ```
-New-CWCMFA [-DisplayName <Object>] [-UserAccount <Object>] [-WhatIf]
+New-CWCMFA [[-DisplayName] <Object>] [[-UserAccount] <Object>] [-WhatIf]
  [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Will generate an MFA code to use with user creation.
+Generates a random 16-character Base32 secret.
+Returns it in the form ScreenConnect stores ("ms:\<secret\>") together with a QR code URL to scan with an
+authenticator app.
+Nothing is sent to the ScreenConnect server: pass the OTP value to New-CWCUser or Update-CWCUser to set it on
+an account.
+
+The QR code URL is on quickchart.io and contains the secret.
+Open it only if you accept sending the secret to that service.
 
 ## EXAMPLES
 
 ### Example 1
 ```powershell
-PS C:\> New-CWCMFA -DisplayName 'My Control Server' -UserAccount 'CTaylor'
+PS C:\> New-CWCMFA -DisplayName 'My ScreenConnect Server' -UserAccount 'CTaylor'
 ```
 
 Creates an MFA OTP code and QR URL with the provided information.
@@ -32,7 +39,7 @@ Creates an MFA OTP code and QR URL with the provided information.
 ## PARAMETERS
 
 ### -DisplayName
-Name you want to display in OTP app.
+Label the authenticator app shows for the entry.
 
 ```yaml
 Type: Object
@@ -40,8 +47,8 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: Named
-Default value: None
+Position: 1
+Default value: ScreenConnect
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -53,6 +60,21 @@ User account to display in OTP app.
 Type: Object
 Parameter Sets: (All)
 Aliases:
+
+Required: False
+Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -WhatIf
+Shows what would happen if the cmdlet runs. The cmdlet is not run.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases: wi
 
 Required: False
 Position: Named
@@ -68,21 +90,6 @@ Prompts you for confirmation before running the cmdlet.
 Type: SwitchParameter
 Parameter Sets: (All)
 Aliases: cf
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -WhatIf
-Shows what would happen if the cmdlet runs. The cmdlet is not run.
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases: wi
 
 Required: False
 Position: Named

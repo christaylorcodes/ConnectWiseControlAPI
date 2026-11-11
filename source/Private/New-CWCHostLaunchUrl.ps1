@@ -1,7 +1,7 @@
 function New-CWCHostLaunchUrl {
     <#
     .SYNOPSIS
-        Builds the sc-<id>:// URL that opens the Control client, in the web client's format.
+        Builds the sc-<id>:// URL that opens the ScreenConnect client, in the web client's format.
 
     .DESCRIPTION
         Mirrors getSchemeUrlFunc in the web client (SC.main.ts):

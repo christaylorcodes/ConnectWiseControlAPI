@@ -26,7 +26,7 @@ Removes the provided internal user.
 PS C:\> Remove-CWCUser -User 'ctaylor'
 ```
 
-Removes the 'ctaylor' user from Control.
+Removes the 'ctaylor' user from ScreenConnect.
 
 ## PARAMETERS
 

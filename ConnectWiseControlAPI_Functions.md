@@ -18,10 +18,10 @@ Create a new Remote Workforce security role
 Adds a note to a session.
 
 ### [Connect-CWC](Docs/Connect-CWC.md)
-Connects to a ConnectWise Control server.
+Connects to a ConnectWise ScreenConnect server.
 
 ### [Enter-CWCSession](Docs/Enter-CWCSession.md)
-Opens the ConnectWise Control Host client joined to a session, like Join in the web UI.
+Opens the ConnectWise ScreenConnect Host client joined to a session, like Join in the web UI.
 
 ### [Find-CWCSession](Docs/Find-CWCSession.md)
 Finds sessions by session filter expression, name or ID (API secret connections).
@@ -70,7 +70,7 @@ Will issue a wake command to a given session.
 Gets an access token for joining a session.
 
 ### [New-CWCMFA](Docs/New-CWCMFA.md)
-Will generate an MFA code to use with user creation.
+Creates a new authenticator-app (TOTP) secret for a ScreenConnect user.
 
 ### [New-CWCRemoteWorkforceAssignment](Docs/New-CWCRemoteWorkforceAssignment.md)
 Assign a user to machines.

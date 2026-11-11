@@ -6,7 +6,8 @@ the [GitHub-Template](https://github.com/christaylorcodes/GitHub-Template); deli
 
 ## Project Overview
 
-PowerShell module wrapping the ConnectWise Control (ScreenConnect) web API; published to the PowerShell Gallery and
+PowerShell module wrapping the ConnectWise ScreenConnect (formerly ConnectWise Control) web API. The module keeps
+the `ConnectWiseControlAPI` name and the `CWC` prefix; prose uses "ScreenConnect". Published to the PowerShell Gallery and
 used by MSPs. Source lives in `source/` (Sampler layout); `./build.ps1` builds the publishable module into
 `output/<ModuleName>/<version>/`. Version: `ModuleVersion` in `source/ConnectWiseControlAPI.psd1` (history in
 `CHANGELOG.md`).
@@ -91,7 +92,7 @@ Gallery is manual and needs the owner's explicit go: build, then
 
 1. Add `source/Public/<Service>/Verb-CWCNoun.ps1` (approved verb, `CWC` prefix). Use `Get-CWCSession.ps1` as the
    template. No manifest edit: the build exports every `Public/` file.
-2. Call `Invoke-CWCServiceMethod`. Check the method name and argument order against the Control server's
+2. Call `Invoke-CWCServiceMethod`. Check the method name and argument order against the ScreenConnect server's
    `Services/*.ashx` source. Pass `-Idempotent` only for reads and "set to value" updates.
 3. Add mocked Pester tests to `Tests/ConnectWiseControlAPI.Public.Tests.ps1`.
 4. Run `./Build/Update-Help.ps1` and commit the generated pages.

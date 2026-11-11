@@ -26,6 +26,6 @@ function Start-CWCHostClient {
     catch {
         $ExceptionType = $_.Exception.GetType().Name
         if ($Error.Count -gt 0) { $Error.RemoveAt(0) }
-        throw "Could not start the Control client ($ExceptionType)."
+        throw "Could not start the ScreenConnect client ($ExceptionType)."
     }
 }

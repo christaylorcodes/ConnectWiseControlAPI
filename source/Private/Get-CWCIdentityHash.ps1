@@ -24,7 +24,7 @@ function Get-CWCIdentityHash {
 
     $Sha = [System.Security.Cryptography.SHA256]::Create()
     try {
-        # Usernames are case-insensitive in Control; passwords are not
+        # Usernames are case-insensitive in ScreenConnect; passwords are not
         $Text = "$($script:CWCIdentitySalt)`n$($Credentials.UserName.ToLowerInvariant())`n$($Credentials.GetNetworkCredential().Password)"
         [Convert]::ToBase64String($Sha.ComputeHash([Text.Encoding]::UTF8.GetBytes($Text)))
     }

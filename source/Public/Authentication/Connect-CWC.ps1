@@ -1,12 +1,12 @@
 function Connect-CWC {
     <#
     .SYNOPSIS
-        Connects to a ConnectWise Control server.
+        Connects to a ConnectWise ScreenConnect server.
 
     .DESCRIPTION
         Three ways to sign in:
 
-        -Credentials alone (default): Basic auth with a Control user account that does not use MFA. Gives
+        -Credentials alone (default): Basic auth with a ScreenConnect user account that does not use MFA. Gives
         access to every function in the module, limited by that user's permissions. Never expires.
 
         -Credentials with -Mfa, -OneTimeCode or -TotpSecret: signs in the way the web page does, with a
@@ -25,10 +25,10 @@ function Connect-CWC {
         new login if it has expired.
 
     .PARAMETER Server
-        Control server hostname, e.g. control.example.com. A leading http(s):// is removed. HTTPS is always used.
+        ScreenConnect server hostname, e.g. screenconnect.example.com. A leading http(s):// is removed. HTTPS is always used.
 
     .PARAMETER Credentials
-        Username and password of a Control user account.
+        Username and password of a ScreenConnect user account.
 
     .PARAMETER Mfa
         Sign in for an account that requires MFA, asking for the one-time code at the console when the
@@ -41,7 +41,7 @@ function Connect-CWC {
 
     .PARAMETER TotpSecret
         The account's authenticator-app (TOTP) secret, for unattended scripts. The current code is
-        computed from it at each login; the secret itself is not stored. Accepts the value Control stores
+        computed from it at each login; the secret itself is not stored. Accepts the value ScreenConnect stores
         for authenticator apps ("ms:" followed by Base32, as New-CWCMFA creates) or bare Base32.
         Not for email or SMS codes.
 
@@ -63,31 +63,31 @@ function Connect-CWC {
         or identity leaves the module disconnected, so later commands can't reach the old server.
 
     .EXAMPLE
-        Connect-CWC -Server 'control.example.com' -Credentials (Get-Credential)
+        Connect-CWC -Server 'screenconnect.example.com' -Credentials (Get-Credential)
 
         Connects with an account that does not use MFA.
 
     .EXAMPLE
-        Connect-CWC -Server 'control.example.com' -Credentials (Get-Credential) -Mfa
+        Connect-CWC -Server 'screenconnect.example.com' -Credentials (Get-Credential) -Mfa
 
         Connects with an account that requires MFA and asks for the one-time code.
 
     .EXAMPLE
-        Connect-CWC -Server 'control.example.com' -Credentials $Credential -OneTimeCode (Read-Host 'One-time code')
+        Connect-CWC -Server 'screenconnect.example.com' -Credentials $Credential -OneTimeCode (Read-Host 'One-time code')
 
         Connects with an account that requires MFA, using a code you supply. Reading it with Read-Host
         keeps it out of the command history.
 
     .EXAMPLE
         $Credential = Get-Secret -Name 'CWC-Login'
-        Connect-CWC -Server 'control.example.com' -Credentials $Credential -TotpSecret (Get-Secret -Name 'CWC-TOTP')
+        Connect-CWC -Server 'screenconnect.example.com' -Credentials $Credential -TotpSecret (Get-Secret -Name 'CWC-TOTP')
 
         Unattended login for an account that requires MFA. Run it again before each batch of work: when
         the cached login is still valid it costs one call, and when it has expired it logs in again.
 
     .EXAMPLE
         $Secret = Read-Host -AsSecureString -Prompt 'RESTful API secret'
-        Connect-CWC -Server 'control.example.com' -ApiSecret $Secret
+        Connect-CWC -Server 'screenconnect.example.com' -ApiSecret $Secret
 
     .NOTES
         Functions available with -ApiSecret: Get-CWCSessionDetail, Update-CWCSessionName,
@@ -95,7 +95,7 @@ function Connect-CWC {
         New-CWCSession, Add-CWCSessionNote, Send-CWCSessionMessage, Send-CWCToolboxItem.
         Only calls that are safe to repeat (reads, "set to value" updates) are retried on HTTP 500.
 
-        The API secret is not tied to a Control user: the extension does not apply role permissions or
+        The API secret is not tied to a ScreenConnect user: the extension does not apply role permissions or
         session group scoping, so it can act on every session. Treat it like an administrator password.
         Requires the RESTful API Manager extension (2d558935-686a-4bd0-9991-07539f5fe749).
 
@@ -239,7 +239,7 @@ function Connect-CWC {
         try {
             # Lookup of an all-zero session ID: returns an empty list when the secret is valid.
             $null = Invoke-CWCServiceMethod -RestApi -Method GetSessionBySessionID -Arguments ([guid]::Empty.ToString()) -Idempotent -ErrorAction Stop
-            Write-Verbose "Connected to Control server with API secret: https://$Server"
+            Write-Verbose "Connected to ScreenConnect server with API secret: https://$Server"
         }
         catch {
             $script:CWCServerConnection = $PreviousConnection
@@ -258,7 +258,7 @@ function Connect-CWC {
         }
         try {
             Invoke-CWCMfaLogin @LoginParameters
-            Write-Verbose "Connected to Control server with an MFA login: https://$Server"
+            Write-Verbose "Connected to ScreenConnect server with an MFA login: https://$Server"
         }
         catch {
             $script:CWCServerConnection = $PreviousConnection
@@ -283,7 +283,7 @@ function Connect-CWC {
         }
         catch {
             $script:CWCServerConnection = $PreviousConnection
-            Write-Error "Failed to connect to Control server 'https://$Server': $_"
+            Write-Error "Failed to connect to ScreenConnect server 'https://$Server': $_"
         }
 
         if ($FrontPage) {
@@ -297,7 +297,7 @@ function Connect-CWC {
                 Headers    = $Headers
                 WebSession = $WebSession
             }
-            Write-Verbose "Connected to Control server: https://$Server"
+            Write-Verbose "Connected to ScreenConnect server: https://$Server"
 
             try {
                 # GetEligibleHosts requires any permission, so it validates auth for non-admin accounts too

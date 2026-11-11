@@ -1198,8 +1198,8 @@ Describe 'Enter-CWCSession' {
     }
 
     It 'reports a launch failure without the URL' -Skip:([Environment]::OSVersion.Platform -ne 'Win32NT') {
-        Mock -ModuleName 'ConnectWiseControlAPI' Start-CWCHostClient { throw 'Could not start the Control client (Win32Exception).' }
-        { Enter-CWCSession -GUID $Id -ErrorAction Stop } | Should -Throw 'Could not start the Control client*'
+        Mock -ModuleName 'ConnectWiseControlAPI' Start-CWCHostClient { throw 'Could not start the ScreenConnect client (Win32Exception).' }
+        { Enter-CWCSession -GUID $Id -ErrorAction Stop } | Should -Throw 'Could not start the ScreenConnect client*'
         Should -Invoke Invoke-CWCWebRequest -ModuleName 'ConnectWiseControlAPI' -Times 0 -ParameterFilter { $Arguments.Endpoint -like '*/LogInitiatedJoin' }
     }
 

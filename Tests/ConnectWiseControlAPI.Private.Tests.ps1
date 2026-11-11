@@ -799,7 +799,7 @@ Describe 'Start-CWCHostClient' {
     It 'throws a fixed message and leaves no trace of the URL in $Error' -Skip:([Environment]::OSVersion.Platform -ne 'Win32NT') {
         InModuleScope 'ConnectWiseControlAPI' {
             $Missing = Join-Path ([IO.Path]::GetTempPath()) 'cwc-missing-SECRETTOKEN\client.exe'
-            { Start-CWCHostClient -Url $Missing } | Should -Throw 'Could not start the Control client (*).'
+            { Start-CWCHostClient -Url $Missing } | Should -Throw 'Could not start the ScreenConnect client (*).'
             ($Error | Out-String) | Should -Not -Match 'SECRETTOKEN'
         }
     }

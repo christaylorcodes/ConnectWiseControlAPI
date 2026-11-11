@@ -5,7 +5,7 @@ function Remove-CWCHostFromSession {
 
     .DESCRIPTION
         Queues a QueuedForceDisconnect session event (type 48) for the given connection, the same
-        action as disconnecting a participant in the Control web UI. Connection IDs are listed in
+        action as disconnecting a participant in the ScreenConnect web UI. Connection IDs are listed in
         (Get-CWCSessionDetail -GUID <session> -Include Connections).Connections.
 
     .PARAMETER SessionID

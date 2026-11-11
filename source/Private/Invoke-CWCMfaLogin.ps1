@@ -56,7 +56,7 @@ function Invoke-CWCMfaLogin {
             $Page = Invoke-WebRequest -Uri $Origin -WebSession $WebSession -UseBasicParsing -ErrorAction Stop
         }
         catch {
-            throw (New-LoginError "Failed to connect to Control server '$Origin': $($_.Exception.Message)" 'CWC.NoResponse' ConnectionError)
+            throw (New-LoginError "Failed to connect to ScreenConnect server '$Origin': $($_.Exception.Message)" 'CWC.NoResponse' ConnectionError)
         }
         Get-CWCAntiForgeryToken -Content $Page.Content
     }

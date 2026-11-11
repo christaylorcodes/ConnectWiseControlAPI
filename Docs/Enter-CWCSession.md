@@ -8,7 +8,7 @@ schema: 2.0.0
 # Enter-CWCSession
 
 ## SYNOPSIS
-Opens the ConnectWise Control Host client joined to a session, like Join in the web UI.
+Opens the ConnectWise ScreenConnect Host client joined to a session, like Join in the web UI.
 
 ## SYNTAX
 
@@ -18,7 +18,7 @@ Enter-CWCSession [-GUID] <Guid> [[-Type] <Object>] [[-Group] <String[]>] [[-Name
 
 ## DESCRIPTION
 Gets a Host access token for the session (PageService.GetAccessToken), builds the client launch
-URL the web client uses (sc-\<instance\>://...) and opens it with the installed Control client.
+URL the web client uses (sc-\<instance\>://...) and opens it with the installed ScreenConnect client.
 The join is recorded in the session's audit trail (InitiatedJoin), as a web UI join is.
 
 The client must already be installed for the current Windows user: join any session once from

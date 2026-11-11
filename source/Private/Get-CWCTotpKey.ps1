@@ -6,7 +6,7 @@ function Get-CWCTotpKey {
     .DESCRIPTION
         Accepts the forms people have the secret in:
         - Base32, optionally with spaces, dashes or '=' padding, in any case;
-        - with a "<name>:" prefix, as Control stores it (e.g. "ms:<Base32>" from New-CWCMFA);
+        - with a "<name>:" prefix, as ScreenConnect stores it (e.g. "ms:<Base32>" from New-CWCMFA);
         - an otpauth:// link (the QR code's content), using its secret= value.
         Errors never include the secret.
     #>

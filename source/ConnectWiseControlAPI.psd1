@@ -27,10 +27,10 @@
     CompanyName       = 'ChrisTaylorCodes'
 
     # Copyright statement for this module
-    Copyright         = '(c) 2020 Chris Taylor. All rights reserved.'
+    Copyright         = '(c) 2020-2026 Chris Taylor. All rights reserved.'
 
     # Description of the functionality provided by this module
-    Description       = 'PowerShell wrapper for ConnectWise Control web API'
+    Description       = 'PowerShell wrapper for the ConnectWise ScreenConnect (formerly ConnectWise Control) web API'
 
     # Minimum version of the Windows PowerShell engine required by this module
     PowerShellVersion = '3.0'
@@ -98,7 +98,7 @@
         PSData = @{
 
             # Tags applied to this module. These help with module discovery in online galleries.
-            Tags         = @('ChrisTaylorCodes', 'ConnectWise', 'Control', 'ScreenConnect', 'API')
+            Tags         = @('ChrisTaylorCodes', 'ConnectWise', 'ScreenConnect', 'ConnectWiseControl', 'Control', 'API', 'MSP')
 
             # A URL to the license for this module.
             LicenseUri   = 'https://github.com/christaylorcodes/ConnectWiseControlAPI/blob/master/LICENSE'
@@ -120,9 +120,6 @@
         } # End of PSData hashtable
 
     } # End of PrivateData hashtable
-
-    # HelpInfo URI of this module
-    HelpInfoURI       = 'https://raw.githubusercontent.com/christaylorcodes/ConnectWiseControlAPI/master/source/en-US/ConnectWiseControlAPI-help.xml'
 
     # Default prefix for commands exported from this module. Override the default prefix using Import-Module -Prefix.
     # DefaultCommandPrefix = ''

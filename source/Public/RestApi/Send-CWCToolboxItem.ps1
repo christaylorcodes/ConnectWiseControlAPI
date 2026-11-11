@@ -17,7 +17,7 @@ function Send-CWCToolboxItem {
         Session ID.
 
     .PARAMETER Name
-        Toolbox item name as shown in the Control Toolbox.
+        Toolbox item name as shown in the ScreenConnect Toolbox.
 
     .PARAMETER Group
         Session group containing the session (credentials connections only). Defaults to 'All Machines'.

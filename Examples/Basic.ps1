@@ -1,7 +1,7 @@
-# Your Control server URL
-$Server = 'control.domain.com'
+# Your ScreenConnect server URL
+$Server = 'screenconnect.domain.com'
 
-# Get Control credentials
+# Get ScreenConnect credentials
 $Credentials = Get-Credential
 
 # Load module
@@ -11,7 +11,7 @@ Import-Module 'ConnectWiseControlAPI'
 # Save connection info
 Connect-CWC -Server $Server -Credentials $Credentials
 
-# Find this machine in Control
+# Find this machine in ScreenConnect
 $Computer = Get-CWCSession -Type Access -Search $env:COMPUTERNAME -Limit 1
 
 if(!$Computer){ return "Computer not found" }

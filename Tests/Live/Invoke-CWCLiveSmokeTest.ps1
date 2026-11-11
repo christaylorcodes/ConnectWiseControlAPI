@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Live smoke test against a real Control server. Answers the questions the unit tests can't.
+    Live smoke test against a real ScreenConnect server. Answers the questions the unit tests can't.
 
 .DESCRIPTION
     Read-only by default. -AllowWrites adds actions on ONE test session you choose (a command, a note,
@@ -16,10 +16,10 @@
       - PageService.CreateSession + Remove-CWCSession round trip
 
 .EXAMPLE
-    ./Tests/Live/Invoke-CWCLiveSmokeTest.ps1 -Server control.example.com -TestSessionID <guid>
+    ./Tests/Live/Invoke-CWCLiveSmokeTest.ps1 -Server screenconnect.example.com -TestSessionID <guid>
 
 .EXAMPLE
-    ./Tests/Live/Invoke-CWCLiveSmokeTest.ps1 -Server control.example.com -TestSessionID <guid> -AllowWrites -ToolboxItem 'Test.ps1'
+    ./Tests/Live/Invoke-CWCLiveSmokeTest.ps1 -Server screenconnect.example.com -TestSessionID <guid> -AllowWrites -ToolboxItem 'Test.ps1'
 #>
 [CmdletBinding()]
 param(
@@ -134,7 +134,7 @@ function Remove-SmokeTestNote {
     [ordered]@{ Deleted = $TestNotes.Count; Remaining = $Remaining }
 }
 
-$AdminCredential = Get-Credential -Message 'Admin (non-MFA) Control account'
+$AdminCredential = Get-Credential -Message 'Admin (non-MFA) ScreenConnect account'
 
 if ($CleanupOnly) {
     Invoke-Step 'Creds.Connect' { Connect-CWC -Server $Server -Credentials $AdminCredential -Force; 'connected' }

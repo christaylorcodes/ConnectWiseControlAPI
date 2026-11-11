@@ -50,7 +50,7 @@ Accept wildcard characters: False
 ```
 
 ### -Name
-Toolbox item name as shown in the Control Toolbox.
+Toolbox item name as shown in the ScreenConnect Toolbox.
 
 ```yaml
 Type: String

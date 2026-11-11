@@ -25,7 +25,7 @@ Remove-CWCSessionNote -GUID <Guid> [-All] [-Group <String[]>] [-WhatIf]
 
 ## DESCRIPTION
 Deletes notes (AddedNote events) by adding a DeletedEvent correlated to each note, the same way
-the Control web UI removes a note.
+the ScreenConnect web UI removes a note.
 The user needs the RemoveNote permission in -Group.
 
 -NoteEventID removes specific notes; -All removes every note still on the session.
