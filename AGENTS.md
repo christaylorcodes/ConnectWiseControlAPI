@@ -46,7 +46,11 @@ Invoke-Pester -Path ./Tests/ConnectWiseControlAPI.Private.Tests.ps1
 ./Build/Update-Help.ps1
 ```
 
-Tooling: PowerShell 7 for the build; Pester 5.7.1+, PSScriptAnalyzer, platyPS 0.14.x (`RequiredModules.psd1`).
+Tooling: PowerShell 7 for the build. Every tool version (Sampler, ModuleBuilder, InvokeBuild, powershell-yaml,
+Pester 5.7.1, PSScriptAnalyzer, platyPS 0.14.2) is pinned exactly in `RequiredModules.psd1`, the only place versions
+are written. The first build resolves them into `output/RequiredModules`; `Tests/test-local.ps1` imports each tool
+at its pinned version and fails if it is missing. To raise a pin, change the file in a PR and delete
+`output/RequiredModules`.
 
 `Tests/ConnectWiseControlAPI.Live.Tests.ps1` skips unless `$env:CWC_SERVER`, `CWC_USER` and `CWC_PASSWORD` are set.
 `Tests/Live/Invoke-CWCLiveSmokeTest.ps1` checks behaviour against a real server (read-only unless `-AllowWrites`).
@@ -59,10 +63,12 @@ Tooling: PowerShell 7 for the build; Pester 5.7.1+, PSScriptAnalyzer, platyPS 0.
 | --- | --- |
 | Build module | `./build.ps1` (Sampler/ModuleBuilder); `Test-ModuleManifest` on source and built manifests |
 | Pester (PowerShell 7) / Pester (Windows PowerShell 5.1) | Full Pester suite against the built module, both editions |
-| PSScriptAnalyzer | Zero analyzer errors in `source/` |
+| PSScriptAnalyzer | No analyzer errors in `source/`, and nothing from three rules that block at any severity: `PSUseCompatibleSyntax`, `PSAvoidUsingPlainTextForPassword`, `PSUsePSCredentialType` |
 | Docs drift | `Build/Update-Help.ps1` leaves no diff |
 
-`.github/workflows/pr-validation.yml` warns when a PR doesn't update `CHANGELOG.md`.
+Only the build job downloads tools from the Gallery; the other jobs get `output/RequiredModules` as an artifact.
+A Pester run in which no test passes fails. `.github/workflows/pr-validation.yml` warns when a PR doesn't update
+`CHANGELOG.md`.
 
 ### Releasing
 
@@ -72,18 +78,31 @@ every step below needs the owner's explicit go.
 1. Release PR: set `ModuleVersion` in `source/<ModuleName>.psd1` (three parts), rename the CHANGELOG's
    `## [Unreleased]` notes to `## [<version>] - <yyyy-MM-dd>` (leave an empty `[Unreleased]` above it) and update
    the compare links at the bottom. Merge it.
-2. Dry run: run the **Release** workflow by hand (`gh workflow run release.yml`). It checks, builds, tests and
-   packages, and publishes nothing. Locally: `./Build/Get-ReleaseInfo.ps1`, then `./Tests/test-local.ps1`, then
-   `./Build/Test-ReleasePackage.ps1`.
-3. Tag the merged commit on `master` as `v<version>` and push the tag. The workflow fails before building unless
-   the tag equals `ModuleVersion`, the CHANGELOG has the dated section, the version is not on the Gallery and the
-   commit is on `master`.
+2. Dry run on the exact commit that will be tagged: run the **Release** workflow by hand
+   (`gh workflow run release.yml --ref master`). It checks, builds, tests and packages, and publishes nothing.
+   Locally: `./Build/Get-ReleaseInfo.ps1`, then `./Tests/test-local.ps1`, then `./Build/Test-ReleasePackage.ps1`.
+3. Tag that commit and push only that tag (never `--tags`):
+   `git fetch origin; git tag -a v<version> origin/master -m "v<version>"; git push origin v<version>`.
+   The workflow fails before building unless the tag equals `ModuleVersion`, the CHANGELOG has the dated section,
+   the version is not on the Gallery and the commit is on `master`.
 4. The `publish` job waits for the owner's approval in the `psgallery` environment, which holds the
-   `PSGALLERY_API_KEY` secret. Agents never see or handle that key. The job publishes the `.nupkg` the package
-   check tested, after comparing its SHA256. After the publish, the workflow creates the GitHub Release from the
-   CHANGELOG section.
+   `PSGALLERY_API_KEY` secret. Agents never see or handle that key. Before approving, check that the commit in
+   the run summary is the `master` commit that was reviewed; to cancel, reject the deployment. The job publishes
+   the `.nupkg` the package check tested, after comparing its SHA256 with the one the build job reported.
+5. The workflow then creates the GitHub Release from the CHANGELOG section and waits for the Gallery to list the
+   version. If it warns that the Gallery does not list it yet, check the package page before announcing.
 
-If the publish succeeded and a later job failed, re-run only the failed job; never re-run the publish.
+When a release run fails:
+
+| What happened | What to do |
+| --- | --- |
+| A job failed before `publish` | Nothing was published. For a flaky download, "Re-run failed jobs". A re-run uses the same commit and workflow file, so for a real fault delete the tag (`git push origin :refs/tags/v<version>`), fix it in a PR, dry-run and tag again. |
+| `publish` failed or timed out | Look at `https://www.powershellgallery.com/packages/<ModuleName>/<version>`, then "Re-run failed jobs". The job asks the Gallery first: if the version is there it uploads nothing and goes on to the GitHub Release; if not, it uploads. It needs the owner's approval again. |
+| `github-release` failed | "Re-run failed jobs". It leaves an existing release alone. |
+| "Re-run all jobs" after a successful publish | Fails at the first check ("already on the PowerShell Gallery"). That is intended; nothing needs fixing. |
+| The upload itself cannot work from the runner | Download the run's `release` artifact and run `Publish-PSResource -NupkgPath <file> -Repository PSGallery -ApiKey <key>` locally (owner only), then "Re-run failed jobs" to create the release. |
+
+The `release` artifact is kept for 30 days; re-runs need it.
 
 ## Architecture
 

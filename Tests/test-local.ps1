@@ -73,6 +73,21 @@ function Add-RequiredModulesPath {
 }
 Add-RequiredModulesPath
 
+# Tools are imported at the exact version pinned in RequiredModules.psd1, never "whatever is installed": a runner
+# image or a developer machine can have another Pester or PSScriptAnalyzer earlier on the module path.
+$PinnedModules = Import-PowerShellDataFile -Path (Join-Path $RepoRoot 'RequiredModules.psd1')
+function Import-PinnedModule([string]$Name) {
+    $Pin = "$($PinnedModules[$Name])"
+    if ($Pin -notmatch '^\d+(\.\d+){1,3}$') { throw "RequiredModules.psd1 has no exact version for $Name ('$Pin')." }
+    try {
+        Import-Module $Name -RequiredVersion $Pin -ErrorAction Stop
+    } catch {
+        throw ("$Name $Pin is not available: $($_.Exception.Message) Run './Tests/test-local.ps1 -Stage Build' " +
+            "once to resolve it into output/RequiredModules, or Install-Module $Name -RequiredVersion $Pin.")
+    }
+    Write-Host "Using $Name $((Get-Module $Name).Version)"
+}
+
 function Write-Stage([string]$Name) {
     Write-Host ''
     Write-Host "=== $Name ($($PSVersionTable.PSEdition) $($PSVersionTable.PSVersion)) ===" -ForegroundColor Cyan
@@ -110,15 +125,25 @@ if ($Stage -contains 'Build') {
 
 if ($Stage -contains 'Analyze') {
     Write-Stage 'Analyze'
-    Import-Module PSScriptAnalyzer -ErrorAction Stop
+    Import-PinnedModule PSScriptAnalyzer
     $Results = @(Invoke-ScriptAnalyzer -Path $SourceFolder -Recurse -ErrorAction Stop `
             -Settings (Join-Path $RepoRoot '.PSScriptAnalyzerSettings.psd1'))
-    $Errors = @($Results | Where-Object Severity -EQ 'Error')
+    # Errors fail the stage (a file that does not parse stops Invoke-ScriptAnalyzer through -ErrorAction Stop).
+    # These rules also fail it, whatever severity they report:
+    #   PSUseCompatibleSyntax is the only check behind the manifest's PowerShellVersion = '3.0' (the 5.1 test run
+    #   cannot catch syntax that 5.1 accepts and 3.0 does not); the other two are warnings that keep secrets out
+    #   of [string] parameters.
+    $BlockingRules = 'PSUseCompatibleSyntax', 'PSAvoidUsingPlainTextForPassword', 'PSUsePSCredentialType'
+    $Errors = @($Results | Where-Object {
+            "$($_.Severity)" -in 'Error', 'ParseError' -or $_.RuleName -in $BlockingRules
+        })
     if ($Errors) {
         $Errors | Format-Table RuleName, ScriptName, Line, Message -AutoSize -Wrap | Out-String | Write-Host
         $Failures.Add("PSScriptAnalyzer: $($Errors.Count) error(s)")
     }
     Write-Host "PSScriptAnalyzer: $($Errors.Count) error(s), $($Results.Count - $Errors.Count) other finding(s)"
+    $Results | Where-Object { $Errors -notcontains $_ } | Group-Object RuleName | Sort-Object Count -Descending |
+        ForEach-Object { Write-Host ('  {0,4} {1}' -f $_.Count, $_.Name) }
 }
 
 if ($Stage -contains 'Manifest') {
@@ -163,7 +188,7 @@ if ($Stage -contains 'Test') {
         Write-Host "Testing $(Get-DisplayPath $TestTarget)"
         $env:MODULE_TEST_PATH = $TestTarget
         try {
-            Import-Module Pester -MinimumVersion 5.7.1 -ErrorAction Stop
+            Import-PinnedModule Pester
             $Config = New-PesterConfiguration
             $Config.Run.Path = Join-Path $RepoRoot 'Tests'
             $Config.Run.PassThru = $true
@@ -184,6 +209,10 @@ if ($Stage -contains 'Test') {
             }
             if ($Result.FailedCount -gt 0 -or $Result.Result -ne 'Passed') {
                 $Failures.Add("Pester ($($PSVersionTable.PSEdition)): $($Result.FailedCount) failed, result $($Result.Result)")
+            }
+            # Pester reports 'Passed' when it found nothing to run (a wrong path, renamed files)
+            if ($Result.PassedCount -eq 0) {
+                $Failures.Add("Pester ($($PSVersionTable.PSEdition)): no test passed ($($Result.TotalCount) found)")
             }
 
             $CanRunDesktop = $PSVersionTable.PSEdition -eq 'Core' -and $IsWindows -and
@@ -213,9 +242,11 @@ if ($Stage -contains 'Docs') {
         (git -C $RepoRoot ls-files --others --exclude-standard -- $GeneratedPaths) -join "`n"
     }
     $Before = (& $GetSnapshot) -join "`n"
+    # Loaded here at the pinned version; Update-Help.ps1's own Import-Module platyPS then finds it loaded
+    Import-PinnedModule platyPS
     & (Join-Path $RepoRoot 'Build/Update-Help.ps1') -ErrorAction Stop
     $After = (& $GetSnapshot) -join "`n"
-    if ($Before -ne $After) {
+    if ($Before -cne $After) {
         git -C $RepoRoot status --porcelain -- $GeneratedPaths | Write-Host
         $Failures.Add('Docs drift: ./Build/Update-Help.ps1 changed generated help; review and commit the result')
     } else {

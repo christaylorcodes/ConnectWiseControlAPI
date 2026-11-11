@@ -12,10 +12,14 @@
 #                package on both editions (Build/Test-ReleasePackage.ps1)
 #   4. publish   Publish-PSResource -NupkgPath of that exact .nupkg, after checking its SHA256. Runs in the
 #                "psgallery" environment, which holds the PSGALLERY_API_KEY secret and should require the owner's
-#                approval.
-#   5. release   GitHub Release for the tag, with the CHANGELOG section as its notes
+#                approval. If the version is already on the Gallery (a re-run after the upload went through), it
+#                uploads nothing and succeeds.
+#   5. release   GitHub Release for the tag, with the CHANGELOG section as its notes, then a wait until the
+#                Gallery lists the version (a warning, never a failure)
 #
 # A Gallery version can never be replaced, so everything that can fail is checked before step 4.
+# Re-running: "Re-run failed jobs" is always safe. "Re-run all jobs" after a successful publish stops at step 1,
+# because the version then exists. See "Releasing" in AGENTS.md.
 # No module name is hard-coded here.
 #
 # Security note: never interpolate ${{ github.* }} values directly into a run: script. Use env: or the
@@ -45,6 +49,9 @@ jobs:
     defaults:
       run:
         shell: pwsh
+    outputs:
+      # Passed to the publish job apart from the artifact, so the file and its expected hash do not travel together
+      sha256: ${{ steps.package.outputs.sha256 }}
 
     steps:
       - name: Checkout Repository
@@ -70,9 +77,11 @@ jobs:
         run: ./Tests/test-local.ps1
 
       - name: Package and check the package
+        id: package
         run: |
           $Release = Join-Path 'output' 'release'
           $Package = ./Build/Test-ReleasePackage.ps1 -PackagePath $Release
+          "sha256=$($Package.PackageSha256)" | Add-Content -Path $env:GITHUB_OUTPUT
           Move-Item -Path 'release-notes.md' -Destination $Release
           $Package | Select-Object ModuleName, Version, Functions, PackageName, PackageSha256 |
               ConvertTo-Json | Set-Content -Path (Join-Path $Release 'release.json')
@@ -122,32 +131,44 @@ jobs:
       - name: Publish
         env:
           PSGALLERY_API_KEY: ${{ secrets.PSGALLERY_API_KEY }}
+          EXPECTED_SHA256: ${{ needs.build.outputs.sha256 }}
         run: |
           if (-not $env:PSGALLERY_API_KEY) { throw 'The PSGALLERY_API_KEY secret is not set in the psgallery environment.' }
+          if (-not $env:EXPECTED_SHA256) { throw 'The build job reported no package hash.' }
           $Release = Get-Content -Path 'release/release.json' -Raw | ConvertFrom-Json
           if ("v$($Release.Version)" -ne $env:GITHUB_REF_NAME) {
               throw "The built version $($Release.Version) does not match tag $env:GITHUB_REF_NAME."
           }
-          # Publish the .nupkg the build job checked, and only if it is byte-for-byte that file
+          # Publish the .nupkg the build job checked: its hash must be the one that job reported
           $Package = Join-Path 'release' $Release.PackageName
           $Hash = (Get-FileHash -Path $Package -Algorithm SHA256).Hash
-          if ($Hash -ne $Release.PackageSha256) {
-              throw "The package hash $Hash does not match the checked package $($Release.PackageSha256)."
+          if ($Hash -ne $env:EXPECTED_SHA256) {
+              throw "The package hash $Hash does not match the checked package $env:EXPECTED_SHA256."
           }
+
+          # Is the version already on the Gallery? 200 = yes, 404 = no, anything else = stop. It is there when
+          # this job is re-run after an upload that went through (the build job refuses a version that exists
+          # before it builds). Uploading again would only fail, so skip it and let the release be created.
+          $Uri = "https://www.powershellgallery.com/api/v2/Packages(Id='$($Release.ModuleName)',Version='$($Release.Version)')"
+          try {
+              Invoke-WebRequest -Uri $Uri -UseBasicParsing | Out-Null
+              $Exists = $true
+          } catch {
+              $Status = 0
+              if ($_.Exception.Response) { $Status = [int]$_.Exception.Response.StatusCode }
+              if ($Status -ne 404) { throw "Could not check the PowerShell Gallery (HTTP $Status): $($_.Exception.Message)" }
+              $Exists = $false
+          }
+          if ($Exists) {
+              Write-Warning "$($Release.ModuleName) $($Release.Version) is already on the PowerShell Gallery. Nothing was uploaded."
+              "Already on the Gallery: $($Release.ModuleName) $($Release.Version). Nothing was uploaded in this run." |
+                  Add-Content -Path $env:GITHUB_STEP_SUMMARY
+              exit 0
+          }
+
           Publish-PSResource -NupkgPath $Package -Repository PSGallery -ApiKey $env:PSGALLERY_API_KEY
           Write-Host "Published $($Release.ModuleName) $($Release.Version) ($($Release.PackageName), SHA256 $Hash)"
-
-      - name: Wait until the Gallery lists the version
-        run: |
-          $Release = Get-Content -Path 'release/release.json' -Raw | ConvertFrom-Json
-          foreach ($Attempt in 1..20) {
-              $Found = Find-PSResource -Name $Release.ModuleName -Version $Release.Version -Repository PSGallery `
-                  -ErrorAction SilentlyContinue
-              if ($Found) { Write-Host "The Gallery lists $($Found.Name) $($Found.Version)"; exit 0 }
-              Start-Sleep -Seconds 30
-          }
-          # The publish itself succeeded; the Gallery can take longer to validate and index a package.
-          Write-Warning 'The Gallery does not list the version yet. Check the package page before announcing it.'
+          "Published $($Release.ModuleName) $($Release.Version), SHA256 $Hash" | Add-Content -Path $env:GITHUB_STEP_SUMMARY
 
   github-release:
     name: Create the GitHub Release
@@ -164,8 +185,32 @@ jobs:
           name: release
           path: release
 
+      # Safe to re-run: an existing release is left as it is
       - name: Create Release
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-        run: gh release create "$GITHUB_REF_NAME" --verify-tag --title "$GITHUB_REF_NAME" --notes-file release/release-notes.md
+        run: |
+          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            echo "Release $GITHUB_REF_NAME already exists."
+          else
+            gh release create "$GITHUB_REF_NAME" --verify-tag --title "$GITHUB_REF_NAME" --notes-file release/release-notes.md
+          fi
+
+      # Last, and never a failure: the upload succeeded, but the Gallery can take a while to validate and list it
+      - name: Wait until the Gallery lists the version
+        shell: pwsh
+        run: |
+          try {
+              $Release = Get-Content -Path 'release/release.json' -Raw | ConvertFrom-Json
+              foreach ($Attempt in 1..20) {
+                  $Found = Find-PSResource -Name $Release.ModuleName -Version $Release.Version -Repository PSGallery `
+                      -ErrorAction SilentlyContinue
+                  if ($Found) { Write-Host "The Gallery lists $($Found.Name) $($Found.Version)"; exit 0 }
+                  Start-Sleep -Seconds 30
+              }
+              Write-Warning 'The Gallery does not list the version yet. Check the package page before announcing it.'
+          } catch {
+              Write-Warning "Could not ask the Gallery for the version: $($_.Exception.Message)"
+          }
+          exit 0

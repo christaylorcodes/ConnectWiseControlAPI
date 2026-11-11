@@ -165,6 +165,10 @@ Changes to the repository. They do not change the published module.
   tag against the manifest and this changelog, builds, runs every test stage, checks the package installs on
   both editions, publishes to the PowerShell Gallery after the owner approves, and creates the GitHub Release.
   A manual run is a dry run that publishes nothing
+- Build, test and docs tools are pinned to exact versions in `RequiredModules.psd1`. CI downloads them once per
+  run and shares them between jobs, and `Tests/test-local.ps1` imports each tool at its pinned version
+- The analyzer stage also fails on the warnings `PSAvoidUsingPlainTextForPassword` and `PSUsePSCredentialType`,
+  and lists its other findings by rule; a Pester run in which no test passes fails
 - Repository layout follows the GitHub-Template (Sampler): the module source moved from `ConnectWiseControlAPI/` to
   `source/` (`Extensions/Remote Workforce` is now `Extensions/RemoteWorkforce`; the `Launcher` extension folder
   was the Remote Workforce extension) and `./build.ps1` builds the published module into
