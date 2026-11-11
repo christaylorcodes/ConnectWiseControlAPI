@@ -66,9 +66,12 @@ $Failures = New-Object System.Collections.Generic.List[string]
 # Restored before the script exits.
 $SavedModulePath = $env:PSModulePath
 $RequiredModulesPath = Join-Path $RepoRoot 'output/RequiredModules'
-if ((Test-Path $RequiredModulesPath) -and ($env:PSModulePath -notlike "*$RequiredModulesPath*")) {
-    $env:PSModulePath = $RequiredModulesPath + [IO.Path]::PathSeparator + $env:PSModulePath
+function Add-RequiredModulesPath {
+    if ((Test-Path $RequiredModulesPath) -and ($env:PSModulePath -notlike "*$RequiredModulesPath*")) {
+        $env:PSModulePath = $RequiredModulesPath + [IO.Path]::PathSeparator + $env:PSModulePath
+    }
 }
+Add-RequiredModulesPath
 
 function Write-Stage([string]$Name) {
     Write-Host ''
@@ -99,6 +102,9 @@ if ($Stage -contains 'Build') {
         & (Get-Process -Id $PID).Path @BuildArgs
         if ($LASTEXITCODE -ne 0) { $Failures.Add("Build: build.ps1 exited with $LASTEXITCODE") }
         $env:ModuleVersion = $SavedBuildVersion
+        # On a clean checkout the build has only just created output/RequiredModules; the later stages need it
+        # (the release workflow runs every stage in one call on a runner that has no platyPS).
+        Add-RequiredModulesPath
     }
 }
 
