@@ -62,9 +62,27 @@ Tooling: PowerShell 7 for the build; Pester 5.7.1+, PSScriptAnalyzer, platyPS 0.
 | PSScriptAnalyzer | Zero analyzer errors in `source/` |
 | Docs drift | `Build/Update-Help.ps1` leaves no diff |
 
-`.github/workflows/pr-validation.yml` warns when a PR doesn't update `CHANGELOG.md`. Publishing to the PowerShell
-Gallery is manual and needs the owner's explicit go: build, then
-`Publish-Module -Path output/<ModuleName>/<version> -NuGetApiKey <key>` (publish the built folder, not `source/`).
+`.github/workflows/pr-validation.yml` warns when a PR doesn't update `CHANGELOG.md`.
+
+### Releasing
+
+`.github/workflows/release.yml` publishes to the PowerShell Gallery. A Gallery version can never be replaced, and
+every step below needs the owner's explicit go.
+
+1. Release PR: set `ModuleVersion` in `source/<ModuleName>.psd1` (three parts), rename the CHANGELOG's
+   `## [Unreleased]` notes to `## [<version>] - <yyyy-MM-dd>` (leave an empty `[Unreleased]` above it) and update
+   the compare links at the bottom. Merge it.
+2. Dry run: run the **Release** workflow by hand (`gh workflow run release.yml`). It checks, builds, tests and
+   packages, and publishes nothing. Locally: `./Build/Get-ReleaseInfo.ps1`, then `./Tests/test-local.ps1`, then
+   `./Build/Test-ReleasePackage.ps1`.
+3. Tag the merged commit on `master` as `v<version>` and push the tag. The workflow fails before building unless
+   the tag equals `ModuleVersion`, the CHANGELOG has the dated section, the version is not on the Gallery and the
+   commit is on `master`.
+4. The `publish` job waits for the owner's approval in the `psgallery` environment, which holds the
+   `PSGALLERY_API_KEY` secret. Agents never see or handle that key. After the publish, the workflow creates the
+   GitHub Release from the CHANGELOG section.
+
+If the publish succeeded and a later job failed, re-run only the failed job; never re-run the publish.
 
 ## Architecture
 
@@ -142,8 +160,8 @@ Enforced by `.PSScriptAnalyzerSettings.psd1` and `.editorconfig`:
 | --- | --- | --- |
 | PowerShell 7.6, Core only | PowerShell 3.0+, runs on 5.1 and 7 | MSPs run it from RMM agents on Windows PowerShell 5.1 |
 | Sampler `test` task, Pester 6 | `Tests/test-local.ps1`, Pester 5.7 | Must run the suite under Windows PowerShell 5.1 |
-| `Tests/Unit/{Module,Public,Private}`, one file per function | Four suite files under `Tests/` | Not split yet |
+| `Tests/Unit/{Module,Public,Private}`, one file per function | Four module suite files (plus `Release.Tests.ps1`) under `Tests/` | Not split yet |
 | `docs/` (help, examples, media) | `Docs/` (platyPS), `Examples/`, `Media/` at the root | `docs/` = `Docs/` on Windows |
-| Changelog release task | Release notes by hand | The task cannot parse this CHANGELOG's 4-part versions |
+| Changelog release task | `Build/Get-ReleaseInfo.ps1` reads the notes | The task cannot parse this CHANGELOG's 4-part versions |
 | PlatyPS 1.x → `docs/help` | platyPS 0.14 via `Build/Update-Help.ps1` (+ MAML) | `Get-Help` on 5.1 uses the MAML |
-| Tag-driven publish workflow | Manual `Publish-Module` | Owner publishes by hand |
+| Sampler `publish` task | `release.yml` with `Publish-PSResource` | Publishes the exact build the tests and the package check used |

@@ -1,0 +1,166 @@
+# Release: publishes the module to the PowerShell Gallery and creates the GitHub Release.
+#
+# Real release: push a tag v<ModuleVersion> (for example v0.5.0) that points at a commit on master.
+# Dry run:      "Run workflow" (workflow_dispatch) on any branch. It checks, builds, tests and packages, and then
+#               stops: nothing is published and no release is created.
+#
+# What a release does, in order:
+#   1. check     tag = ModuleVersion in the manifest, CHANGELOG.md has a dated section for the version, the version
+#                is not on the Gallery yet, and the tagged commit is on master (Build/Get-ReleaseInfo.ps1)
+#   2. build     build and run every stage of Tests/test-local.ps1 (the same checks as CI, both PowerShell editions)
+#   3. package   publish to a temporary folder repository and import the saved package on both editions
+#                (Build/Test-ReleasePackage.ps1)
+#   4. publish   Publish-PSResource of that exact build. Runs in the "psgallery" environment, which holds the
+#                PSGALLERY_API_KEY secret and should require the owner's approval.
+#   5. release   GitHub Release for the tag, with the CHANGELOG section as its notes
+#
+# A Gallery version can never be replaced, so everything that can fail is checked before step 4.
+# No module name is hard-coded here.
+#
+# Security note: never interpolate ${{ github.* }} values directly into a run: script. Use env: or the
+# default GITHUB_* environment variables instead.
+
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Check, build and test
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Check the release
+        run: |
+          $Params = @{ NotesPath = 'release-notes.md' }
+          if ($env:GITHUB_EVENT_NAME -eq 'push') {
+              $Params.Tag = $env:GITHUB_REF_NAME
+              git merge-base --is-ancestor HEAD origin/master
+              if ($LASTEXITCODE -ne 0) { throw "Tag $env:GITHUB_REF_NAME does not point at a commit on master." }
+          } else {
+              $Params.AllowUnreleased = $true
+          }
+          $Info = ./Build/Get-ReleaseInfo.ps1 @Params
+          $Info | Select-Object ModuleName, Version, Tag, DryRun, NotesSource | Format-List
+
+      - name: Build and test
+        run: ./Tests/test-local.ps1
+
+      - name: Package and check the package
+        run: |
+          $Package = ./Build/Test-ReleasePackage.ps1
+          $Release = Join-Path 'output' 'release'
+          $Target = Join-Path $Release (Join-Path 'module' (Join-Path $Package.ModuleName $Package.Version))
+          New-Item -ItemType Directory -Path $Target -Force | Out-Null
+          Copy-Item -Path (Join-Path $Package.ModulePath '*') -Destination $Target -Recurse
+          Move-Item -Path 'release-notes.md' -Destination $Release
+          $Package | Select-Object ModuleName, Version, Functions, PackageName, PackageSha256 |
+              ConvertTo-Json | Set-Content -Path (Join-Path $Release 'release.json')
+
+          $Mode = if ($env:GITHUB_EVENT_NAME -eq 'push') { 'Release' } else { 'Dry run (nothing is published)' }
+          @(
+              "## $($Package.ModuleName) $($Package.Version)"
+              ''
+              "- Mode: $Mode"
+              "- Commit: $env:GITHUB_SHA"
+              "- Functions: $($Package.Functions)"
+              "- Package: $($Package.PackageName), SHA256 $($Package.PackageSha256)"
+              ''
+              '### Release notes'
+              ''
+              (Get-Content -Path (Join-Path $Release 'release-notes.md') -Raw)
+          ) | Add-Content -Path $env:GITHUB_STEP_SUMMARY
+
+      - name: Upload Release Artifact
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release
+          path: output/release/
+          if-no-files-found: error
+          retention-days: 30
+
+  publish:
+    name: Publish to the PowerShell Gallery
+    if: github.event_name == 'push'
+    needs: build
+    runs-on: windows-latest
+    environment:
+      name: psgallery
+      url: https://www.powershellgallery.com/packages/${{ github.event.repository.name }}
+    defaults:
+      run:
+        shell: pwsh
+
+    steps:
+      # No checkout: this job only handles the files the build job tested.
+      - name: Download Release Artifact
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release
+          path: release
+
+      - name: Publish
+        env:
+          PSGALLERY_API_KEY: ${{ secrets.PSGALLERY_API_KEY }}
+        run: |
+          if (-not $env:PSGALLERY_API_KEY) { throw 'The PSGALLERY_API_KEY secret is not set in the psgallery environment.' }
+          $Release = Get-Content -Path 'release/release.json' -Raw | ConvertFrom-Json
+          if ("v$($Release.Version)" -ne $env:GITHUB_REF_NAME) {
+              throw "The built version $($Release.Version) does not match tag $env:GITHUB_REF_NAME."
+          }
+          $ModulePath = Join-Path 'release/module' (Join-Path $Release.ModuleName $Release.Version)
+          Publish-PSResource -Path $ModulePath -Repository PSGallery -ApiKey $env:PSGALLERY_API_KEY
+          Write-Host "Published $($Release.ModuleName) $($Release.Version)"
+
+      - name: Wait until the Gallery lists the version
+        run: |
+          $Release = Get-Content -Path 'release/release.json' -Raw | ConvertFrom-Json
+          foreach ($Attempt in 1..20) {
+              $Found = Find-PSResource -Name $Release.ModuleName -Version $Release.Version -Repository PSGallery `
+                  -ErrorAction SilentlyContinue
+              if ($Found) { Write-Host "The Gallery lists $($Found.Name) $($Found.Version)"; exit 0 }
+              Start-Sleep -Seconds 30
+          }
+          # The publish itself succeeded; the Gallery can take longer to validate and index a package.
+          Write-Warning 'The Gallery does not list the version yet. Check the package page before announcing it.'
+
+  github-release:
+    name: Create the GitHub Release
+    if: github.event_name == 'push'
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download Release Artifact
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release
+          path: release
+
+      - name: Create Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh release create "$GITHUB_REF_NAME" --verify-tag --title "$GITHUB_REF_NAME" --notes-file release/release-notes.md

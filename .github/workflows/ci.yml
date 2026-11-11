@@ -3,7 +3,7 @@
 # Every job calls Tests/test-local.ps1 for one stage, so `./Tests/test-local.ps1` locally runs the same checks.
 # The build job (Sampler/ModuleBuilder) produces output/<ModuleName>/<version>/; the Pester jobs test that built
 # module under both Windows PowerShell 5.1 and PowerShell 7, because the module must work on both.
-# Publishing to the PowerShell Gallery is manual for now (see AGENTS.md). No module name is hard-coded here.
+# Publishing to the PowerShell Gallery is done by release.yml (see AGENTS.md). No module name is hard-coded here.
 #
 # Security note: never interpolate ${{ github.* }} / ${{ matrix.* }} values directly into a
 # run: script. Pass them through env: instead.
