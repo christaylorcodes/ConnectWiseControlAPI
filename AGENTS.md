@@ -96,11 +96,11 @@ When a release run fails:
 
 | What happened | What to do |
 | --- | --- |
-| A job failed before `publish` | Nothing was published. For a flaky download, "Re-run failed jobs". A re-run uses the same commit and workflow file, so for a real fault delete the tag (`git push origin :refs/tags/v<version>`), fix it in a PR, dry-run and tag again. |
+| A job failed before `publish` | Nothing was published. A failed download of the build tools is retried twice by the build itself; if it still fails, "Re-run failed jobs". A re-run uses the same commit and workflow file, so for a real fault delete the tag (`git push origin :refs/tags/v<version>`), fix it in a PR, dry-run and tag again. |
 | `publish` failed or timed out | Look at `https://www.powershellgallery.com/packages/<ModuleName>/<version>`, then "Re-run failed jobs". The job asks the Gallery first: if the version is there it uploads nothing and goes on to the GitHub Release; if not, it uploads. It needs the owner's approval again. |
 | `github-release` failed | "Re-run failed jobs". It leaves an existing release alone. |
 | "Re-run all jobs" after a successful publish | Fails at the first check ("already on the PowerShell Gallery"). That is intended; nothing needs fixing. |
-| The upload itself cannot work from the runner | Download the run's `release` artifact and run `Publish-PSResource -NupkgPath <file> -Repository PSGallery -ApiKey <key>` locally (owner only), then "Re-run failed jobs" to create the release. |
+| The upload itself cannot work from the runner | Download the run's `release` artifact and run `Publish-PSResource -NupkgPath <file> -Repository PSGallery -ApiKey <key>` locally (owner only), then "Re-run failed jobs" to create the release. Do not use `Publish-Module` on the built folder: it adds the command tags a second time, which exceeds the Gallery's tag limit. |
 
 The `release` artifact is kept for 30 days; re-runs need it.
 

@@ -108,14 +108,33 @@ if ($Stage -contains 'Build') {
         $Failures.Add('Build: needs PowerShell 7 (run ./build.ps1 from pwsh)')
     } else {
         $BuildArgs = @('-NoProfile', '-File', (Join-Path $RepoRoot 'build.ps1'), '-Tasks', 'build')
-        # Resolve dependencies only once: re-resolving 'latest' modules piles up versions side by side, which the
-        # Assert_RequiredModule_Versions task rejects. Delete output/RequiredModules to refresh them.
-        if (-not (Test-Path $RequiredModulesPath)) { $BuildArgs += '-ResolveDependency' }
+        # Resolve dependencies only when output/RequiredModules is missing. Delete that folder to resolve again
+        # (after changing a pin in RequiredModules.psd1).
+        $Resolve = -not (Test-Path $RequiredModulesPath)
+        if ($Resolve) { $BuildArgs += '-ResolveDependency' }
         # Pin the version to the manifest: Sampler would otherwise use GitVersion when it is installed.
         $SavedBuildVersion = $env:ModuleVersion
         $env:ModuleVersion = (Import-PowerShellDataFile -Path $ManifestPath).ModuleVersion
-        & (Get-Process -Id $PID).Path @BuildArgs
-        if ($LASTEXITCODE -ne 0) { $Failures.Add("Build: build.ps1 exited with $LASTEXITCODE") }
+        # The PowerShell Gallery sometimes fails a download (HTTP 502). A half-filled RequiredModules folder cannot
+        # be repaired, so a failed first-time resolve is repeated from an empty folder.
+        $Attempts = if ($Resolve) { 3 } else { 1 }
+        for ($Attempt = 1; $Attempt -le $Attempts; $Attempt++) {
+            $BuildStarted = [DateTime]::UtcNow
+            & (Get-Process -Id $PID).Path @BuildArgs
+            $BuildExit = $LASTEXITCODE
+            # build.ps1 can exit 0 after an aborted build, so also require a manifest written by this attempt
+            $Built = Get-BuiltManifest
+            $BuildWroteModule = $Built -and $Built.LastWriteTimeUtc -ge $BuildStarted.AddSeconds(-2)
+            if (($BuildExit -eq 0 -and $BuildWroteModule) -or $Attempt -eq $Attempts) { break }
+            Write-Warning "Build attempt $Attempt of $Attempts failed; resolving the build tools again in 20 seconds."
+            Remove-Item -Path $RequiredModulesPath -Recurse -Force -ErrorAction SilentlyContinue
+            Start-Sleep -Seconds 20
+        }
+        if ($BuildExit -ne 0) {
+            $Failures.Add("Build: build.ps1 exited with $BuildExit")
+        } elseif (-not $BuildWroteModule) {
+            $Failures.Add('Build: build.ps1 exited with 0 but wrote no built module (see the build output above)')
+        }
         $env:ModuleVersion = $SavedBuildVersion
         # On a clean checkout the build has only just created output/RequiredModules; the later stages need it
         # (the release workflow runs every stage in one call on a runner that has no platyPS).
