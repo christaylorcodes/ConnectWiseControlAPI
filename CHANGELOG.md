@@ -92,6 +92,10 @@ Details are in the sections below.
 - CI moved from AppVeyor to GitHub Actions (`.github/workflows/ci.yml`): Pester on PowerShell 7 and Windows
   PowerShell 5.1, PSScriptAnalyzer, `Test-ModuleManifest` and a docs-drift check. `Tests/test-local.ps1` runs the
   same stages locally. `Tests/appveyor.pester.ps1` removed.
+- Releases are published by a workflow (`.github/workflows/release.yml`): pushing a tag `v<version>` checks the
+  tag against the manifest and this changelog, builds, runs every test stage, checks the package installs on
+  both editions, publishes to the PowerShell Gallery after the owner approves, and creates the GitHub Release.
+  A manual run is a dry run that publishes nothing.
 - Repository layout follows the GitHub-Template (Sampler): the module source moved from `ConnectWiseControlAPI/` to
   `source/` (`Extensions/Remote Workforce` is now `Extensions/RemoteWorkforce`) and `./build.ps1` builds the
   published module into `output/<ModuleName>/<version>/`. Module-level setup moved from the `.psm1` to
