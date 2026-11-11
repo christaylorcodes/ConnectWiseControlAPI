@@ -9,8 +9,11 @@
       - the section has text
       - that version is not already on the PowerShell Gallery (a published version can never be replaced)
 
-    Without -Tag it is a dry run for the version in the manifest. With -AllowUnreleased a dry run takes the
-    notes from the [Unreleased] section when the version has no section yet.
+    Without -Tag it is a dry run for the version in the manifest. A dry run only warns when the version is
+    already on the Gallery, and with -AllowUnreleased it takes the notes from the [Unreleased] section when the
+    version has no section yet.
+
+    The Gallery check fails when the Gallery cannot be reached: no answer is not treated as "not published".
 
 .PARAMETER Tag
     The git tag being released, for example v0.5.0. Leave empty for a dry run.
@@ -82,7 +85,11 @@ $Current = $null
 foreach ($Line in $Lines) {
     if ($Line -match '^## \[(?<Name>[^\]]+)\](?<Rest>.*)$') {
         $Current = $Matches.Name
-        $Sections[$Current] = @{ Heading = $Line; Rest = $Matches.Rest; Body = New-Object System.Collections.Generic.List[string] }
+        $Sections[$Current] = @{
+            Heading = $Line
+            Rest    = $Matches.Rest
+            Body    = New-Object System.Collections.Generic.List[string]
+        }
     } elseif ($Line -match '^\[[^\]]+\]:\s') {
         $Current = $null   # link definitions at the end of the file
     } elseif ($Current) {
@@ -104,11 +111,29 @@ if ($Sections.Contains($Version)) {
 $Notes = ($Sections[$NotesSource].Body -join "`n").Trim()
 if (-not $Notes) { throw "CHANGELOG section [$NotesSource] is empty." }
 
+$AlreadyPublished = $null
 if (-not $SkipGalleryCheck) {
-    # Find-PSResource writes an error when nothing matches; that is the result we want
-    $Existing = Find-PSResource -Name $ModuleName -Version $Version -Repository PSGallery -ErrorAction SilentlyContinue
-    if ($Existing) {
-        throw "$ModuleName $Version is already on the PowerShell Gallery. Raise ModuleVersion; a version cannot be replaced."
+    # Ask the Gallery for this exact package version: 200 = it exists (unlisted versions too), 404 = it does not.
+    # Any other answer, or none, fails the check instead of counting as "not published".
+    [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072
+    $Uri = "https://www.powershellgallery.com/api/v2/Packages(Id='$ModuleName',Version='$Version')"
+    try {
+        Invoke-WebRequest -Uri $Uri -UseBasicParsing | Out-Null
+        $AlreadyPublished = $true
+    } catch {
+        $Status = 0
+        if ($_.Exception.Response) { $Status = [int]$_.Exception.Response.StatusCode }
+        if ($Status -ne 404) {
+            throw ("Could not check the PowerShell Gallery for $ModuleName $Version (HTTP $Status): " +
+                $_.Exception.Message)
+        }
+        $AlreadyPublished = $false
+    }
+    if ($AlreadyPublished) {
+        $Message = "$ModuleName $Version is already on the PowerShell Gallery. A version cannot be replaced; " +
+            'raise ModuleVersion for the next release.'
+        if ($Tag) { throw $Message }
+        Write-Warning $Message
     }
 }
 
@@ -120,10 +145,11 @@ if ($NotesPath) {
 }
 
 [pscustomobject]@{
-    ModuleName  = $ModuleName
-    Version     = $Version
-    Tag         = "v$Version"
-    DryRun      = -not $Tag
-    NotesSource = $NotesSource
-    Notes       = $Notes
+    ModuleName       = $ModuleName
+    Version          = $Version
+    Tag              = "v$Version"
+    DryRun           = -not $Tag
+    NotesSource      = $NotesSource
+    AlreadyPublished = $AlreadyPublished
+    Notes            = $Notes
 }

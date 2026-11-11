@@ -13,8 +13,20 @@ BeforeAll {
     }
 
     function Get-TestReleaseInfo {
-        param([hashtable]$With = @{})
-        & $Script:ReleaseInfo -ManifestPath $Script:TestManifest -ChangelogPath $Script:TestChangelog -SkipGalleryCheck @With
+        param([hashtable]$With = @{}, [switch]$GalleryCheck)
+        $Paths = @{ ManifestPath = $Script:TestManifest; ChangelogPath = $Script:TestChangelog }
+        & $Script:ReleaseInfo @Paths -SkipGalleryCheck:(-not $GalleryCheck) @With
+    }
+
+    # A failed web request as Invoke-WebRequest reports it on both editions: an exception with Response.StatusCode
+    function New-TestWebError {
+        param([int]$StatusCode)
+        $Exception = New-Object System.Exception "HTTP $StatusCode"
+        if ($StatusCode) {
+            $Response = [pscustomobject]@{ StatusCode = $StatusCode }
+            $Exception | Add-Member -NotePropertyName Response -NotePropertyValue $Response
+        }
+        $Exception
     }
 
     $Script:ReleasedChangelog = @(
@@ -120,6 +132,49 @@ Describe 'Build/Get-ReleaseInfo.ps1' {
             $Info = Get-TestReleaseInfo -With @{ AllowUnreleased = $true }
             $Info.NotesSource | Should -Be 'Unreleased'
             $Info.Notes | Should -Be '- Coming soon'
+        }
+    }
+
+    Context 'the PowerShell Gallery check' {
+        BeforeEach { Set-TestRelease -Changelog $Script:ReleasedChangelog }
+
+        It 'asks for the exact package version and passes when the Gallery answers 404' {
+            Mock Invoke-WebRequest { throw (New-TestWebError -StatusCode 404) }
+            $Info = Get-TestReleaseInfo -GalleryCheck -With @{ Tag = 'v1.2.3' }
+            $Info.AlreadyPublished | Should -BeFalse
+            Should -Invoke Invoke-WebRequest -Times 1 -Exactly -ParameterFilter {
+                "$Uri" -like "*Packages(Id='Sample',Version='1.2.3')"
+            }
+        }
+
+        It 'fails a tagged release when the version is already published' {
+            Mock Invoke-WebRequest { [pscustomobject]@{ StatusCode = 200 } }
+            { Get-TestReleaseInfo -GalleryCheck -With @{ Tag = 'v1.2.3' } } |
+                Should -Throw '*already on the PowerShell Gallery*'
+        }
+
+        It 'only warns in a dry run when the version is already published' {
+            Mock Invoke-WebRequest { [pscustomobject]@{ StatusCode = 200 } }
+            $Output = @(Get-TestReleaseInfo -GalleryCheck 3>&1)
+            $Warnings = @($Output | Where-Object { $_ -is [System.Management.Automation.WarningRecord] })
+            $Info = $Output | Where-Object { $_ -isnot [System.Management.Automation.WarningRecord] }
+            "$Warnings" | Should -Match 'already on the PowerShell Gallery'
+            $Info.AlreadyPublished | Should -BeTrue
+        }
+
+        It 'fails when the Gallery cannot be reached or answers with an error: <StatusCode>' -ForEach @(
+            @{ StatusCode = 0 }, @{ StatusCode = 503 }
+        ) {
+            Mock Invoke-WebRequest { throw (New-TestWebError -StatusCode $StatusCode) }
+            $Expected = '*Could not check the PowerShell Gallery*'
+            { Get-TestReleaseInfo -GalleryCheck -With @{ Tag = 'v1.2.3' } } | Should -Throw $Expected
+            { Get-TestReleaseInfo -GalleryCheck } | Should -Throw $Expected
+        }
+
+        It 'does not contact the Gallery with -SkipGalleryCheck' {
+            Mock Invoke-WebRequest { throw 'must not be called' }
+            Get-TestReleaseInfo -With @{ Tag = 'v1.2.3' } | Out-Null
+            Should -Invoke Invoke-WebRequest -Times 0 -Exactly
         }
     }
 

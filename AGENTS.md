@@ -79,8 +79,9 @@ every step below needs the owner's explicit go.
    the tag equals `ModuleVersion`, the CHANGELOG has the dated section, the version is not on the Gallery and the
    commit is on `master`.
 4. The `publish` job waits for the owner's approval in the `psgallery` environment, which holds the
-   `PSGALLERY_API_KEY` secret. Agents never see or handle that key. After the publish, the workflow creates the
-   GitHub Release from the CHANGELOG section.
+   `PSGALLERY_API_KEY` secret. Agents never see or handle that key. The job publishes the `.nupkg` the package
+   check tested, after comparing its SHA256. After the publish, the workflow creates the GitHub Release from the
+   CHANGELOG section.
 
 If the publish succeeded and a later job failed, re-run only the failed job; never re-run the publish.
 
@@ -164,4 +165,4 @@ Enforced by `.PSScriptAnalyzerSettings.psd1` and `.editorconfig`:
 | `docs/` (help, examples, media) | `Docs/` (platyPS), `Examples/`, `Media/` at the root | `docs/` = `Docs/` on Windows |
 | Changelog release task | `Build/Get-ReleaseInfo.ps1` reads the notes | The task cannot parse this CHANGELOG's 4-part versions |
 | PlatyPS 1.x → `docs/help` | platyPS 0.14 via `Build/Update-Help.ps1` (+ MAML) | `Get-Help` on 5.1 uses the MAML |
-| Sampler `publish` task | `release.yml` with `Publish-PSResource` | Publishes the exact build the tests and the package check used |
+| Sampler `publish` task | `release.yml` with `Publish-PSResource` | Publishes the exact `.nupkg` the package check installed and imported |

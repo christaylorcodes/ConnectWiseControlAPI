@@ -8,10 +8,11 @@
 #   1. check     tag = ModuleVersion in the manifest, CHANGELOG.md has a dated section for the version, the version
 #                is not on the Gallery yet, and the tagged commit is on master (Build/Get-ReleaseInfo.ps1)
 #   2. build     build and run every stage of Tests/test-local.ps1 (the same checks as CI, both PowerShell editions)
-#   3. package   publish to a temporary folder repository and import the saved package on both editions
-#                (Build/Test-ReleasePackage.ps1)
-#   4. publish   Publish-PSResource of that exact build. Runs in the "psgallery" environment, which holds the
-#                PSGALLERY_API_KEY secret and should require the owner's approval.
+#   3. package   pack the build into a .nupkg, push it to a temporary folder repository and import the saved
+#                package on both editions (Build/Test-ReleasePackage.ps1)
+#   4. publish   Publish-PSResource -NupkgPath of that exact .nupkg, after checking its SHA256. Runs in the
+#                "psgallery" environment, which holds the PSGALLERY_API_KEY secret and should require the owner's
+#                approval.
 #   5. release   GitHub Release for the tag, with the CHANGELOG section as its notes
 #
 # A Gallery version can never be replaced, so everything that can fail is checked before step 4.
@@ -31,8 +32,10 @@ on:
 permissions:
   contents: read
 
+# Dry runs and tag runs queue separately: a group keeps only one waiting run, so a dry run in the same group
+# could cancel a waiting release.
 concurrency:
-  group: release
+  group: release-${{ github.event_name }}
   cancel-in-progress: false
 
 jobs:
@@ -68,11 +71,8 @@ jobs:
 
       - name: Package and check the package
         run: |
-          $Package = ./Build/Test-ReleasePackage.ps1
           $Release = Join-Path 'output' 'release'
-          $Target = Join-Path $Release (Join-Path 'module' (Join-Path $Package.ModuleName $Package.Version))
-          New-Item -ItemType Directory -Path $Target -Force | Out-Null
-          Copy-Item -Path (Join-Path $Package.ModulePath '*') -Destination $Target -Recurse
+          $Package = ./Build/Test-ReleasePackage.ps1 -PackagePath $Release
           Move-Item -Path 'release-notes.md' -Destination $Release
           $Package | Select-Object ModuleName, Version, Functions, PackageName, PackageSha256 |
               ConvertTo-Json | Set-Content -Path (Join-Path $Release 'release.json')
@@ -128,9 +128,14 @@ jobs:
           if ("v$($Release.Version)" -ne $env:GITHUB_REF_NAME) {
               throw "The built version $($Release.Version) does not match tag $env:GITHUB_REF_NAME."
           }
-          $ModulePath = Join-Path 'release/module' (Join-Path $Release.ModuleName $Release.Version)
-          Publish-PSResource -Path $ModulePath -Repository PSGallery -ApiKey $env:PSGALLERY_API_KEY
-          Write-Host "Published $($Release.ModuleName) $($Release.Version)"
+          # Publish the .nupkg the build job checked, and only if it is byte-for-byte that file
+          $Package = Join-Path 'release' $Release.PackageName
+          $Hash = (Get-FileHash -Path $Package -Algorithm SHA256).Hash
+          if ($Hash -ne $Release.PackageSha256) {
+              throw "The package hash $Hash does not match the checked package $($Release.PackageSha256)."
+          }
+          Publish-PSResource -NupkgPath $Package -Repository PSGallery -ApiKey $env:PSGALLERY_API_KEY
+          Write-Host "Published $($Release.ModuleName) $($Release.Version) ($($Release.PackageName), SHA256 $Hash)"
 
       - name: Wait until the Gallery lists the version
         run: |
