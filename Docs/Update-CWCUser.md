@@ -13,9 +13,9 @@ Update properties of an internal user.
 ## SYNTAX
 
 ```
-Update-CWCUser [-UserToUpdate] <String> [-NewUserName <String>] [-Password <SecureString>] [[-OTP] <String>]
- [[-DisplayName] <String>] [[-Email] <String>] [[-SecurityGroups] <String[]>] [[-ForcePassChange] <Boolean>]
- [-WhatIf] [-Confirm] [<CommonParameters>]
+Update-CWCUser [-UserToUpdate] <String> [[-NewUserName] <String>] [[-Password] <SecureString>]
+ [[-OTP] <String>] [[-DisplayName] <String>] [[-Email] <String>] [[-SecurityGroups] <String[]>]
+ [[-ForcePassChange] <Boolean>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -32,61 +32,46 @@ Updates the password for 'ctaylor' and forces a password change at next logon.
 
 ## PARAMETERS
 
-### -Confirm
-Prompts you for confirmation before running the cmdlet.
+### -UserToUpdate
+The user account you want to update.
 
 ```yaml
-Type: SwitchParameter
+Type: String
 Parameter Sets: (All)
-Aliases: cf
+Aliases:
 
-Required: False
-Position: Named
+Required: True
+Position: 1
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -DisplayName
-The wanted display name for the user.
+### -NewUserName
+The new username of the user you are updating.
 
 ```yaml
 Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Password
+The wanted password of the user.
+
+```yaml
+Type: SecureString
 Parameter Sets: (All)
 Aliases:
 
 Required: False
 Position: 3
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Email
-The wanted email address for the user.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 4
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -ForcePassChange
-Force the user to change their password at next logon.
-
-```yaml
-Type: Boolean
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 6
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -101,7 +86,37 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 2
+Position: 4
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -DisplayName
+The wanted display name for the user.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 5
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Email
+The wanted email address for the user.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 6
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -116,22 +131,22 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 5
+Position: 7
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -UserToUpdate
-The user account you want to update.
+### -ForcePassChange
+Force the user to change their password at next logon.
 
 ```yaml
-Type: String
+Type: Boolean
 Parameter Sets: (All)
 Aliases:
 
-Required: True
-Position: 0
+Required: False
+Position: 8
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -153,13 +168,13 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -NewUserName
-The new username of the user you are updating.
+### -Confirm
+Prompts you for confirmation before running the cmdlet.
 
 ```yaml
-Type: String
+Type: SwitchParameter
 Parameter Sets: (All)
-Aliases:
+Aliases: cf
 
 Required: False
 Position: Named
@@ -168,20 +183,6 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Password
-The wanted password of the user.
-
-```yaml
-Type: SecureString
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
 
 ### CommonParameters
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).

@@ -1,0 +1,57 @@
+# GitHub Actions PR Validation Workflow
+# Checks that CHANGELOG.md was updated and still has an [Unreleased] section. Warnings only.
+#
+# Security note: never interpolate ${{ github.* }} values directly into a
+# run: script. Pass them through env: instead.
+
+name: PR Validation
+
+on:
+  pull_request:
+    branches:
+      - master
+      - 'release/**'
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate PR
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Check CHANGELOG Updated
+        shell: pwsh
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          $ChangedFiles = git diff --name-only "origin/$env:BASE_REF...HEAD"
+
+          if ($ChangedFiles -notcontains 'CHANGELOG.md') {
+              Write-Host "::warning::CHANGELOG.md has not been updated in this PR"
+              Write-Host "Consider adding release notes for your changes"
+          } else {
+              Write-Host "CHANGELOG.md has been updated"
+          }
+
+      - name: Validate CHANGELOG Format
+        shell: pwsh
+        run: |
+          if (Test-Path 'CHANGELOG.md') {
+              $Changelog = Get-Content -Path 'CHANGELOG.md' -Raw
+              if ($Changelog -notmatch '\[Unreleased\]') {
+                  Write-Host "::warning::CHANGELOG.md should have an [Unreleased] section for pending changes"
+              } else {
+                  Write-Host "CHANGELOG.md has an [Unreleased] section"
+              }
+          } else {
+              Write-Host "::warning::No CHANGELOG.md found"
+          }

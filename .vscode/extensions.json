@@ -1,0 +1,32 @@
+{
+    "recommendations": [
+        // PowerShell extension (required)
+        "ms-vscode.powershell",
+
+        // Pester testing support
+        "pspester.pester-test",
+
+        // Git integration
+        "eamodio.gitlens",
+
+        // Markdown support
+        "yzhang.markdown-all-in-one",
+        "davidanson.vscode-markdownlint",
+
+        // YAML support (for GitHub Actions)
+        "redhat.vscode-yaml",
+
+        // EditorConfig support
+        "editorconfig.editorconfig",
+
+        // Better Comments (color-coded comments)
+        "aaron-bond.better-comments",
+
+        // Spell checker
+        "streetsidesoftware.code-spell-checker",
+
+        // Todo Tree (track TODOs in code)
+        "gruntfuggly.todo-tree"
+    ],
+    "unwantedRecommendations": []
+}

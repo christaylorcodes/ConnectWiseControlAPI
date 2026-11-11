@@ -1,0 +1,20 @@
+# Keeps the SHA-pinned GitHub Actions in .github/workflows current.
+# Dependabot updates both the commit SHA and the trailing "# vX.Y.Z" comment.
+#
+# PowerShell Gallery modules are NOT covered by Dependabot. The Pester, PSScriptAnalyzer and platyPS
+# versions are pinned in the env: block of .github/workflows/ci.yml; bump them there by hand.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    # Let new releases settle for a week before proposing them
+    cooldown:
+      default-days: 7
+    groups:
+      github-actions:
+        patterns:
+          - '*'
+    commit-message:
+      prefix: ci

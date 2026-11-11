@@ -1,0 +1,94 @@
+# Git Attributes Configuration
+# https://git-scm.com/docs/gitattributes
+
+# Set default behavior to automatically normalize line endings
+* text=auto
+
+###############################
+# Text Files (Auto-normalize) #
+###############################
+
+# PowerShell
+*.ps1     text eol=crlf diff=powershell
+*.psm1    text eol=crlf diff=powershell
+*.psd1    text eol=crlf
+*.ps1xml  text eol=crlf
+*.pssc    text eol=crlf
+*.psrc    text eol=crlf
+*.cdxml   text eol=crlf
+
+# Scripts
+*.bash    text eol=lf
+*.sh      text eol=lf
+*.bat     text eol=crlf
+*.cmd     text eol=crlf
+
+# Documentation
+*.md         text diff=markdown
+*.txt        text
+
+# Config files
+*.json       text
+*.yaml       text
+*.yml        text
+*.xml        text
+.editorconfig text
+.gitattributes text
+.gitconfig   text
+.gitignore   text
+
+# Special files
+AUTHORS      text
+CHANGELOG    text
+CONTRIBUTING text
+LICENSE      text
+README       text
+
+###############################
+# Binary Files                #
+###############################
+
+# Graphics
+*.gif        binary
+*.ico        binary
+*.jpg        binary
+*.jpeg       binary
+*.png        binary
+*.webp       binary
+*.svg        text
+
+# Archives
+*.7z         binary
+*.gz         binary
+*.tar        binary
+*.zip        binary
+
+# Executables
+*.exe        binary
+*.dll        binary
+
+####################
+# Merge Strategies #
+####################
+
+# For changelog files, prefer union merge
+CHANGELOG*       merge=union
+
+####################
+# Linguist         #
+####################
+
+# Documentation
+Docs/**           linguist-documentation
+*.md              linguist-documentation
+
+####################
+# Export Ignore    #
+####################
+# Files to exclude from export archives (git archive)
+
+.gitattributes   export-ignore
+.gitignore       export-ignore
+.editorconfig    export-ignore
+.github          export-ignore
+Tests            export-ignore

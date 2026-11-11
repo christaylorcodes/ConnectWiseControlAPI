@@ -13,7 +13,7 @@ Returns the date the machine last connected to the control server.
 ## SYNTAX
 
 ```
-Get-CWCLastContact [-GUID] <Guid> [-Quiet] [[-Seconds] <Int32>] [[-Group] <String>] [<CommonParameters>]
+Get-CWCLastContact -GUID <Guid> [-Quiet] [-Seconds <Int32>] [-Group <String[]>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -45,7 +45,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: 3
+Position: Named
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -76,7 +76,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 4
+Position: Named
 Default value: 0
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -86,16 +86,17 @@ Accept wildcard characters: False
 Name of session group to use.
 
 ```yaml
-Type: String
+Type: String[]
 Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 5
+Position: Named
 Default value: All Machines
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
+
 
 ### CommonParameters
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).

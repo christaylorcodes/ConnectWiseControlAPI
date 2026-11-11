@@ -13,7 +13,7 @@ Will return information about a session.
 ## SYNTAX
 
 ```
-Get-CWCSessionDetail [-Group <String>] -GUID <Guid> [<CommonParameters>]
+Get-CWCSessionDetail [[-Group] <String[]>] [-GUID] <Guid> [[-Include] <String[]>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -34,12 +34,12 @@ Will return details of the requested session.
 Name of session group to use.
 
 ```yaml
-Type: String
+Type: String[]
 Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: Named
+Position: 1
 Default value: All Machines
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -54,11 +54,27 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: Named
+Position: 2
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
+
+### -Include
+Parts of the session details to return: SessionInfo, GuestScreenshotContent, Events, Connections. Omit to return everything, including the guest screenshot. Ignored on -ApiSecret connections.
+
+```yaml
+Type: String[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 
 ### CommonParameters
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
@@ -67,7 +83,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### ConnectWise Control session objects
+### ConnectWise ScreenConnect session objects
 ## NOTES
 Version:        1.0
 Author:         Chris Taylor

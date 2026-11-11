@@ -1,7 +1,7 @@
-# Your Control server URL
-$Server = 'control.domain.com'
+# Your ScreenConnect server URL
+$Server = 'screenconnect.domain.com'
 
-# Get Control credentials
+# Get ScreenConnect credentials
 $Credentials = Get-Credential
 
 # Load module

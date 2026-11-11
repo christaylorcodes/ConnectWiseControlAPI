@@ -13,7 +13,8 @@ Will end a given session.
 ## SYNTAX
 
 ```
-Remove-CWCSession -GUID <Guid[]> -Group <String> [-WhatIf] [-Confirm] [<CommonParameters>]
+Remove-CWCSession [-GUID] <Guid[]> [-Group] <String[]> [-Uninstall]
+ [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -40,19 +41,34 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: Named
+Position: 1
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Confirm
-Prompts you for confirmation before running the cmdlet.
+### -Group
+Session group containing the session(s). Defaults to 'All Machines' where a default exists.
+
+```yaml
+Type: String[]
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Uninstall
+Queue an uninstall of the Access client and delete the session (QueuedUninstallAndDelete) instead of only deleting the session record.
 
 ```yaml
 Type: SwitchParameter
 Parameter Sets: (All)
-Aliases: cf
+Aliases:
 
 Required: False
 Position: Named
@@ -76,20 +92,21 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Group
-{{ Fill Group Description }}
+### -Confirm
+Prompts you for confirmation before running the cmdlet.
 
 ```yaml
-Type: String
+Type: SwitchParameter
 Parameter Sets: (All)
-Aliases:
+Aliases: cf
 
-Required: True
+Required: False
 Position: Named
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
+
 
 ### CommonParameters
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).

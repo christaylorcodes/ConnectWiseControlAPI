@@ -31,8 +31,8 @@ Get the audit logs for Computer1 for the last day.
 
 ## PARAMETERS
 
-### -EndDate
-{{ Fill EndDate Description }}
+### -StartDate
+Start of the time range. Defaults to 24 hours ago. Local times are converted to UTC.
 
 ```yaml
 Type: DateTime
@@ -46,11 +46,26 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -EventTypes
-{{ Fill EventTypes Description }}
+### -EndDate
+End of the time range. Defaults to now. Local times are converted to UTC.
 
 ```yaml
-Type: Int32[]
+Type: DateTime
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -SessionName
+Only return entries for sessions with this name.
+
+```yaml
+Type: String
 Parameter Sets: (All)
 Aliases:
 
@@ -62,7 +77,7 @@ Accept wildcard characters: False
 ```
 
 ### -IncludeSessionCaptures
-{{ Fill IncludeSessionCaptures Description }}
+Deprecated. The server no longer accepts this option; it is ignored with a warning.
 
 ```yaml
 Type: SwitchParameter
@@ -76,8 +91,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -SecurityTypes
-{{ Fill SecurityTypes Description }}
+### -EventTypes
+Session event type numbers to include (for example 44 for QueuedCommand, 70 for RanCommand).
 
 ```yaml
 Type: Int32[]
@@ -91,35 +106,21 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -SessionName
-{{ Fill SessionName Description }}
+### -SecurityTypes
+Security event type numbers to include.
 
 ```yaml
-Type: String
+Type: Int32[]
 Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 2
+Position: 5
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -StartDate
-{{ Fill StartDate Description }}
-
-```yaml
-Type: DateTime
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 0
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
 
 ### CommonParameters
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).

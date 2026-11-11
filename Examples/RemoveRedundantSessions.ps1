@@ -5,10 +5,10 @@
     You will need to get session details to further determine uniqueness.
 #>
 
-# Your Control server URL
-$Server = 'control.domain.com'
+# Your ScreenConnect server URL
+$Server = 'screenconnect.domain.com'
 
-# Get Control credentials
+# Get ScreenConnect credentials
 $Credentials = Get-Credential
 
 # Set GroupName to Search in
@@ -27,11 +27,14 @@ Import-Module 'ConnectWiseControlAPI'
 Connect-CWC -Server $Server -Credentials $Credentials
 
 # Search for multiple sessions for the same machine, and collect all but the last connected one
-$RedundantSessionColl = Get-CWCSession -Type Access -Group $GroupNameAll |
+$RedundantSessionColl = Get-CWCSession -Type Access -Group $GroupName |
 Group-Object -Property Name |
 Where-Object -Property Count -gt 1 |
 ForEach-Object {
-    $_.Group | Sort-Object -Property LastConnectedEventTime |
+    # LastConnectedEventTime is seconds since the last connection: smallest first, so Skip 1 keeps
+    # the most recently connected session
+    # A session that never connected (no time) sorts last, so it is never the one kept
+    $_.Group | Sort-Object -Property { if ($null -eq $_.LastConnectedEventTime) { [double]::MaxValue } else { [double]$_.LastConnectedEventTime } } |
     Select-Object -Skip 1
 }
 

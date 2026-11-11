@@ -1,0 +1,67 @@
+{
+    // PowerShell extension settings
+    "powershell.codeFormatting.preset": "Custom",
+    "powershell.codeFormatting.openBraceOnSameLine": true,
+    "powershell.codeFormatting.newLineAfterOpenBrace": true,
+    // false keeps "} catch {" / "} else {" cuddled, matching PSPlaceCloseBrace in the analyzer settings
+    "powershell.codeFormatting.newLineAfterCloseBrace": false,
+    "powershell.codeFormatting.whitespaceBeforeOpenBrace": true,
+    "powershell.codeFormatting.whitespaceBeforeOpenParen": true,
+    "powershell.codeFormatting.whitespaceAroundOperator": true,
+    "powershell.codeFormatting.whitespaceAfterSeparator": true,
+    "powershell.codeFormatting.ignoreOneLineBlock": true,
+    "powershell.codeFormatting.alignPropertyValuePairs": true,
+    "powershell.codeFormatting.pipelineIndentationStyle": "IncreaseIndentationForFirstPipeline",
+
+    // PSScriptAnalyzer integration
+    "powershell.scriptAnalysis.enable": true,
+    "powershell.scriptAnalysis.settingsPath": ".PSScriptAnalyzerSettings.psd1",
+
+    // Pester integration
+    "pester.useLegacyCodeLens": false,
+    "pester.outputVerbosity": "FromPreference",
+
+    // Editor settings
+    "editor.formatOnSave": true,
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": false,
+    "editor.rulers": [120],
+    "editor.wordWrap": "off",
+
+    // File associations
+    "files.associations": {
+        "*.ps1": "powershell",
+        "*.psm1": "powershell",
+        "*.psd1": "powershell",
+        "*.ps1xml": "xml"
+    },
+
+    // Files to exclude from explorer
+    "files.exclude": {
+        "**/output": true,
+        "**/.vs": true,
+        "**/*.coverage.xml": true,
+        "**/testResults*.xml": true
+    },
+
+    // Search exclusions
+    "search.exclude": {
+        "**/output": true,
+        "**/.vs": true
+    },
+
+    // Git settings
+    "git.ignoreLimitWarning": true,
+
+    // Markdown settings for documentation
+    "markdown.preview.breaks": true,
+    "[markdown]": {
+        "editor.wordWrap": "on",
+        "editor.quickSuggestions": {
+            "comments": "off",
+            "strings": "off",
+            "other": "off"
+        }
+    }
+}

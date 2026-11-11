@@ -13,8 +13,8 @@ Assign a user to machines.
 ## SYNTAX
 
 ```
-New-CWCRemoteWorkforceAssignment -GUID <Guid[]> -Username <String> [-DisplayName <String>] [-WhatIf] [-Confirm]
- [<CommonParameters>]
+New-CWCRemoteWorkforceAssignment [-GUID] <Guid[]> [-Username] <String> [[-DisplayName] <String>]
+ [[-Group] <String[]>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -38,7 +38,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: Named
+Position: 1
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -53,7 +53,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: Named
+Position: 2
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -66,6 +66,36 @@ Name that is displayed when user is connected to a session.
 Type: String
 Parameter Sets: (All)
 Aliases:
+
+Required: False
+Position: 3
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Group
+Session group containing the session(s). Defaults to 'All Machines' where a default exists.
+
+```yaml
+Type: String[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 4
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -WhatIf
+Shows what would happen if the cmdlet runs. The cmdlet is not run.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases: wi
 
 Required: False
 Position: Named
@@ -89,20 +119,6 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -WhatIf
-Shows what would happen if the cmdlet runs. The cmdlet is not run.
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases: wi
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
 
 ### CommonParameters
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
