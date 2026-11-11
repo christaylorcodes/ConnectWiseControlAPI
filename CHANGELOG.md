@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.5.0] - 2026-11-10
 
-Versions now have three parts (`0.5.0`); the build needs that. The previous release was 0.4.0.0.
+Version numbers now have three parts (`0.5.0`). The previous release was 0.4.0.0, which had 21 commands; this
+release has 32.
 
 ### Breaking changes
 
@@ -19,6 +20,8 @@ Versions now have three parts (`0.5.0`); the build needs that. The previous rele
   old connection
 - `Get-CWCLastContact` returns an error when no connection event is found, instead of the current time
 - `Get-CWCAuditLog` `-StartDate`/`-EndDate` default to the last 24 hours
+- `Get-CWCSession -Type Support` and `-Type Meeting` without `-Group` read the `All Sessions` and `All Meetings`
+  groups. Before, they read `All Machines`, which holds Access sessions
 - HTTP 500 errors are retried only for calls that are safe to repeat
 
 Details are in the sections below.
@@ -34,11 +37,6 @@ Details are in the sections below.
 
 ### Added
 
-- GitHub community files: CONTRIBUTING, CODE_OF_CONDUCT, SECURITY, issue templates, PR template
-- `.editorconfig` for consistent editor formatting
-- `.gitattributes` for line ending normalization and diff drivers
-- `.PSScriptAnalyzerSettings.psd1` with 60+ rules targeting PS 5.1+ compatibility
-- `CHANGELOG.md` (this file)
 - `Connect-CWC -ApiSecret`: second authentication method using the RESTful API Manager extension's
   `RESTfulAuthenticationSecret` (sent as `CTRLAuthHeader`). Works with MFA-enforced servers.
   `Get-CWCSessionDetail`, `Update-CWCSessionName`, `New-CWCSession`, `Add-CWCSessionNote`,
@@ -54,18 +52,11 @@ Details are in the sections below.
   logged out. Errors carry ErrorIds `CWC.MfaRequired`, `CWC.MfaCodeRejected`, `CWC.LoginFailed`,
   `CWC.LoginThrottled`. Logins are never retried. Requests that fail on an MFA connection with a
   permission or anti-forgery error say the login may have expired
-- Failed requests no longer keep the login cookie on the request object stored in `$Error`
-- `Connect-CWC` reuses a cached connection only for the same server, auth method and identity (user or
-  secret); anything else reconnects, even without `-Force`. Before, the old connection was silently kept
-  and later commands went to the previous server or ran as the previous user. If connecting to a
-  different server, method or identity fails, the module is left disconnected; a failed `-Force` refresh
-  of the same connection keeps it
+- `Get-Help about_ConnectWiseControlAPI`: an overview of the three ways to sign in, the ErrorIds and what to
+  check when upgrading from 0.4
 - `Find-CWCSession` (`-Filter`/`-Name`/`-GUID`; API secret only), `New-CWCSession`,
   `Add-CWCSessionNote`, `Send-CWCSessionMessage`, `Send-CWCToolboxItem`. On credentials connections the
   last three queue session events (AddedNote 32, QueuedMessage 45, QueuedTool 47) and take `-Group`
-- Live smoke test script `Tests/Live/Invoke-CWCLiveSmokeTest.ps1` (read-only by default; `-AllowWrites`
-  acts on one chosen test session and cleans up its notes; `-MfaUserName` tests the MFA login; `-TotpTestRole` tests the TOTP login with a temporary user it
-  creates and deletes; `-MfaNegativeProbes` records the raw failed-login codes)
 - `Get-CWCRemoteWorkforceLaunchURL` (by `-GUID`, pipeline, or `-SessionName`), replacing `Get-CWCLauncURL`
 - `Get-CWCRemoteWorkforceSession` lists the calling user's assigned machines (`GetRemoteWorkforceSessions`)
 - `Initialize-CWCRemoteWorkforceSessionGroup` creates/repairs the extension's session group
@@ -82,8 +73,6 @@ Details are in the sections below.
   (`InitiatedJoin`). `-UrlOnly` returns the URL instead (for macOS/Linux or custom launchers), using a
   5-minute delegated token when the role allows it. The token is never written to any output stream.
   Credentials connections only; launching is Windows only
-- Live discovery script `Tests/Live/Invoke-CWCHostLaunchDiscovery.ps1` (read-only; redacts secrets;
-  `-Launch` opens the client for one test session)
 
 ### Deprecated
 
@@ -91,22 +80,11 @@ Details are in the sections below.
 
 ### Changed
 
-- CI moved from AppVeyor to GitHub Actions (`.github/workflows/ci.yml`): Pester on PowerShell 7 and Windows
-  PowerShell 5.1, PSScriptAnalyzer, `Test-ModuleManifest` and a docs-drift check. `Tests/test-local.ps1` runs the
-  same stages locally. `Tests/appveyor.pester.ps1` removed.
-- Releases are published by a workflow (`.github/workflows/release.yml`): pushing a tag `v<version>` checks the
-  tag against the manifest and this changelog, builds, runs every test stage, checks the package installs on
-  both editions, publishes to the PowerShell Gallery after the owner approves, and creates the GitHub Release.
-  A manual run is a dry run that publishes nothing.
-- Repository layout follows the GitHub-Template (Sampler): the module source moved from `ConnectWiseControlAPI/` to
-  `source/` (`Extensions/Remote Workforce` is now `Extensions/RemoteWorkforce`) and `./build.ps1` builds the
-  published module into `output/<ModuleName>/<version>/`. Module-level setup moved from the `.psm1` to
-  `source/prefix.ps1`. The published module is unchanged: same 32 functions, PowerShell 3.0+, same help. CI and
-  `Tests/test-local.ps1` test the built module on PowerShell 7 and Windows PowerShell 5.1.
-- Repo files aligned with the GitHub-Template: `AGENTS.md` (agent guide; `CLAUDE.md` now points to it),
-  `pr-validation.yml`, `dependabot.yml`, `copilot-instructions.md`, `.vscode/` settings, `.github/PowerShell-StyleGuide.md`
-- Expanded `.gitignore` to cover OS files, IDEs, build artifacts, and secrets
-- Updated `README.md` links to use local community files instead of external GitHub-Template references
+- `Connect-CWC` reuses a cached connection only for the same server, auth method and identity (user or
+  secret); anything else reconnects, even without `-Force`. Before, the old connection was silently kept
+  and later commands went to the previous server or ran as the previous user. If connecting to a
+  different server, method or identity fails, the module is left disconnected; a failed `-Force` refresh
+  of the same connection keeps it
 - `Connect-CWC` validates credentials with `PageService/GetEligibleHosts` (any permission) instead of
   `Get-CWCSessionGroup` (requires ManageSessionGroups), so non-admin accounts can connect
 - `Get-CWCAuditLog` `-StartDate`/`-EndDate` default to the last 24 hours; `-IncludeSessionCaptures` is
@@ -123,7 +101,8 @@ Details are in the sections below.
 - `Connect-CWC` reports a failed login with its likely causes. Wrong credentials are not rejected with a
   401: the request runs as an anonymous user and fails with "Needs permission". A local failure (e.g. a
   PowerShell error) is reported as such instead of being blamed on the credentials
-- Removed the unloaded `WIP/Invoke-CWCSession.ps1` prototype, superseded by `Enter-CWCSession`
+- `Get-CWCSessionGroup` calls the documented `GetSessionGroups` (POST) method instead of the undocumented
+  `session-groups` GET route. Both return the same data on ScreenConnect 26.7.6
 - `Get-CWCLastContact` returns an error when no connection event is found, instead of the current time
 - `-Group` accepts the path parts of a nested session group (e.g. `'Clients','Acme'`) on every session
   function that takes it; a single group name works as before
@@ -133,9 +112,12 @@ Details are in the sections below.
 - `Invoke-CWCCommand` waits 1, 2, 3 … up to 5 seconds between polls of the rate-limited session details
 - `Enter-CWCSession` takes `-Name` from the pipeline (e.g. from `Get-CWCSession`) and then skips its
   session lookup
-- `Build/Update-Help.ps1` regenerates `Docs/` and the MAML help in one step
 
 ### Fixed
+
+- `Get-CWCSession -Type Support` and `-Type Meeting` without `-Group` read `All Machines`, the Access group;
+  they now read `All Sessions` and `All Meetings`
+- Failed requests no longer keep the login cookie on the request object stored in `$Error`
 
 Endpoint calls audited against the ScreenConnect server's `Services/*.ashx` source:
 
@@ -143,8 +125,6 @@ Endpoint calls audited against the ScreenConnect server's `Services/*.ashx` sour
   events (type 43) through `AddSessionEvents`
 - `Get-CWCAuditLog` sent 6 arguments to `QueryAuditLog`, which takes 5 (the capture flag landed in the
   event-type slot); local times were also sent with a `Z` suffix and are now converted to UTC
-- `Get-CWCSessionGroup` now calls the documented `GetSessionGroups` (POST) method instead of the
-  undocumented `session-groups` GET route (both return the same data on ScreenConnect 26.7.6; not a bug fix)
 - `Add-CWCRemoteWorkforceRequiredRole` now calls the extension's own
   `EnsureRemoteWorkforceSecurityRoleExists` instead of building the role with `CreateRole`: it is
   idempotent, honors the extension's `RoleName`/`SessionGroupName` settings, and sets `IsRoleCreated`
@@ -171,7 +151,32 @@ Extension calls audited against the Remote Workforce 1.3.16 `App_Extensions/2c4f
 
 - `Get-CWCLauncURL` sent 6 arguments to `GetLaunchUrlForSessionId`, which takes 1 (the session ID),
   including a plaintext password the server never used
-- The `Launcher` extension folder was the Remote Workforce extension; functions moved under `Remote Workforce/`
+
+### Development
+
+Changes to the repository. They do not change the published module.
+
+- CI moved from AppVeyor to GitHub Actions (`.github/workflows/ci.yml`): Pester on PowerShell 7 and Windows
+  PowerShell 5.1, PSScriptAnalyzer, `Test-ModuleManifest` and a docs-drift check. `Tests/test-local.ps1` runs the
+  same stages locally. `Tests/appveyor.pester.ps1` removed
+- Releases are published by a workflow (`.github/workflows/release.yml`): pushing a tag `v<version>` checks the
+  tag against the manifest and this changelog, builds, runs every test stage, checks the package installs on
+  both editions, publishes to the PowerShell Gallery after the owner approves, and creates the GitHub Release.
+  A manual run is a dry run that publishes nothing
+- Repository layout follows the GitHub-Template (Sampler): the module source moved from `ConnectWiseControlAPI/` to
+  `source/` (`Extensions/Remote Workforce` is now `Extensions/RemoteWorkforce`; the `Launcher` extension folder
+  was the Remote Workforce extension) and `./build.ps1` builds the published module into
+  `output/<ModuleName>/<version>/`. Module-level setup moved from the `.psm1` to `source/prefix.ps1`. The build
+  adds the tags the Gallery lists and finds commands by. CI and `Tests/test-local.ps1` test the built module
+- `Build/Update-Help.ps1` regenerates `Docs/` and the MAML help in one step
+- Repo files aligned with the GitHub-Template: `AGENTS.md` (agent guide; `CLAUDE.md` points to it), community
+  files (CONTRIBUTING, CODE_OF_CONDUCT, SECURITY, issue and PR templates), `pr-validation.yml`, `dependabot.yml`,
+  `copilot-instructions.md`, `.vscode/` settings, `.editorconfig`, `.gitattributes`, an expanded `.gitignore`,
+  `.PSScriptAnalyzerSettings.psd1` and `.github/PowerShell-StyleGuide.md`
+- Live test scripts: `Tests/Live/Invoke-CWCLiveSmokeTest.ps1` (read-only by default; `-AllowWrites` acts on one
+  chosen test session and cleans up its notes; `-MfaUserName` and `-TotpTestRole` test the MFA and TOTP logins)
+  and `Tests/Live/Invoke-CWCHostLaunchDiscovery.ps1` (read-only; redacts secrets)
+- Removed the unloaded `WIP/Invoke-CWCSession.ps1` prototype, superseded by `Enter-CWCSession`
 
 ## [0.4.0.0]
 

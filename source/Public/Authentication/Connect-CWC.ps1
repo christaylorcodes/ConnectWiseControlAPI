@@ -110,14 +110,15 @@ function Connect-CWC {
     #>
     [CmdletBinding(DefaultParameterSetName = 'Credentials')]
     param(
-        [Parameter(Mandatory = $True)]
+        # Positions 0 and 1 keep 0.4-style calls working: Connect-CWC 'server' $Credentials
+        [Parameter(Mandatory = $True, Position = 0)]
         [ValidateNotNullOrEmpty()]
         [string]$Server,
 
-        [Parameter(Mandatory = $True, ParameterSetName = 'Credentials')]
-        [Parameter(Mandatory = $True, ParameterSetName = 'Mfa')]
-        [Parameter(Mandatory = $True, ParameterSetName = 'OneTimeCode')]
-        [Parameter(Mandatory = $True, ParameterSetName = 'TotpSecret')]
+        [Parameter(Mandatory = $True, Position = 1, ParameterSetName = 'Credentials')]
+        [Parameter(Mandatory = $True, Position = 1, ParameterSetName = 'Mfa')]
+        [Parameter(Mandatory = $True, Position = 1, ParameterSetName = 'OneTimeCode')]
+        [Parameter(Mandatory = $True, Position = 1, ParameterSetName = 'TotpSecret')]
         [pscredential]$Credentials,
 
         [Parameter(Mandatory = $True, ParameterSetName = 'Mfa')]

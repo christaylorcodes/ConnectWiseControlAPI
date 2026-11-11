@@ -5,10 +5,11 @@
 .DESCRIPTION
     Used by .github/workflows/release.yml after the build and the tests, and safe to run locally. It:
       1. packs the built module (output/<Name>/<version>/) into a .nupkg in a temporary folder repository
-      2. pushes that .nupkg to a second temporary repository with Publish-PSResource -NupkgPath, the same call
+      2. checks the package's version and that it has the tags the Gallery lists and finds commands by
+      3. pushes that .nupkg to a second temporary repository with Publish-PSResource -NupkgPath, the same call
          the workflow uses for the real publish
-      3. saves the package from the second repository, as Install-Module would
-      4. imports the saved copy in PowerShell 7 and in Windows PowerShell 5.1 and checks the version, the number
+      4. saves the package from the second repository, as Install-Module would
+      5. imports the saved copy in PowerShell 7 and in Windows PowerShell 5.1 and checks the version, the number
          of exported functions and that the import shows no warnings
 
     With -PackagePath the checked .nupkg is copied there, so the workflow can publish that exact file.
@@ -73,6 +74,26 @@ try {
     if (-not $Package) { throw 'Publish-PSResource produced no .nupkg in the temporary repository.' }
     if ($Package.Name -ne "$ModuleName.$Version.nupkg") { throw "Unexpected package name '$($Package.Name)'." }
     $PackageHash = (Get-FileHash -Path $Package.FullName -Algorithm SHA256).Hash
+
+    # The Gallery lists and finds commands by these package tags (the build adds them to the manifest)
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    $Zip = [IO.Compression.ZipFile]::OpenRead($Package.FullName)
+    try {
+        $Entry = $Zip.Entries | Where-Object { $_.FullName -eq "$ModuleName.nuspec" }
+        if (-not $Entry) { throw "The package has no $ModuleName.nuspec." }
+        $Reader = New-Object System.IO.StreamReader($Entry.Open())
+        try { $Nuspec = [xml]$Reader.ReadToEnd() } finally { $Reader.Dispose() }
+    } finally {
+        $Zip.Dispose()
+    }
+    $PackageTags = @("$($Nuspec.package.metadata.tags)" -split '\s+')
+    $ExpectedTags = @('PSModule', 'PSIncludes_Function') +
+        @($Manifest.FunctionsToExport | ForEach-Object { "PSFunction_$_"; "PSCommand_$_" })
+    $MissingTags = @($ExpectedTags | Where-Object { $PackageTags -notcontains $_ })
+    if ($MissingTags) { throw "The package is missing Gallery tags: $($MissingTags -join ', ')" }
+    if ("$($Nuspec.package.metadata.version)" -ne $Version) {
+        throw "The package version '$($Nuspec.package.metadata.version)' is not '$Version'."
+    }
 
     Publish-PSResource -NupkgPath $Package.FullName -Repository $PushRepository
     Save-PSResource -Name $ModuleName -Version $Version -Repository $PushRepository -Path $Saved -TrustRepository

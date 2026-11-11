@@ -50,7 +50,8 @@ function Get-CWCLastContact {
 
     try { $SessionDetails = Get-CWCSessionDetail -Group $Group -GUID $GUID -Include 'Events' -ErrorAction Stop }
     catch {
-        Write-Error $_
+        # WriteError keeps the ErrorId (CWC.*) on Windows PowerShell 5.1; Write-Error $_ replaces it there
+        $PSCmdlet.WriteError($_)
         return
     }
 

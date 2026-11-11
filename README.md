@@ -34,7 +34,7 @@ A PowerShell wrapper for the ConnectWise ScreenConnect (formerly ConnectWise Con
 This module makes it easy to leverage PowerShell to automate tasks in ScreenConnect.
 
 ConnectWise renamed Control back to ScreenConnect. The module keeps its name and its `CWC` command names, so
-existing scripts keep working.
+scripts don't need renaming. Version 0.5.0 does change some behaviour: see [Upgrading from 0.4](#upgrading-from-04).
 
 <!-- Summary -->
 
@@ -58,6 +58,8 @@ Install-Module 'ConnectWiseControlAPI'
   old connection.
 * `Get-CWCLastContact` returns an error when it finds no connection event. Before, it returned the current time.
 * `Get-CWCAuditLog` covers the last 24 hours unless you pass `-StartDate` and `-EndDate`.
+* `Get-CWCSession -Type Support` and `-Type Meeting` without `-Group` read the `All Sessions` and `All Meetings`
+  groups. Before, they read `All Machines`, which holds Access sessions.
 * A request that fails with HTTP 500 is repeated only when repeating is safe (reads and "set to value" updates).
 
 The full list is in the [changelog](CHANGELOG.md).

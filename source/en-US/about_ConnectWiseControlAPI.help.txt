@@ -1,0 +1,100 @@
+TOPIC
+    about_ConnectWiseControlAPI
+
+SHORT DESCRIPTION
+    PowerShell commands for the ConnectWise ScreenConnect (formerly ConnectWise
+    Control) web API.
+
+LONG DESCRIPTION
+    The module wraps the ScreenConnect web API: sessions, session groups,
+    commands, notes, messages, users, the audit log and the Remote Workforce
+    extension. It runs on Windows PowerShell 5.1 and PowerShell 7. The server
+    must use https.
+
+    ConnectWise renamed Control back to ScreenConnect. The module keeps the
+    name ConnectWiseControlAPI and the CWC prefix on its commands.
+
+    List the commands:
+
+        Get-Command -Module ConnectWiseControlAPI
+
+SIGNING IN
+    Run Connect-CWC once per PowerShell session. Every other command uses that
+    connection. There are three ways to sign in.
+
+    A user account without MFA:
+
+        Connect-CWC -Server sc.example.com -Credentials $Cred
+
+    A user account with MFA. -Mfa asks for the one-time code, -OneTimeCode
+    takes it as a parameter, and -TotpSecret computes the authenticator-app
+    code for unattended scripts. The password and the secret are not kept:
+
+        Connect-CWC -Server sc.example.com -Credentials $Cred -Mfa
+        Connect-CWC -Server sc.example.com -Credentials $Cred -TotpSecret $Key
+
+    An MFA login expires. Run Connect-CWC again when a command reports that
+    the login may have expired.
+
+    The secret of the RESTful API Manager extension. It works on servers where
+    every account requires MFA, for these commands only: Find-CWCSession,
+    Get-CWCSessionDetail, Update-CWCSessionName, New-CWCSession,
+    Add-CWCSessionNote, Send-CWCSessionMessage, Send-CWCToolboxItem and
+    Invoke-CWCCommand (which queues the command and does not return output):
+
+        Connect-CWC -Server sc.example.com -ApiSecret $Secret
+
+    A command that needs the other kind of connection returns an error that
+    names it.
+
+ERRORS
+    Most commands report failures as non-terminating errors. Add
+    -ErrorAction Stop to catch them. Errors from API calls carry an ErrorId at
+    the start of
+    $_.FullyQualifiedErrorId:
+
+        CWC.NotConnected       Connect-CWC has not been run
+        CWC.AuthModeMismatch   The command needs the other kind of connection
+        CWC.Http<status>       The server answered with that HTTP status
+        CWC.NoResponse         The server did not answer
+        CWC.MfaRequired        The account needs a one-time code
+        CWC.MfaCodeRejected    The one-time code was wrong or has expired
+        CWC.LoginFailed        The sign-in was rejected
+        CWC.LoginThrottled     Too many sign-in attempts; wait before retrying
+
+    Example:
+
+        try {
+            Get-CWCSession -Type Access -ErrorAction Stop
+        } catch {
+            if ($_.FullyQualifiedErrorId -like 'CWC.NotConnected*') {
+                Write-Warning 'Run Connect-CWC first.'
+            }
+        }
+
+REMOVING THINGS
+    Remove-CWCSession, Remove-CWCSessionNote and Remove-CWCHostFromSession ask
+    for confirmation. In an unattended script add -Confirm:$false; without it
+    the command fails and removes nothing.
+
+UPGRADING FROM 0.4
+    Check these before updating scripts written for 0.4.0.0:
+
+    - The Remove-* commands above ask for confirmation by default.
+    - Connect-CWC without -Force switches to a different server, sign-in method
+      or user. Before, it kept the old connection.
+    - Get-CWCLastContact returns an error when it finds no connection event.
+      Before, it returned the current time.
+    - Get-CWCAuditLog covers the last 24 hours unless -StartDate and -EndDate
+      are given.
+    - Get-CWCSession -Type Support and -Type Meeting without -Group read the
+      'All Sessions' and 'All Meetings' groups. Before, they read
+      'All Machines'.
+    - A request that fails with HTTP 500 is repeated only when repeating is
+      safe.
+
+SEE ALSO
+    Connect-CWC
+    Get-CWCSession
+    https://github.com/christaylorcodes/ConnectWiseControlAPI
+    CHANGELOG.md in that repository has the full list of changes.

@@ -66,6 +66,30 @@ Describe 'Connect-CWC' {
         }
     }
 
+    Context 'Positional parameters (0.4.0.0 compatibility)' {
+        It 'accepts server and credentials by position' {
+            InModuleScope 'ConnectWiseControlAPI' -Parameters @{ cred = $cred } {
+                param($cred)
+                Connect-CWC 'server.example.com' $cred
+                $script:CWCServerConnection.Server | Should -Be 'server.example.com'
+                $script:CWCServerConnection.AuthType | Should -Be 'Credentials'
+            }
+        }
+
+        It 'has Server at position 0 and Credentials at position 1 in every credential parameter set' {
+            $Sets = (Get-Command Connect-CWC).ParameterSets
+            foreach ($Set in $Sets) {
+                ($Set.Parameters | Where-Object Name -EQ 'Server').Position | Should -Be 0 -Because $Set.Name
+            }
+            foreach ($Set in ($Sets | Where-Object Name -NE 'ApiSecret')) {
+                ($Set.Parameters | Where-Object Name -EQ 'Credentials').Position | Should -Be 1 -Because $Set.Name
+            }
+            # The secret is never positional
+            ($Sets.Parameters | Where-Object { $_.Name -in 'ApiSecret', 'TotpSecret', 'OneTimeCode' }).Position |
+                ForEach-Object { $_ | Should -BeLessThan 0 }
+        }
+    }
+
     Context 'Validation call' {
         It 'validates with GetEligibleHosts (works for non-admin accounts)' {
             InModuleScope 'ConnectWiseControlAPI' -Parameters @{ cred = $cred } {
@@ -275,6 +299,32 @@ Describe 'Connect-CWC' {
 # =============================================================================
 # PageService
 # =============================================================================
+Describe 'ErrorId survives a failed read' {
+    # These functions re-report an error they caught. Write-Error $_ replaces the ErrorId on Windows PowerShell 5.1
+    # (it becomes WriteErrorException), so they must use $PSCmdlet.WriteError($_).
+    BeforeEach {
+        InModuleScope 'ConnectWiseControlAPI' { $script:CWCServerConnection = $null }
+        $SessionID = [guid]::NewGuid()
+    }
+
+    It '<Name> reports CWC.NotConnected when not connected' -ForEach @(
+        @{ Name = 'Get-CWCLastContact'; Call = { param($ID) Get-CWCLastContact -GUID $ID -ErrorAction Stop } }
+        @{ Name = 'Invoke-CWCCommand'; Call = {
+                param($ID) Invoke-CWCCommand -GUID $ID -Command 'hostname' -ErrorAction Stop
+            }
+        }
+        @{ Name = 'Remove-CWCSessionNote'; Call = {
+                param($ID) Remove-CWCSessionNote -GUID $ID -All -Confirm:$false -ErrorAction Stop
+            }
+        }
+    ) {
+        $Caught = $null
+        try { & $Call $SessionID } catch { $Caught = $_ }
+        $Caught | Should -Not -BeNullOrEmpty
+        $Caught.FullyQualifiedErrorId | Should -BeLike 'CWC.NotConnected,*'
+    }
+}
+
 Describe 'Connect-CWC -ApiSecret' {
 
     BeforeEach {
