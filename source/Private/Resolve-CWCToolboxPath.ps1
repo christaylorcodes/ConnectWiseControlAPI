@@ -9,7 +9,9 @@ function Resolve-CWCToolboxPath {
         inside the Toolbox, such as the Toolbox root, its parent or another drive: an empty path, or a
         part that is empty, ends in a dot or whitespace (Windows drops those, so '.', '..', '...' and
         '. ' all resolve to a folder above the item), or holds a character Windows does not allow in a
-        file name (which covers 'C:'). A file path ending in a slash is refused too.
+        file name (which covers 'C:'). A file path ending in a slash is refused too, and so is a part that
+        is a Windows device name (CON, NUL, COM1, with or without an extension) or longer than 255
+        characters.
 
     .PARAMETER Path
         Path of the item inside the Toolbox.
@@ -31,7 +33,8 @@ function Resolve-CWCToolboxPath {
     if ($Folder) { $Clean = $Clean.TrimEnd('/') }
 
     $BadParts = @($Clean -split '/' | Where-Object {
-            [string]::IsNullOrWhiteSpace($_) -or $_ -match '[.\s]$' -or $_ -match '[:*?"<>|\x00-\x1f]'
+            [string]::IsNullOrWhiteSpace($_) -or $_ -match '[.\s]$' -or $_ -match '[:*?"<>|\x00-\x1f]' -or
+            $_ -match '^(CON|PRN|AUX|NUL|COM[0-9]|LPT[0-9])(\.|$)' -or $_.Length -gt 255
         })
     if ($BadParts.Count -gt 0) {
         $Message = "'$Path' is not a valid Toolbox path."

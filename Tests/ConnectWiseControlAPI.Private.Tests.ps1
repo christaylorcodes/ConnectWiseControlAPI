@@ -438,6 +438,18 @@ Describe 'Invoke-CWCWebRequest' {
             }
         }
 
+        It 'suggests Connect-CWC -Force on an MFA connection refused with 401 Needs permission, not on a 500' {
+            InModuleScope 'ConnectWiseControlAPI' {
+                Mock Invoke-WebRequest { throw (& $script:NewServerErrorRecord '{"errorType":"SecurityException","message":"Needs permission"}' $null 401) }
+                $null = Invoke-CWCWebRequest -Arguments @{ Endpoint = 'Services/ToolboxService.ashx/WriteToolboxFileContent'; Method = 'Post' } -ErrorAction SilentlyContinue -ErrorVariable err
+                "$err" | Should -Match 'MFA login has expired'
+                "$err" | Should -Match 'Connect-CWC with -Force'
+                Mock Invoke-WebRequest { throw (& $script:NewServerErrorRecord '{"errorType":"SecurityException","message":"Needs permission"}' $null) }
+                $null = Invoke-CWCWebRequest -Arguments @{ Endpoint = 'Services/ToolboxService.ashx/WriteToolboxFileContent'; Method = 'Post' } -ErrorAction SilentlyContinue -ErrorVariable err
+                "$err" | Should -Not -Match 'Connect-CWC with -Force'
+            }
+        }
+
         It 'says the login may have expired on an anti-forgery error' {
             InModuleScope 'ConnectWiseControlAPI' {
                 Mock Invoke-WebRequest { throw (& $script:NewServerErrorRecord '{"errorType":"InvalidOperationException","message":"Invalid anti-forgery token"}' $null) }

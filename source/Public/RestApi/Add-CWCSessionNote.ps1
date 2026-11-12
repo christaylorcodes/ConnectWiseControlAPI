@@ -45,7 +45,10 @@ function Add-CWCSessionNote {
     )
 
     process {
-        if (-not $PSCmdlet.ShouldProcess("$GUID", 'Add note')) { return }
+        # A prompt that cannot be shown throws: the assignment then never happens and nothing is sent
+        $Proceed = $False
+        $Proceed = $PSCmdlet.ShouldProcess("$GUID", 'Add note')
+        if (-not $Proceed) { return }
 
         # Adding an event is not idempotent: never retried
         if (Test-CWCApiSecretConnection) {

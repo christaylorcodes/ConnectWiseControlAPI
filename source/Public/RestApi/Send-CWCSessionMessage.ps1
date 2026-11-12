@@ -54,7 +54,10 @@ function Send-CWCSessionMessage {
     )
 
     process {
-        if (-not $PSCmdlet.ShouldProcess("$GUID", 'Send message')) { return }
+        # A prompt that cannot be shown throws: the assignment then never happens and nothing is sent
+        $Proceed = $False
+        $Proceed = $PSCmdlet.ShouldProcess("$GUID", 'Send message')
+        if (-not $Proceed) { return }
 
         # Adding an event is not idempotent: never retried
         if (Test-CWCApiSecretConnection) {

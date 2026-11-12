@@ -8,8 +8,11 @@ function Add-CWCToolboxItem {
         the item, replacing an item of the same name, and the rest are appended. The user needs the
         ManageSharedToolbox permission.
 
-        When -Name contains a folder, that folder is created first. If a chunk fails, a partial file is
-        left in the Toolbox; run the command again to replace it.
+        When -Name contains a folder, that folder is created first.
+
+        The first chunk replaces an existing item at once. If a later chunk fails, or the upload is
+        stopped with Ctrl+C, the incomplete item is deleted so it cannot be run; an item it was replacing
+        is gone. Run the command again to upload it.
 
         Several files can be piped in; each keeps its own file name.
 
@@ -26,8 +29,8 @@ function Add-CWCToolboxItem {
         Create the Toolbox folder -Name instead of uploading a file.
 
     .PARAMETER ChunkSize
-        Bytes of the file sent per request. Defaults to 524288 (512 KB). Lower it if the server rejects
-        the request as too large.
+        Bytes of the file sent per request, up to 4194304 (4 MB). Defaults to 524288 (512 KB). Lower it
+        if the server rejects the request as too large.
 
     .EXAMPLE
         Add-CWCToolboxItem -Path .\Cleanup.cmd
@@ -69,7 +72,7 @@ function Add-CWCToolboxItem {
         [switch]$Directory,
 
         [Parameter(ParameterSetName = 'File')]
-        [ValidateRange(1, 2147483647)]
+        [ValidateRange(1, 4194304)]
         [int]$ChunkSize = 524288
     )
 
@@ -114,9 +117,14 @@ function Add-CWCToolboxItem {
         $ItemName = Resolve-CWCToolboxPath -Path $ItemName
         if (-not $ItemName) { return }
 
-        if (-not $PSCmdlet.ShouldProcess($ItemName, "Upload '$LocalPath' to the Toolbox")) { return }
+        $Action = "Upload '$LocalPath' to the Toolbox, replacing an item of that name"
+        # A prompt that cannot be shown throws: the assignment then never happens and nothing is sent
+        $Proceed = $False
+        $Proceed = $PSCmdlet.ShouldProcess($ItemName, $Action)
+        if (-not $Proceed) { return }
 
         $Append = $False
+        $Completed = $False
         try {
             $Stream = [System.IO.File]::OpenRead($LocalPath)
             try {
@@ -136,13 +144,30 @@ function Add-CWCToolboxItem {
                     $null = Invoke-CWCServiceMethod @Write -Arguments $Chunk -Sensitive -ErrorAction Stop
                     $Append = $True
                 }
+                $Completed = $True
             } finally {
                 $Stream.Dispose()
             }
         } catch {
-            if ($Append) { Write-Warning "Upload of '$ItemName' stopped part way; a partial file is in the Toolbox." }
             # WriteError keeps the transport's ErrorId (CWC.Http401, ...); Write-Error $_ loses it on PS 5.1
             $PSCmdlet.WriteError($_)
+        } finally {
+            # Runs after an error and on Ctrl+C. Once the first chunk is written, the item under that name is
+            # incomplete (the item it replaced is already gone) and Send-CWCToolboxItem could still run it.
+            # Not deleted when the first chunk failed: an existing item may be untouched then.
+            if ($Append -and -not $Completed) {
+                # ProcessToolboxOperation(ToolboxOperation operation, string path, string originalPath)
+                $Delete = @($script:CWCToolboxOperation.Delete, $ItemName, $null)
+                try {
+                    $null = Invoke-CWCServiceMethod -Service ToolboxService -Method ProcessToolboxOperation `
+                        -Arguments $Delete -ErrorAction Stop
+                    Write-Warning ("Upload of '$ItemName' stopped part way; the server was asked to delete the " +
+                        'incomplete item. Check with Get-CWCToolbox.')
+                } catch {
+                    Write-Warning ("Upload of '$ItemName' stopped part way and the incomplete item could not be " +
+                        'deleted. Remove it with Remove-CWCToolboxItem.')
+                }
+            }
         }
     }
 }

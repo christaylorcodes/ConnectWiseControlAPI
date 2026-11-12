@@ -47,7 +47,10 @@ function Remove-CWCToolboxItem {
         if (-not $ItemPath) { return }
 
         # ConfirmImpact High: a deleted item can't be restored, and a folder takes its contents with it
-        if (-not $PSCmdlet.ShouldProcess($ItemPath, 'Delete Toolbox item')) { return }
+        # A prompt that cannot be shown throws: the assignment then never happens and nothing is sent
+        $Proceed = $False
+        $Proceed = $PSCmdlet.ShouldProcess($ItemPath, 'Delete Toolbox item')
+        if (-not $Proceed) { return }
 
         # ProcessToolboxOperation(ToolboxOperation operation, string path, string originalPath);
         # originalPath is only used by Move. Never retried.

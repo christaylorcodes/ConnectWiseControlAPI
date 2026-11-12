@@ -2339,6 +2339,31 @@ Describe 'Session event functions (credentials)' {
         }
     }
 
+    # A prompt cannot be answered in a test. A runspace without a host UI fails at the prompt (HostException)
+    # and the command must stop there. A call that does not prompt goes on to the next check: there is no
+    # connection in that runspace, so it reports CWC.NotConnected.
+    It '<Case>' -ForEach @(
+        @{ Case = 'Send-CWCToolboxItem -Silent asks for confirmation'; Call = "Send-CWCToolboxItem -GUID ([guid]::NewGuid()) -Name 'Tool.cmd' -Silent"; Prompts = $true }
+        @{ Case = 'Send-CWCToolboxItem -Elevated asks for confirmation'; Call = "Send-CWCToolboxItem -GUID ([guid]::NewGuid()) -Name 'Tool.cmd' -Elevated"; Prompts = $true }
+        @{ Case = 'Send-CWCToolboxItem does not ask for a standard run'; Call = "Send-CWCToolboxItem -GUID ([guid]::NewGuid()) -Name 'Tool.cmd'"; Prompts = $false }
+        @{ Case = 'Send-CWCToolboxItem -Silent -Confirm:$false does not ask'; Call = "Send-CWCToolboxItem -GUID ([guid]::NewGuid()) -Name 'Tool.cmd' -Silent -Confirm:`$false"; Prompts = $false }
+        @{ Case = 'Send-CWCToolboxItem -Silent does not ask when $ConfirmPreference is None'; Call = "`$ConfirmPreference = 'None'; Send-CWCToolboxItem -GUID ([guid]::NewGuid()) -Name 'Tool.cmd' -Silent"; Prompts = $false }
+        @{ Case = 'Remove-CWCToolboxItem stops when it cannot ask'; Call = "Remove-CWCToolboxItem -Path 'Tool.cmd'"; Prompts = $true }
+        @{ Case = 'Remove-CWCHostFromSession stops when it cannot ask'; Call = "Remove-CWCHostFromSession -SessionID ([guid]::NewGuid()) -ConnectionID ([guid]::NewGuid()) -Group 'All Machines'"; Prompts = $true }
+        @{ Case = 'Add-CWCSessionNote -Confirm stops when it cannot ask'; Call = "Add-CWCSessionNote -GUID ([guid]::NewGuid()) -Note 'n' -Confirm"; Prompts = $true }
+        @{ Case = 'Send-CWCSessionMessage -Confirm stops when it cannot ask'; Call = "Send-CWCSessionMessage -GUID ([guid]::NewGuid()) -Message 'm' -Confirm"; Prompts = $true }
+    ) {
+        $ModulePath = (Get-Module 'ConnectWiseControlAPI').Path
+        $Shell = [powershell]::Create()
+        try {
+            $null = $Shell.AddScript("Import-Module '$ModulePath'; $Call").Invoke()
+            $Ids = @($Shell.Streams.Error | ForEach-Object { $_.FullyQualifiedErrorId.Split(',')[0] })
+            if ($Prompts) { $Ids | Should -Be @('HostException') } else { $Ids | Should -Be @('CWC.NotConnected') }
+        } finally {
+            $Shell.Dispose()
+        }
+    }
+
     It 'Send-CWCSessionMessage warns that -From is ignored' {
         InModuleScope 'ConnectWiseControlAPI' {
             Mock Invoke-CWCWebRequest {}
@@ -2705,7 +2730,30 @@ Describe 'Add-CWCToolboxItem' {
         }
     }
 
-    It 'warns about a partial file when a later chunk fails' {
+    It 'deletes the incomplete item when a later chunk fails' {
+        New-CWCTestFile 'Big.bin' 1, 2, 3, 4, 5, 6
+        InModuleScope 'ConnectWiseControlAPI' {
+            Mock Invoke-CWCWebRequest {
+                param($Arguments)
+                $null = $script:ToolboxCalls.Add([PSCustomObject]@{
+                        Endpoint = $Arguments.Endpoint
+                        Body     = $Arguments.Body | ConvertFrom-Json
+                    })
+                if ($script:ToolboxCalls.Count -eq 3) { Write-Error 'HTTP 500' -ErrorId 'CWC.Http500' }
+            }
+            Mock Write-Warning {}
+            Add-CWCToolboxItem -Path 'TestDrive:\Big.bin' -Name 'Scripts\Big.bin' -ChunkSize 2 -Confirm:$false -ErrorVariable err -ErrorAction SilentlyContinue
+            # folder, chunk 1, chunk 2 (fails), delete: the third chunk is never sent
+            $script:ToolboxCalls.Count | Should -Be 4
+            $script:ToolboxCalls[3].Endpoint | Should -Be 'Services/ToolboxService.ashx/ProcessToolboxOperation'
+            $script:ToolboxCalls[3].Body[0] | Should -Be 3
+            $script:ToolboxCalls[3].Body[1] | Should -Be 'Scripts/Big.bin'
+            $err[-1].FullyQualifiedErrorId | Should -BeLike 'CWC.Http500*'
+            Should -Invoke Write-Warning -Times 1 -ParameterFilter { $Message -like '*asked to delete the incomplete item*' }
+        }
+    }
+
+    It 'says so when the incomplete item cannot be deleted' {
         New-CWCTestFile 'Big.bin' 1, 2, 3, 4
         InModuleScope 'ConnectWiseControlAPI' {
             $script:ToolboxCallCount = 0
@@ -2715,9 +2763,37 @@ Describe 'Add-CWCToolboxItem' {
             }
             Mock Write-Warning {}
             Add-CWCToolboxItem -Path 'TestDrive:\Big.bin' -ChunkSize 2 -Confirm:$false -ErrorVariable err -ErrorAction SilentlyContinue
-            $script:ToolboxCallCount | Should -Be 2
-            $err[-1].FullyQualifiedErrorId | Should -BeLike 'CWC.Http500*'
-            Should -Invoke Write-Warning -Times 1 -ParameterFilter { $Message -like '*partial file*' }
+            $script:ToolboxCallCount | Should -Be 3
+            @($err | Where-Object { $_.FullyQualifiedErrorId -like 'CWC.Http500,Add-CWCToolboxItem' }).Count | Should -Be 1
+            Should -Invoke Write-Warning -Times 1 -ParameterFilter { $Message -like '*could not be deleted*Remove-CWCToolboxItem*' }
+        }
+    }
+
+    It 'does not delete anything when the first chunk fails (an existing item may be untouched)' {
+        New-CWCTestFile 'Tool.cmd' 1, 2
+        InModuleScope 'ConnectWiseControlAPI' {
+            Mock Invoke-CWCWebRequest { Write-Error 'HTTP 500' -ErrorId 'CWC.Http500' }
+            Mock Write-Warning {}
+            Add-CWCToolboxItem -Path 'TestDrive:\Tool.cmd' -Confirm:$false -ErrorVariable err -ErrorAction SilentlyContinue
+            Should -Invoke Invoke-CWCWebRequest -Times 1 -Exactly
+            Should -Invoke Write-Warning -Times 0
+        }
+    }
+
+    It 'sends a file that is an exact multiple of the chunk size without an empty last chunk' {
+        New-CWCTestFile 'Even.bin' 1, 2, 3, 4
+        InModuleScope 'ConnectWiseControlAPI' {
+            Add-CWCToolboxItem -Path 'TestDrive:\Even.bin' -ChunkSize 2 -Confirm:$false
+            $script:ToolboxCalls.Count | Should -Be 2
+            @($script:ToolboxCalls | ForEach-Object { $_.Endpoint }) | Should -Not -Contain 'Services/ToolboxService.ashx/ProcessToolboxOperation'
+        }
+    }
+
+    It 'refuses a -ChunkSize above 4 MB' {
+        New-CWCTestFile 'Tool.cmd' 1
+        InModuleScope 'ConnectWiseControlAPI' {
+            { Add-CWCToolboxItem -Path 'TestDrive:\Tool.cmd' -ChunkSize 4194305 -Confirm:$false } | Should -Throw
+            $script:ToolboxCalls.Count | Should -Be 0
         }
     }
 
@@ -2743,6 +2819,7 @@ Describe 'Add-CWCToolboxItem' {
 
     It 'refuses the -Name <_> without calling the API' -ForEach @(
         '..\x.cmd', 'Scripts/', 'a//b.cmd', './x.cmd', '/', '.. /x.cmd', 'C:\x.cmd', 'x.cmd.', 'a*b.cmd'
+        'CON', 'nul.txt', 'Scripts/com1.cmd', 'LPT9/x.cmd', ('a' * 256)
     ) {
         New-CWCTestFile 'Tool.cmd' 1
         InModuleScope 'ConnectWiseControlAPI' -Parameters @{ BadName = $_ } {

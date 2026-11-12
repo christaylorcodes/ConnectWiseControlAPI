@@ -8,6 +8,10 @@ function Send-CWCToolboxItem {
         event instead, which runs the item with administrative privileges; -Silent queues a
         QueuedSilentElevatedTool event, which runs it elevated and silently.
 
+        -Elevated and -Silent ask for confirmation, like the Remove-* commands: the item runs with
+        administrative rights, and with -Silent nobody at the machine sees it. Pass -Confirm:$false in
+        unattended scripts.
+
         The machine opens the item the way Windows opens a file, so use a file type that runs when opened
         (.exe, .msi, .cmd, .bat): a .ps1 opens in its default program instead of running.
 
@@ -41,8 +45,12 @@ function Send-CWCToolboxItem {
     .EXAMPLE
         Send-CWCToolboxItem -GUID $SessionID -Name 'Installers/Setup.exe' -Elevated
 
+        Asks for confirmation, then runs the item with administrative privileges.
+
     .EXAMPLE
-        Send-CWCToolboxItem -GUID $SessionID -Name 'Cleanup.cmd' -Silent
+        Send-CWCToolboxItem -GUID $SessionID -Name 'Cleanup.cmd' -Silent -Confirm:$false
+
+        Runs the item elevated and silently, without asking.
 
     .NOTES
         Author: Chris Taylor
@@ -87,7 +95,14 @@ function Send-CWCToolboxItem {
             $EventType = $script:CWCSessionEventType.QueuedElevatedTool
             $Action = "Run toolbox item '$Name' elevated"
         }
-        if (-not $PSCmdlet.ShouldProcess("$GUID", $Action)) { return }
+        # An elevated run is treated as high impact, a standard run is not. The command's impact is Medium,
+        # so lowering the default preference (High) to Medium makes ShouldProcess ask. -Confirm:$false and a
+        # caller's own $ConfirmPreference arrive here as other values and are left alone.
+        if (($Silent -or $Elevated) -and $ConfirmPreference -eq 'High') { $ConfirmPreference = 'Medium' }
+        # A prompt that cannot be shown throws: the assignment then never happens and nothing is sent
+        $Proceed = $False
+        $Proceed = $PSCmdlet.ShouldProcess("$GUID", $Action)
+        if (-not $Proceed) { return }
 
         # Adding an event is not idempotent: never retried
         if (Test-CWCApiSecretConnection) {

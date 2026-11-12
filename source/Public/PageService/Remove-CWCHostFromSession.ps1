@@ -45,7 +45,10 @@ function Remove-CWCHostFromSession {
         [string[]]$Group
     )
 
-    if (-not $PSCmdlet.ShouldProcess("Connection $ConnectionID in session $SessionID", 'Force disconnect')) { return }
+    # A prompt that cannot be shown throws: the assignment then never happens and nothing is sent
+    $Proceed = $False
+    $Proceed = $PSCmdlet.ShouldProcess("Connection $ConnectionID in session $SessionID", 'Force disconnect')
+    if (-not $Proceed) { return }
 
     Add-CWCSessionEvent -Group $Group -Entry @{
         SessionID    = $SessionID

@@ -126,6 +126,11 @@
             if ($StatusCode -gt 0 -and $script:CWCServerConnection.AuthType -eq 'Mfa' -and -not $script:CWCServerConnection.LoggingIn -and
                 ("$ServerErrorType" -match 'Security' -or "$ServerMessage" -match 'anti-?forgery|Needs permission')) {
                 $ErrorMessage += 'If the MFA login has expired, run Connect-CWC again.'
+                # Connect-CWC reuses a cached MFA login that still answers ordinary calls, which is the case
+                # described below, so only -Force signs in again.
+                if ($StatusCode -eq 401 -and "$ServerMessage" -match 'Needs permission') {
+                    $ErrorMessage += 'If the error stays and the account has this permission, run Connect-CWC with -Force.'
+                }
             }
             # A credentials login keeps working for ordinary calls after the server stops honouring its
             # management permissions: ToolboxService and SessionGroupService answered 401 "Needs permission"
