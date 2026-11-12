@@ -93,6 +93,11 @@ function Add-CWCToolboxItem {
         $Write = @{ Service = 'ToolboxService'; Method = 'WriteToolboxFileContent' }
 
         if ($PSCmdlet.ParameterSetName -eq 'Directory') {
+            if (-not $Directory) {
+                # -Directory:$false still selects this parameter set; a folder is not what was asked for
+                $Message = 'Nothing to do: pass -Path to upload a file, or -Directory to create a folder.'
+                return Write-Error $Message -ErrorId 'CWC.NothingToUpload' -Category InvalidArgument
+            }
             $Folder = Resolve-CWCToolboxPath -Path $Name -Folder
             if ($Folder -and $PSCmdlet.ShouldProcess($Folder, 'Create Toolbox folder')) {
                 $null = Invoke-CWCServiceMethod @Write -Arguments @($Folder, $True, $False, '')
@@ -124,6 +129,7 @@ function Add-CWCToolboxItem {
         if (-not $Proceed) { return }
 
         $Append = $False
+        $FirstChunkSent = $False
         $Completed = $False
         try {
             $Stream = [System.IO.File]::OpenRead($LocalPath)
@@ -140,6 +146,7 @@ function Add-CWCToolboxItem {
                 # -not $Append: an empty file still needs one call to create the item
                 while (($BytesRead = $Stream.Read($Buffer, 0, $Buffer.Length)) -gt 0 -or -not $Append) {
                     $Chunk = @($ItemName, $False, $Append, [Convert]::ToBase64String($Buffer, 0, $BytesRead))
+                    $FirstChunkSent = $True
                     # -Sensitive keeps the file content out of verbose and debug output
                     $null = Invoke-CWCServiceMethod @Write -Arguments $Chunk -Sensitive -ErrorAction Stop
                     $Append = $True
@@ -167,6 +174,11 @@ function Add-CWCToolboxItem {
                     Write-Warning ("Upload of '$ItemName' stopped part way and the incomplete item could not be " +
                         'deleted. Remove it with Remove-CWCToolboxItem.')
                 }
+            } elseif ($FirstChunkSent -and -not $Completed) {
+                # The first chunk got no confirmed answer: the server may have refused it and left an existing
+                # item alone, or may have written it. Deleting here could destroy an intact item, so only warn.
+                Write-Warning ("Upload of '$ItemName' failed on its first chunk. If the server wrote that chunk, " +
+                    'the Toolbox holds an incomplete item of that name: check with Get-CWCToolbox before running it.')
             }
         }
     }

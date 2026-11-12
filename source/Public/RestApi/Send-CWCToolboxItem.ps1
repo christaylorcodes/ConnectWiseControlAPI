@@ -97,7 +97,8 @@ function Send-CWCToolboxItem {
         }
         # An elevated run is treated as high impact, a standard run is not. The command's impact is Medium,
         # so lowering the default preference (High) to Medium makes ShouldProcess ask. -Confirm:$false and a
-        # caller's own $ConfirmPreference arrive here as other values and are left alone.
+        # session-wide (global) $ConfirmPreference arrive here as other values and are left alone. As with
+        # every module command, a preference set only in the caller's script scope is not seen: use -Confirm.
         if (($Silent -or $Elevated) -and $ConfirmPreference -eq 'High') { $ConfirmPreference = 'Medium' }
         # A prompt that cannot be shown throws: the assignment then never happens and nothing is sent
         $Proceed = $False

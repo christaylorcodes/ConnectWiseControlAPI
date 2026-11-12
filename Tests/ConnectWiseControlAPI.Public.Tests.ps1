@@ -2347,7 +2347,7 @@ Describe 'Session event functions (credentials)' {
         @{ Case = 'Send-CWCToolboxItem -Elevated asks for confirmation'; Call = "Send-CWCToolboxItem -GUID ([guid]::NewGuid()) -Name 'Tool.cmd' -Elevated"; Prompts = $true }
         @{ Case = 'Send-CWCToolboxItem does not ask for a standard run'; Call = "Send-CWCToolboxItem -GUID ([guid]::NewGuid()) -Name 'Tool.cmd'"; Prompts = $false }
         @{ Case = 'Send-CWCToolboxItem -Silent -Confirm:$false does not ask'; Call = "Send-CWCToolboxItem -GUID ([guid]::NewGuid()) -Name 'Tool.cmd' -Silent -Confirm:`$false"; Prompts = $false }
-        @{ Case = 'Send-CWCToolboxItem -Silent does not ask when $ConfirmPreference is None'; Call = "`$ConfirmPreference = 'None'; Send-CWCToolboxItem -GUID ([guid]::NewGuid()) -Name 'Tool.cmd' -Silent"; Prompts = $false }
+        @{ Case = 'Send-CWCToolboxItem -Silent does not ask when the session $ConfirmPreference is None'; Call = "`$ConfirmPreference = 'None'; Send-CWCToolboxItem -GUID ([guid]::NewGuid()) -Name 'Tool.cmd' -Silent"; Prompts = $false }
         @{ Case = 'Remove-CWCToolboxItem stops when it cannot ask'; Call = "Remove-CWCToolboxItem -Path 'Tool.cmd'"; Prompts = $true }
         @{ Case = 'Remove-CWCHostFromSession stops when it cannot ask'; Call = "Remove-CWCHostFromSession -SessionID ([guid]::NewGuid()) -ConnectionID ([guid]::NewGuid()) -Group 'All Machines'"; Prompts = $true }
         @{ Case = 'Add-CWCSessionNote -Confirm stops when it cannot ask'; Call = "Add-CWCSessionNote -GUID ([guid]::NewGuid()) -Note 'n' -Confirm"; Prompts = $true }
@@ -2769,14 +2769,22 @@ Describe 'Add-CWCToolboxItem' {
         }
     }
 
-    It 'does not delete anything when the first chunk fails (an existing item may be untouched)' {
+    It 'does not delete anything when the first chunk fails (an existing item may be untouched), but warns' {
         New-CWCTestFile 'Tool.cmd' 1, 2
         InModuleScope 'ConnectWiseControlAPI' {
             Mock Invoke-CWCWebRequest { Write-Error 'HTTP 500' -ErrorId 'CWC.Http500' }
             Mock Write-Warning {}
             Add-CWCToolboxItem -Path 'TestDrive:\Tool.cmd' -Confirm:$false -ErrorVariable err -ErrorAction SilentlyContinue
             Should -Invoke Invoke-CWCWebRequest -Times 1 -Exactly
-            Should -Invoke Write-Warning -Times 0
+            Should -Invoke Write-Warning -Times 1 -ParameterFilter { $Message -like '*failed on its first chunk*' }
+        }
+    }
+
+    It 'creates nothing with -Directory:$false' {
+        InModuleScope 'ConnectWiseControlAPI' {
+            Add-CWCToolboxItem -Name 'Tool.cmd' -Directory:$false -Confirm:$false -ErrorVariable err -ErrorAction SilentlyContinue
+            $err[0].FullyQualifiedErrorId | Should -BeLike 'CWC.NothingToUpload*'
+            $script:ToolboxCalls.Count | Should -Be 0
         }
     }
 

@@ -396,6 +396,17 @@ Describe 'Repository' {
         $Ignored = @(git -C $RepoRoot check-ignore --no-index -- $SourceFiles | Where-Object { $_ })
         $Ignored | Should -BeNullOrEmpty
     }
+
+    # ShouldProcess throws when it has to ask and the host cannot prompt. The error ends only that statement,
+    # so 'if (-not $PSCmdlet.ShouldProcess(...)) { return }' goes on and sends the request. Use
+    # 'if ($PSCmdlet.ShouldProcess(...)) { ... }', or assign the result to a variable that starts as $false.
+    It 'has no early return on a negated ShouldProcess call' {
+        $SourceFolder = Join-Path (Split-Path $PSScriptRoot -Parent) 'source'
+        $Hits = @(Get-ChildItem $SourceFolder -Filter '*.ps1' -Recurse |
+                Select-String -Pattern '-not\s+\$PSCmdlet\.ShouldProcess' |
+                ForEach-Object { "$($_.Filename):$($_.LineNumber)" })
+        $Hits | Should -BeNullOrEmpty
+    }
 }
 
 Describe 'Generated help' {
