@@ -32,8 +32,12 @@ The user needs the
 ManageSharedToolbox permission.
 
 When -Name contains a folder, that folder is created first.
-If a chunk fails, a partial file is
-left in the Toolbox; run the command again to replace it.
+
+The first chunk replaces an existing item at once.
+If a later chunk fails, or the upload is
+stopped with Ctrl+C, the incomplete item is deleted so it cannot be run; an item it was replacing
+is gone.
+Run the command again to upload it.
 
 Several files can be piped in; each keeps its own file name.
 
@@ -130,10 +134,10 @@ Accept wildcard characters: False
 ```
 
 ### -ChunkSize
-Bytes of the file sent per request.
+Bytes of the file sent per request, up to 4194304 (4 MB).
 Defaults to 524288 (512 KB).
-Lower it if the server rejects
-the request as too large.
+Lower it
+if the server rejects the request as too large.
 
 ```yaml
 Type: Int32

@@ -7,33 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-
-- `Add-CWCToolboxItem` uploads a file to the shared Toolbox in chunks, or creates a Toolbox folder
-  (`ToolboxService.WriteToolboxFileContent`; needs the ManageSharedToolbox permission; credentials
-  connections only). Accepts files from the pipeline
-- `Get-CWCToolbox` lists the Toolbox contents (`PageService.GetToolbox`) as one object per folder and file
-  with its path; `-Raw` returns the server's tree
-- `Remove-CWCToolboxItem` deletes a Toolbox file or folder (`ToolboxService.ProcessToolboxOperation`, Delete);
-  asks for confirmation by default
-- `Send-CWCToolboxItem -Elevated` runs the item with administrative privileges (QueuedElevatedTool 101) and
-  `-Silent` runs it elevated and silently (QueuedSilentElevatedTool 117); credentials connections only
-
-### Changed
-
-- A 401 "Needs permission" on a credentials connection now suggests `Connect-CWC -Force`: the server stops
-  honouring an older login's management permissions while ordinary calls keep working
-
 ## [0.5.0] - 2026-11-10
 
 Version numbers now have three parts (`0.5.0`). The previous release was 0.4.0.0, which had 21 commands; this
-release has 32.
+release has 35.
 
 ### Breaking changes
 
-- `Remove-CWCSession`, `Remove-CWCSessionNote` and `Remove-CWCHostFromSession` ask for confirmation by default.
+- `Remove-CWCSession`, `Remove-CWCSessionNote`, `Remove-CWCHostFromSession` and the new `Remove-CWCToolboxItem`
+  ask for confirmation by default, and so does `Send-CWCToolboxItem` with the new `-Elevated` or `-Silent`.
   Unattended scripts must add `-Confirm:$false`. Without it, a session started with `-NonInteractive` fails at
-  the prompt and removes nothing; other unattended hosts may wait at the prompt or take its default answer (Yes)
+  the prompt and does nothing; other unattended hosts may wait at the prompt or take its default answer (Yes)
 - `Connect-CWC` without `-Force` switches to a different server, sign-in method or user instead of keeping the
   old connection
 - `Get-CWCLastContact` returns an error when no connection event is found, instead of the current time
@@ -92,6 +76,17 @@ Details are in the sections below.
   (`InitiatedJoin`). `-UrlOnly` returns the URL instead (for macOS/Linux or custom launchers), using a
   5-minute delegated token when the role allows it. The token is never written to any output stream.
   Credentials connections only; launching is Windows only
+- `Get-CWCToolbox` lists the Toolbox contents (`PageService.GetToolbox`) as one object per folder and file
+  with its path; `-Raw` returns the server's tree. Credentials connections only
+- `Add-CWCToolboxItem` uploads a file to the shared Toolbox in chunks, or creates a Toolbox folder
+  (`ToolboxService.WriteToolboxFileContent`; needs the ManageSharedToolbox permission; credentials
+  connections only). Accepts files from the pipeline. It replaces an item of the same name. If the upload
+  fails or is stopped part way, the incomplete item is deleted so it cannot be run
+- `Remove-CWCToolboxItem` deletes a Toolbox file or folder (`ToolboxService.ProcessToolboxOperation`, Delete);
+  asks for confirmation by default. Credentials connections only
+- `Send-CWCToolboxItem -Elevated` runs the item with administrative privileges (QueuedElevatedTool 101) and
+  `-Silent` runs it elevated and silently (QueuedSilentElevatedTool 117). Both ask for confirmation unless
+  `-Confirm:$false` is passed; credentials connections only
 
 ### Deprecated
 
@@ -131,6 +126,8 @@ Details are in the sections below.
 - `Invoke-CWCCommand` waits 1, 2, 3 … up to 5 seconds between polls of the rate-limited session details
 - `Enter-CWCSession` takes `-Name` from the pipeline (e.g. from `Get-CWCSession`) and then skips its
   session lookup
+- A 401 "Needs permission" on a credentials or MFA connection suggests `Connect-CWC -Force` (#31): the server
+  stops honouring an older login's management permissions while ordinary calls keep working
 
 ### Fixed
 

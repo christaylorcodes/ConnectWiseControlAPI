@@ -253,6 +253,251 @@
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
+      <command:name>Add-CWCToolboxItem</command:name>
+      <command:verb>Add</command:verb>
+      <command:noun>CWCToolboxItem</command:noun>
+      <maml:description>
+        <maml:para>Uploads a file to the shared ScreenConnect Toolbox, or creates a Toolbox folder.</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>Calls ToolboxService.WriteToolboxFileContent. The file is sent in chunks: the first chunk creates the item, replacing an item of the same name, and the rest are appended. The user needs the ManageSharedToolbox permission.</maml:para>
+      <maml:para>When -Name contains a folder, that folder is created first.</maml:para>
+      <maml:para>The first chunk replaces an existing item at once. If a later chunk fails, or the upload is stopped with Ctrl+C, the incomplete item is deleted so it cannot be run; an item it was replacing is gone. Run the command again to upload it.</maml:para>
+      <maml:para>Several files can be piped in; each keeps its own file name.</maml:para>
+      <maml:para>Run the uploaded item on a session with Send-CWCToolboxItem.</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>Add-CWCToolboxItem</maml:name>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="named" aliases="FullName">
+          <maml:name>Path</maml:name>
+          <maml:description>
+            <maml:para>Local file to upload. Accepts paths and Get-Item / Get-ChildItem output from the pipeline.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Name</maml:name>
+          <maml:description>
+            <maml:para>Path of the item inside the Toolbox, e.g. 'Cleanup.cmd' or 'Scripts/Cleanup.cmd'. Defaults to the file name of -Path. It names one item, so it cannot be used when several files are piped in.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>ChunkSize</maml:name>
+          <maml:description>
+            <maml:para>Bytes of the file sent per request, up to 4194304 (4 MB). Defaults to 524288 (512 KB). Lower it if the server rejects the request as too large.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
+          <dev:type>
+            <maml:name>Int32</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>524288</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="wi">
+          <maml:name>WhatIf</maml:name>
+          <maml:description>
+            <maml:para>Shows what would happen if the cmdlet runs. The cmdlet is not run.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="cf">
+          <maml:name>Confirm</maml:name>
+          <maml:description>
+            <maml:para>Prompts you for confirmation before running the cmdlet.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+      <command:syntaxItem>
+        <maml:name>Add-CWCToolboxItem</maml:name>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Name</maml:name>
+          <maml:description>
+            <maml:para>Path of the item inside the Toolbox, e.g. 'Cleanup.cmd' or 'Scripts/Cleanup.cmd'. Defaults to the file name of -Path. It names one item, so it cannot be used when several files are piped in.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Directory</maml:name>
+          <maml:description>
+            <maml:para>Create the Toolbox folder -Name instead of uploading a file.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="wi">
+          <maml:name>WhatIf</maml:name>
+          <maml:description>
+            <maml:para>Shows what would happen if the cmdlet runs. The cmdlet is not run.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="cf">
+          <maml:name>Confirm</maml:name>
+          <maml:description>
+            <maml:para>Prompts you for confirmation before running the cmdlet.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="named" aliases="FullName">
+        <maml:name>Path</maml:name>
+        <maml:description>
+          <maml:para>Local file to upload. Accepts paths and Get-Item / Get-ChildItem output from the pipeline.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>Name</maml:name>
+        <maml:description>
+          <maml:para>Path of the item inside the Toolbox, e.g. 'Cleanup.cmd' or 'Scripts/Cleanup.cmd'. Defaults to the file name of -Path. It names one item, so it cannot be used when several files are piped in.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>Directory</maml:name>
+        <maml:description>
+          <maml:para>Create the Toolbox folder -Name instead of uploading a file.</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>ChunkSize</maml:name>
+        <maml:description>
+          <maml:para>Bytes of the file sent per request, up to 4194304 (4 MB). Defaults to 524288 (512 KB). Lower it if the server rejects the request as too large.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
+        <dev:type>
+          <maml:name>Int32</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>524288</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="wi">
+        <maml:name>WhatIf</maml:name>
+        <maml:description>
+          <maml:para>Shows what would happen if the cmdlet runs. The cmdlet is not run.</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="cf">
+        <maml:name>Confirm</maml:name>
+        <maml:description>
+          <maml:para>Prompts you for confirmation before running the cmdlet.</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes />
+    <command:returnValues />
+    <maml:alertSet>
+      <maml:alert>
+        <maml:para>Requires Connect-CWC -Credentials (the RESTful API Manager extension cannot write to the Toolbox). Author: Chris Taylor</maml:para>
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <dev:code>Add-CWCToolboxItem -Path .\Cleanup.cmd</dev:code>
+        <dev:remarks>
+          <maml:para>Uploads Cleanup.cmd to the top level of the Toolbox.</maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>-------------------------- EXAMPLE 2 --------------------------</maml:title>
+        <dev:code>Add-CWCToolboxItem -Path .\Cleanup.cmd -Name 'Scripts/Cleanup.cmd'</dev:code>
+        <dev:remarks>
+          <maml:para>Creates the Scripts folder if needed and uploads the file into it.</maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>-------------------------- EXAMPLE 3 --------------------------</maml:title>
+        <dev:code>Get-ChildItem .\Tools\*.exe | Add-CWCToolboxItem</dev:code>
+        <dev:remarks>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>-------------------------- EXAMPLE 4 --------------------------</maml:title>
+        <dev:code>Add-CWCToolboxItem -Directory -Name 'Scripts'</dev:code>
+        <dev:remarks>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>https://github.com/christaylorcodes/ConnectWiseControlAPI</maml:linkText>
+        <maml:uri>https://github.com/christaylorcodes/ConnectWiseControlAPI</maml:uri>
+      </maml:navigationLink>
+    </command:relatedLinks>
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
       <command:name>Connect-CWC</command:name>
       <command:verb>Connect</command:verb>
       <command:noun>CWC</command:noun>
@@ -2125,6 +2370,80 @@ open $Url   # macOS</dev:code>
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
+      <command:name>Get-CWCToolbox</command:name>
+      <command:verb>Get</command:verb>
+      <command:noun>CWCToolbox</command:noun>
+      <maml:description>
+        <maml:para>Lists the contents of the ScreenConnect Toolbox.</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>Calls PageService.GetToolbox, the same call the host client makes to list Toolbox items. Any signed-in user can call it.</maml:para>
+      <maml:para>The server returns a tree: a root folder whose Items hold folders and files, each with a Name, Attributes (1 for a folder, 0 for a file), a base64 icon (Image) and its own Items. By default the tree is flattened to one object per folder and file, with its Path inside the Toolbox and without the icon.</maml:para>
+      <maml:para>Use it to find an item for Send-CWCToolboxItem, or to check an upload made with Add-CWCToolboxItem.</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>Get-CWCToolbox</maml:name>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Raw</maml:name>
+          <maml:description>
+            <maml:para>Return the tree as the server sends it, including the icons.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>Raw</maml:name>
+        <maml:description>
+          <maml:para>Return the tree as the server sends it, including the icons.</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes />
+    <command:returnValues />
+    <maml:alertSet>
+      <maml:alert>
+        <maml:para>Requires Connect-CWC -Credentials (the RESTful API Manager extension cannot list the Toolbox). Author: Chris Taylor</maml:para>
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <dev:code>Get-CWCToolbox</dev:code>
+        <dev:remarks>
+          <maml:para>Lists every folder and file in the Toolbox.</maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>-------------------------- EXAMPLE 2 --------------------------</maml:title>
+        <dev:code>Get-CWCToolbox | Where-Object { -not $_.IsFolder -and $_.Path -like 'Scripts/*' }</dev:code>
+        <dev:remarks>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>https://github.com/christaylorcodes/ConnectWiseControlAPI</maml:linkText>
+        <maml:uri>https://github.com/christaylorcodes/ConnectWiseControlAPI</maml:uri>
+      </maml:navigationLink>
+    </command:relatedLinks>
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
       <command:name>Initialize-CWCRemoteWorkforceSessionGroup</command:name>
       <command:verb>Initialize</command:verb>
       <command:noun>CWCRemoteWorkforceSessionGroup</command:noun>
@@ -3973,6 +4292,126 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
+      <command:name>Remove-CWCToolboxItem</command:name>
+      <command:verb>Remove</command:verb>
+      <command:noun>CWCToolboxItem</command:noun>
+      <maml:description>
+        <maml:para>Deletes a file or folder from the shared ScreenConnect Toolbox.</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>Calls ToolboxService.ProcessToolboxOperation with the Delete operation. The user needs the ManageSharedToolbox permission.</maml:para>
+      <maml:para>Only items stored in the server's Toolbox folder can be deleted. Items that an extension adds (for example Command Toolbox commands) are refused by the server with "Cannot edit virtual toolbox item".</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>Remove-CWCToolboxItem</maml:name>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="1" aliases="none">
+          <maml:name>Path</maml:name>
+          <maml:description>
+            <maml:para>Path of the item inside the Toolbox, e.g. 'Cleanup.cmd' or 'Scripts/Cleanup.cmd': the Path that Get-CWCToolbox returns.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="wi">
+          <maml:name>WhatIf</maml:name>
+          <maml:description>
+            <maml:para>Shows what would happen if the cmdlet runs. The cmdlet is not run.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="cf">
+          <maml:name>Confirm</maml:name>
+          <maml:description>
+            <maml:para>Prompts you for confirmation before running the cmdlet.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="1" aliases="none">
+        <maml:name>Path</maml:name>
+        <maml:description>
+          <maml:para>Path of the item inside the Toolbox, e.g. 'Cleanup.cmd' or 'Scripts/Cleanup.cmd': the Path that Get-CWCToolbox returns.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="wi">
+        <maml:name>WhatIf</maml:name>
+        <maml:description>
+          <maml:para>Shows what would happen if the cmdlet runs. The cmdlet is not run.</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="cf">
+        <maml:name>Confirm</maml:name>
+        <maml:description>
+          <maml:para>Prompts you for confirmation before running the cmdlet.</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes />
+    <command:returnValues />
+    <maml:alertSet>
+      <maml:alert>
+        <maml:para>Requires Connect-CWC -Credentials (the RESTful API Manager extension cannot change the Toolbox). Author: Chris Taylor</maml:para>
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <dev:code>Remove-CWCToolboxItem -Path 'Scripts/Cleanup.cmd'</dev:code>
+        <dev:remarks>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>-------------------------- EXAMPLE 2 --------------------------</maml:title>
+        <dev:code>Get-CWCToolbox | Where-Object Path -like 'API Test/*.cmd' | Remove-CWCToolboxItem -Confirm:$false</dev:code>
+        <dev:remarks>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>https://github.com/christaylorcodes/ConnectWiseControlAPI</maml:linkText>
+        <maml:uri>https://github.com/christaylorcodes/ConnectWiseControlAPI</maml:uri>
+      </maml:navigationLink>
+    </command:relatedLinks>
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
       <command:name>Remove-CWCUser</command:name>
       <command:verb>Remove</command:verb>
       <command:noun>CWCUser</command:noun>
@@ -4279,9 +4718,11 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>Queues a QueuedTool session event naming the Toolbox item.</maml:para>
+      <maml:para>Queues a QueuedTool session event naming the Toolbox item. -Elevated queues a QueuedElevatedTool event instead, which runs the item with administrative privileges; -Silent queues a QueuedSilentElevatedTool event, which runs it elevated and silently.</maml:para>
+      <maml:para>-Elevated and -Silent ask for confirmation, like the Remove-* commands: the item runs with administrative rights, and with -Silent nobody at the machine sees it. Pass -Confirm:$false in unattended scripts.</maml:para>
+      <maml:para>The machine opens the item the way Windows opens a file, so use a file type that runs when opened (.exe, .msi, .cmd, .bat): a .ps1 opens in its default program instead of running.</maml:para>
       <maml:para>Credentials connections: PageService.AddSessionEvents; the user needs the RunSharedTool permission in -Group.</maml:para>
-      <maml:para>API secret connections: the RESTful API Manager extension's SendToolboxItemToSession. The event is attributed to the extension's RESTfulUserName setting ("RESTful API" unless renamed); -Group is ignored.</maml:para>
+      <maml:para>API secret connections: the RESTful API Manager extension's SendToolboxItemToSession. The event is attributed to the extension's RESTfulUserName setting ("RESTful API" unless renamed); -Group is ignored. -Elevated and -Silent are not available: the extension only queues the standard event.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -4301,7 +4742,7 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
           <maml:name>Name</maml:name>
           <maml:description>
-            <maml:para>Toolbox item name as shown in the ScreenConnect Toolbox.</maml:para>
+            <maml:para>Toolbox item name as shown in the ScreenConnect Toolbox. For an item in a folder, the Path that Get-CWCToolbox returns.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -4321,6 +4762,28 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
             <maml:uri />
           </dev:type>
           <dev:defaultValue>All Machines</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Elevated</maml:name>
+          <maml:description>
+            <maml:para>Run the item with administrative privileges (QueuedElevatedTool). Credentials connections only.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Silent</maml:name>
+          <maml:description>
+            <maml:para>Run the item elevated and silently (QueuedSilentElevatedTool): it runs as NT AUTHORITY\SYSTEM (seen live, 2026-11-11). Implies -Elevated. Credentials connections only.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
         </command:parameter>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="wi">
           <maml:name>WhatIf</maml:name>
@@ -4362,7 +4825,7 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
       <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
         <maml:name>Name</maml:name>
         <maml:description>
-          <maml:para>Toolbox item name as shown in the ScreenConnect Toolbox.</maml:para>
+          <maml:para>Toolbox item name as shown in the ScreenConnect Toolbox. For an item in a folder, the Path that Get-CWCToolbox returns.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -4382,6 +4845,30 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
           <maml:uri />
         </dev:type>
         <dev:defaultValue>All Machines</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>Elevated</maml:name>
+        <maml:description>
+          <maml:para>Run the item with administrative privileges (QueuedElevatedTool). Credentials connections only.</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>Silent</maml:name>
+        <maml:description>
+          <maml:para>Run the item elevated and silently (QueuedSilentElevatedTool): it runs as NT AUTHORITY\SYSTEM (seen live, 2026-11-11). Implies -Elevated. Credentials connections only.</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
       </command:parameter>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="wi">
         <maml:name>WhatIf</maml:name>
@@ -4418,9 +4905,23 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
     <command:examples>
       <command:example>
         <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
-        <dev:code>Send-CWCToolboxItem -GUID $SessionID -Name 'Cleanup.ps1'</dev:code>
+        <dev:code>Send-CWCToolboxItem -GUID $SessionID -Name 'Cleanup.cmd'</dev:code>
         <dev:remarks>
           <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>-------------------------- EXAMPLE 2 --------------------------</maml:title>
+        <dev:code>Send-CWCToolboxItem -GUID $SessionID -Name 'Installers/Setup.exe' -Elevated</dev:code>
+        <dev:remarks>
+          <maml:para>Asks for confirmation, then runs the item with administrative privileges.</maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>-------------------------- EXAMPLE 3 --------------------------</maml:title>
+        <dev:code>Send-CWCToolboxItem -GUID $SessionID -Name 'Cleanup.cmd' -Silent -Confirm:$false</dev:code>
+        <dev:remarks>
+          <maml:para>Runs the item elevated and silently, without asking.</maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
