@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.5.0] - 2026-11-10
+## [0.5.0] - 2026-11-12
 
 Version numbers now have three parts (`0.5.0`). The previous release was 0.4.0.0, which had 21 commands; this
 release has 35.
