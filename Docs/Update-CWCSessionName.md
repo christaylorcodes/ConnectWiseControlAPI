@@ -17,7 +17,7 @@ Update-CWCSessionName [-GUID] <Guid> [-NewName] <String> [[-Group] <String[]>] [
 ```
 
 ## DESCRIPTION
-Updates the name of a session on the control server.
+Updates the name of a session on the ScreenConnect server.
 
 ## EXAMPLES
 

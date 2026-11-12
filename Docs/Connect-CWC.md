@@ -14,29 +14,28 @@ Connects to a ConnectWise ScreenConnect server.
 
 ### Credentials (Default)
 ```
-Connect-CWC -Server <String> -Credentials <PSCredential> [-Force]
+Connect-CWC [-Server] <String> [-Credentials] <PSCredential> [-Force]
  [<CommonParameters>]
 ```
 
 ### TotpSecret
 ```
-Connect-CWC -Server <String> -Credentials <PSCredential> -TotpSecret <SecureString> [-Force] [<CommonParameters>]
+Connect-CWC [-Server] <String> [-Credentials] <PSCredential> -TotpSecret <SecureString> [-Force] [<CommonParameters>]
 ```
 
 ### OneTimeCode
 ```
-Connect-CWC -Server <String> -Credentials <PSCredential> -OneTimeCode <String> [-Force] [<CommonParameters>]
+Connect-CWC [-Server] <String> [-Credentials] <PSCredential> -OneTimeCode <String> [-Force] [<CommonParameters>]
 ```
 
 ### Mfa
 ```
-Connect-CWC -Server <String> -Credentials <PSCredential> [-Mfa] [-Force]
- [<CommonParameters>]
+Connect-CWC [-Server] <String> [-Credentials] <PSCredential> [-Mfa] [-Force] [<CommonParameters>]
 ```
 
 ### ApiSecret
 ```
-Connect-CWC -Server <String> -ApiSecret <SecureString> [-Origin <String>] [-Force] [<CommonParameters>]
+Connect-CWC [-Server] <String> -ApiSecret <SecureString> [-Origin <String>] [-Force] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -113,7 +112,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: Named
+Position: 1
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -128,7 +127,7 @@ Parameter Sets: Credentials, TotpSecret, OneTimeCode, Mfa
 Aliases:
 
 Required: True
-Position: Named
+Position: 2
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

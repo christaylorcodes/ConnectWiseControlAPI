@@ -27,6 +27,8 @@ BuildWorkflow:
     - Clean
     - Assert_RequiredModule_Versions
     - Build_ModuleOutput_ModuleBuilder
+    # .build/gallery-tags.ps1: the tags the Gallery lists and finds commands by
+    - Add_Gallery_Command_Tags
 
 ####################################################
 #       Sampler Pipeline Configuration             #

@@ -77,8 +77,10 @@ function Invoke-CWCCommand {
         }
     }
     catch {
-        # Not queued: don't report success or poll for output that will never come
-        return Write-Error $_
+        # Not queued: don't report success or poll for output that will never come.
+        # WriteError keeps the ErrorId (CWC.*) on Windows PowerShell 5.1; Write-Error $_ replaces it there.
+        $PSCmdlet.WriteError($_)
+        return
     }
     if ($NoWait) { return }
 
@@ -100,7 +102,7 @@ function Invoke-CWCCommand {
         # Events only, with a growing delay (1, 2, 3 ... 5 s): GetSessionDetails is rate limited.
         try { $SessionDetails = Get-CWCSessionDetail -Group $Group -GUID $GUID -Include 'Events' -ErrorAction Stop }
         catch {
-            Write-Error $_
+            $PSCmdlet.WriteError($_)
             return
         }
 

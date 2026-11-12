@@ -264,7 +264,7 @@
     <command:syntax>
       <command:syntaxItem>
         <maml:name>Connect-CWC</maml:name>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
           <maml:name>Server</maml:name>
           <maml:description>
             <maml:para>ScreenConnect server hostname, e.g. screenconnect.example.com. A leading http(s):// is removed. HTTPS is always used.</maml:para>
@@ -276,7 +276,7 @@
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
           <maml:name>Credentials</maml:name>
           <maml:description>
             <maml:para>Username and password of a ScreenConnect user account.</maml:para>
@@ -302,7 +302,7 @@
       </command:syntaxItem>
       <command:syntaxItem>
         <maml:name>Connect-CWC</maml:name>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
           <maml:name>Server</maml:name>
           <maml:description>
             <maml:para>ScreenConnect server hostname, e.g. screenconnect.example.com. A leading http(s):// is removed. HTTPS is always used.</maml:para>
@@ -314,7 +314,7 @@
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
           <maml:name>Credentials</maml:name>
           <maml:description>
             <maml:para>Username and password of a ScreenConnect user account.</maml:para>
@@ -353,7 +353,7 @@
       </command:syntaxItem>
       <command:syntaxItem>
         <maml:name>Connect-CWC</maml:name>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
           <maml:name>Server</maml:name>
           <maml:description>
             <maml:para>ScreenConnect server hostname, e.g. screenconnect.example.com. A leading http(s):// is removed. HTTPS is always used.</maml:para>
@@ -365,7 +365,7 @@
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
           <maml:name>Credentials</maml:name>
           <maml:description>
             <maml:para>Username and password of a ScreenConnect user account.</maml:para>
@@ -403,7 +403,7 @@
       </command:syntaxItem>
       <command:syntaxItem>
         <maml:name>Connect-CWC</maml:name>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
           <maml:name>Server</maml:name>
           <maml:description>
             <maml:para>ScreenConnect server hostname, e.g. screenconnect.example.com. A leading http(s):// is removed. HTTPS is always used.</maml:para>
@@ -415,7 +415,7 @@
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
           <maml:name>Credentials</maml:name>
           <maml:description>
             <maml:para>Username and password of a ScreenConnect user account.</maml:para>
@@ -452,7 +452,7 @@
       </command:syntaxItem>
       <command:syntaxItem>
         <maml:name>Connect-CWC</maml:name>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
           <maml:name>Server</maml:name>
           <maml:description>
             <maml:para>ScreenConnect server hostname, e.g. screenconnect.example.com. A leading http(s):// is removed. HTTPS is always used.</maml:para>
@@ -502,7 +502,7 @@
       </command:syntaxItem>
     </command:syntax>
     <command:parameters>
-      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
         <maml:name>Server</maml:name>
         <maml:description>
           <maml:para>ScreenConnect server hostname, e.g. screenconnect.example.com. A leading http(s):// is removed. HTTPS is always used.</maml:para>
@@ -514,7 +514,7 @@
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
         <maml:name>Credentials</maml:name>
         <maml:description>
           <maml:para>Username and password of a ScreenConnect user account.</maml:para>
@@ -1229,11 +1229,11 @@ open $Url   # macOS</dev:code>
       <command:verb>Get</command:verb>
       <command:noun>CWCLastContact</command:noun>
       <maml:description>
-        <maml:para>Returns the date the machine last connected to the control server.</maml:para>
+        <maml:para>Returns the date the machine last connected to the ScreenConnect server.</maml:para>
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>Returns the date the machine last connected to the control server.</maml:para>
+      <maml:para>Returns the date the machine last connected to the ScreenConnect server.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -4626,7 +4626,7 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>Updates the name of a session on the control server.</maml:para>
+      <maml:para>Updates the name of a session on the ScreenConnect server.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>

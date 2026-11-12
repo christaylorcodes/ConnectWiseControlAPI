@@ -33,7 +33,7 @@ Shows current audit settings
 Pull audit log information
 
 ### [Get-CWCLastContact](Docs/Get-CWCLastContact.md)
-Returns the date the machine last connected to the control server.
+Returns the date the machine last connected to the ScreenConnect server.
 
 ### [Get-CWCLauncURL](Docs/Get-CWCLauncURL.md)
 DEPRECATED.

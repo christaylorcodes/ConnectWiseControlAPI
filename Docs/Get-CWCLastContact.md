@@ -8,7 +8,7 @@ schema: 2.0.0
 # Get-CWCLastContact
 
 ## SYNOPSIS
-Returns the date the machine last connected to the control server.
+Returns the date the machine last connected to the ScreenConnect server.
 
 ## SYNTAX
 
@@ -17,7 +17,7 @@ Get-CWCLastContact -GUID <Guid> [-Quiet] [-Seconds <Int32>] [-Group <String[]>] 
 ```
 
 ## DESCRIPTION
-Returns the date the machine last connected to the control server.
+Returns the date the machine last connected to the ScreenConnect server.
 
 ## EXAMPLES
 

@@ -34,7 +34,7 @@ A PowerShell wrapper for the ConnectWise ScreenConnect (formerly ConnectWise Con
 This module makes it easy to leverage PowerShell to automate tasks in ScreenConnect.
 
 ConnectWise renamed Control back to ScreenConnect. The module keeps its name and its `CWC` command names, so
-existing scripts keep working.
+scripts don't need renaming. Version 0.5.0 does change some behaviour: see [Upgrading from 0.4](#upgrading-from-04).
 
 <!-- Summary -->
 
@@ -53,12 +53,16 @@ Install-Module 'ConnectWiseControlAPI'
 0.5.0 changes some behaviour. Check your scripts before you update:
 
 * `Remove-CWCSession`, `Remove-CWCSessionNote` and `Remove-CWCHostFromSession` ask for confirmation by default.
-  Unattended scripts must add `-Confirm:$false`; without it they fail and remove nothing.
+  Unattended scripts must add `-Confirm:$false`. Without it, a session started with `-NonInteractive` fails at the
+  prompt and removes nothing; other unattended hosts may wait at the prompt or take its default answer (Yes).
 * `Connect-CWC` without `-Force` now switches to a different server, sign-in method or user. Before, it kept the
   old connection.
 * `Get-CWCLastContact` returns an error when it finds no connection event. Before, it returned the current time.
 * `Get-CWCAuditLog` covers the last 24 hours unless you pass `-StartDate` and `-EndDate`.
-* A request that fails with HTTP 500 is repeated only when repeating is safe (reads and "set to value" updates).
+* `Get-CWCSession -Type Support` and `-Type Meeting` without `-Group` read the `All Sessions` and `All Meetings`
+  groups. Before, they read `All Machines`, which holds Access sessions.
+* A read or "set to value" update that gets HTTP 500 is retried 3 times (after 2, 4 and 8 seconds) before it fails.
+  0.4 failed at once. Commands, wakes, deletes and user creation are never retried.
 
 The full list is in the [changelog](CHANGELOG.md).
 

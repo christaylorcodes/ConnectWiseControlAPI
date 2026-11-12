@@ -74,6 +74,37 @@ Describe 'Module: ConnectWiseControlAPI' {
             @($Listed | Group-Object | Where-Object Count -gt 1 | ForEach-Object Name) | Should -BeNullOrEmpty
             @($Listed | Sort-Object) | Should -Be $Expected
         }
+
+        It 'ships an about topic that has content' {
+            # An empty about_ file shows a blank topic in Get-Help; it shipped that way until 0.5.0 was reviewed
+            $About = Join-Path (Split-Path -Parent $ManifestPath) 'en-US/about_ConnectWiseControlAPI.help.txt'
+            $About | Should -Exist
+            $Text = Get-Content -Path $About -Raw
+            $Text | Should -Match '(?m)^TOPIC\s+about_ConnectWiseControlAPI'
+            $Text | Should -Match 'SHORT DESCRIPTION'
+            (Get-Content -Path $About | Where-Object { $_.Length -gt 80 }) | Should -BeNullOrEmpty
+        }
+
+        It 'built manifest has the tags the Gallery uses to list and find commands' -ForEach @(
+            @{ Expected = $ExpectedFunctions }
+        ) {
+            $Data = Import-PowerShellDataFile -Path $ManifestPath
+            $Listed = @($Data.FunctionsToExport)
+            if ($Listed.Count -eq 1 -and $Listed[0] -eq '*') {
+                Set-ItResult -Skipped -Because 'the build adds these tags; the source manifest has only the topic tags'
+                return
+            }
+            # PowerShellGet v2 (0.4.0.0) added these when packing; Publish-PSResource does not, so the build does.
+            $Tags = @($Data.PrivateData.PSData.Tags)
+            $Tags | Should -Contain 'PSIncludes_Function'
+            foreach ($Function in $Expected) {
+                $Tags | Should -Contain "PSFunction_$Function"
+                $Tags | Should -Contain "PSCommand_$Function"
+            }
+            @($Tags | Group-Object | Where-Object Count -GT 1) | Should -BeNullOrEmpty
+            # NuGet limits the tags field to 4000 characters
+            ($Tags -join ' ').Length | Should -BeLessThan 3900
+        }
     }
 
     Context 'Module Import' {
