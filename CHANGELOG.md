@@ -122,7 +122,7 @@ Details are in the sections below.
 - Failed requests no longer keep the login cookie on the request object stored in `$Error`
 - `Get-Help` and the pages in `Docs/` describe the current commands. They had kept text from earlier versions:
   examples called commands that do not exist (`End-CWWake`, `Remove-CWCAccessSession`, `Get-CWCSessions`), and
-  18 of the 32 synopses were out of date. `Get-Help Remove-CWCSession` and `Get-Help Remove-CWCSessionNote` no
+  18 synopses were out of date. `Get-Help Remove-CWCSession` and `Get-Help Remove-CWCSessionNote` no
   longer show a code comment as a related link
 - `Examples/CreateNewUser.ps1` passed parameters `New-CWCUser` does not have and used the MFA secret as the
   password; it now creates the user from a credential
