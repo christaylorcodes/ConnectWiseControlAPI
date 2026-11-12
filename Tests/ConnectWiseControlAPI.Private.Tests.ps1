@@ -398,9 +398,9 @@ Describe 'Invoke-CWCWebRequest' {
             InModuleScope 'ConnectWiseControlAPI' {
                 # HTTP 500 with a server error body; the failed request (with a login cookie) as TargetObject
                 $script:NewServerErrorRecord = {
-                    param([string]$Body, $Request)
+                    param([string]$Body, $Request, [int]$StatusCode = 500)
                     $exception = [System.Net.WebException]::new('Server Error')
-                    $exception | Add-Member -NotePropertyName Response -NotePropertyValue ([PSCustomObject]@{ StatusCode = 500 }) -Force
+                    $exception | Add-Member -NotePropertyName Response -NotePropertyValue ([PSCustomObject]@{ StatusCode = $StatusCode }) -Force
                     $record = [System.Management.Automation.ErrorRecord]::new($exception, 'WebError', 'InvalidResult', $Request)
                     $record.ErrorDetails = [System.Management.Automation.ErrorDetails]::new($Body)
                     $record
@@ -452,6 +452,24 @@ Describe 'Invoke-CWCWebRequest' {
                 Mock Invoke-WebRequest { throw (& $script:NewServerErrorRecord '{"errorType":"SecurityException","message":"Needs permission"}' $null) }
                 $null = Invoke-CWCWebRequest -Arguments @{ Endpoint = 'Services/PageService.ashx/GetSessionDetails'; Method = 'Post' } -ErrorAction SilentlyContinue -ErrorVariable err
                 "$err" | Should -Not -Match 'MFA login'
+            }
+        }
+
+        It 'suggests Connect-CWC -Force on a credentials connection refused with 401 <Case>' -ForEach @(
+            @{ Case = 'Needs permission'; Status = 401; LoggingIn = $false; Expected = $true }
+            @{ Case = 'while connecting'; Status = 401; LoggingIn = $true; Expected = $false }
+            @{ Case = 'but not on a 500'; Status = 500; LoggingIn = $false; Expected = $false }
+        ) {
+            InModuleScope 'ConnectWiseControlAPI' -Parameters @{ Status = $Status; LoggingIn = $LoggingIn; Expected = $Expected } {
+                param($Status, $LoggingIn, $Expected)
+                $script:CWCServerConnection.AuthType = 'Credentials'
+                if ($LoggingIn) { $script:CWCServerConnection.LoggingIn = $True }
+                $script:HintStatus = $Status
+                Mock Invoke-WebRequest {
+                    throw (& $script:NewServerErrorRecord '{"errorType":"SecurityException","message":"Needs permission"}' $null $script:HintStatus)
+                }
+                $null = Invoke-CWCWebRequest -Arguments @{ Endpoint = 'Services/ToolboxService.ashx/WriteToolboxFileContent'; Method = 'Post' } -ErrorAction SilentlyContinue -ErrorVariable err
+                ("$err" -match 'Connect-CWC with -Force') | Should -Be $Expected
             }
         }
 

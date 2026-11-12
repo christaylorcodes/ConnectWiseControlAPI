@@ -118,9 +118,9 @@ The `release` artifact is kept for 30 days; re-runs need it.
   writes `FunctionsToExport` from the `Public/` file names (the source manifest says `'*'`). The source `.psm1` is only
   for development: it dot-sources the same files and is **not** used by the build, so module-level code belongs in
   `source/prefix.ps1`. That file holds the TLS setup and the shared constants: `$script:CWCSessionType`,
-  `$script:CWCSessionEventType` (live-verified numbers), `$script:CWCDefaultSessionGroup`, `$script:CWCProcessType`,
-  `$script:CWCAllSessionPermissions`, `$script:InternalUserSource` and the Remote Workforce and RESTful API Manager
-  extension IDs.
+  `$script:CWCSessionEventType` and `$script:CWCToolboxOperation` (live-verified numbers),
+  `$script:CWCDefaultSessionGroup`, `$script:CWCProcessType`, `$script:CWCAllSessionPermissions`,
+  `$script:InternalUserSource` and the Remote Workforce and RESTful API Manager extension IDs.
 - **Requests**: every public function calls `Private/Invoke-CWCServiceMethod.ps1`. It builds the endpoint
   (`-Service` → `Services/<Service>.ashx/<Method>`, `-RestApi` / `-ExtensionID` →
   `App_Extensions/<id>/Service.ashx/<Method>`) and sends the arguments as a **positional JSON array** matching the
@@ -130,8 +130,8 @@ The `release` artifact is kept for 30 days; re-runs need it.
   commands/notes/deletes never repeat. Session events go through `Private/Add-CWCSessionEvent.ps1`. Transport
   errors carry an ErrorId (`CWC.NotConnected`, `CWC.AuthModeMismatch`, `CWC.Http<status>`, `CWC.NoResponse`); an MFA
   login adds `CWC.MfaRequired`, `CWC.MfaCodeRejected`, `CWC.LoginFailed` and `CWC.LoginThrottled`. A failed sign-in
-  without MFA or with `-ApiSecret` has no `CWC.*` ErrorId. `-Sensitive` redacts the body from verbose and debug
-  output.
+  without MFA or with `-ApiSecret` has no `CWC.*` ErrorId. `-Sensitive` keeps the body (a secret, or bulk content
+  such as an uploaded file) out of verbose and debug output.
 - **Transport**: `Private/Invoke-CWCWebRequest.ps1` checks that a connection exists, **blocks calls that don't match
   the auth mode** (API-secret connections may only reach the RESTful API Manager), adds auth headers, handles PS 5
   vs 6+ error shapes, and returns parsed JSON.
@@ -140,7 +140,8 @@ The `release` artifact is kept for 30 days; re-runs need it.
   and `IdentityHash`. ApiSecret mode keeps the secret as a SecureString (`ApiSecret`) and sends `CTRLAuthHeader`.
   Connect-CWC validates the login with a test call. If that call fails, the previous connection is restored only
   when this was a `-Force` refresh of the same server, method and identity; a failed switch to anything else leaves
-  the module disconnected.
+  the module disconnected. While a login is being made or validated the connection carries `LoggingIn`, which
+  stops the transport from adding its "the login may be stale, reconnect" hints to permission errors.
 
 ## Adding New Functions
 

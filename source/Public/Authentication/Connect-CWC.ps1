@@ -299,6 +299,8 @@ function Connect-CWC {
                 AuthType   = 'Credentials'
                 Headers    = $Headers
                 WebSession = $WebSession
+                # Until the validation call passes: keeps Invoke-CWCWebRequest from suggesting a stale login
+                LoggingIn  = $True
             }
             Write-Verbose "Connected to ScreenConnect server: https://$Server"
 
@@ -323,6 +325,10 @@ function Connect-CWC {
                     # about the credentials.
                     Write-Error "Connecting to 'https://$Server' failed before authentication could be checked: $_"
                 }
+            }
+            finally {
+                # Also when interrupted (Ctrl+C); after a failure this is the restored connection, or none
+                if ($script:CWCServerConnection) { $script:CWCServerConnection.Remove('LoggingIn') }
             }
         }
     }

@@ -17,6 +17,9 @@ Creates the security role required by the Remote Workforce extension.
 ### [Add-CWCSessionNote](Docs/Add-CWCSessionNote.md)
 Adds a note to a session.
 
+### [Add-CWCToolboxItem](Docs/Add-CWCToolboxItem.md)
+Uploads a file to the shared ScreenConnect Toolbox, or creates a Toolbox folder.
+
 ### [Connect-CWC](Docs/Connect-CWC.md)
 Connects to a ConnectWise ScreenConnect server.
 
@@ -57,6 +60,9 @@ Returns the details of a session: session info, events, connections and guest sc
 ### [Get-CWCSessionGroup](Docs/Get-CWCSessionGroup.md)
 Returns all session groups.
 
+### [Get-CWCToolbox](Docs/Get-CWCToolbox.md)
+Lists the contents of the ScreenConnect Toolbox.
+
 ### [Initialize-CWCRemoteWorkforceSessionGroup](Docs/Initialize-CWCRemoteWorkforceSessionGroup.md)
 Creates or repairs the session group used by the Remote Workforce extension.
 
@@ -89,6 +95,9 @@ Deletes sessions, optionally uninstalling the Access client first.
 
 ### [Remove-CWCSessionNote](Docs/Remove-CWCSessionNote.md)
 Removes notes from a session.
+
+### [Remove-CWCToolboxItem](Docs/Remove-CWCToolboxItem.md)
+Deletes a file or folder from the shared ScreenConnect Toolbox.
 
 ### [Remove-CWCUser](Docs/Remove-CWCUser.md)
 Deletes an internal user.

@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `Add-CWCToolboxItem` uploads a file to the shared Toolbox in chunks, or creates a Toolbox folder
+  (`ToolboxService.WriteToolboxFileContent`; needs the ManageSharedToolbox permission; credentials
+  connections only). Accepts files from the pipeline
+- `Get-CWCToolbox` lists the Toolbox contents (`PageService.GetToolbox`) as one object per folder and file
+  with its path; `-Raw` returns the server's tree
+- `Remove-CWCToolboxItem` deletes a Toolbox file or folder (`ToolboxService.ProcessToolboxOperation`, Delete);
+  asks for confirmation by default
+- `Send-CWCToolboxItem -Elevated` runs the item with administrative privileges (QueuedElevatedTool 101) and
+  `-Silent` runs it elevated and silently (QueuedSilentElevatedTool 117); credentials connections only
+
+### Changed
+
+- A 401 "Needs permission" on a credentials connection now suggests `Connect-CWC -Force`: the server stops
+  honouring an older login's management permissions while ordinary calls keep working
+
 ## [0.5.0] - 2026-11-10
 
 Version numbers now have three parts (`0.5.0`). The previous release was 0.4.0.0, which had 21 commands; this

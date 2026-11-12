@@ -196,6 +196,8 @@ Describe 'Function Structure' {
             'Add-CWCSessionNote'
             'Send-CWCSessionMessage'
             'Send-CWCToolboxItem'
+            'Add-CWCToolboxItem'
+            'Remove-CWCToolboxItem'
             'New-CWCMFA'
         ) {
             $cmd = Get-Command $_ -Module 'ConnectWiseControlAPI'
