@@ -81,8 +81,9 @@ every step below needs the owner's explicit go.
 2. Dry run on the exact commit that will be tagged: run the **Release** workflow by hand
    (`gh workflow run release.yml --ref master`). It checks, builds, tests and packages, and publishes nothing.
    Locally: `./Build/Get-ReleaseInfo.ps1`, then `./Tests/test-local.ps1`, then `./Build/Test-ReleasePackage.ps1`.
-3. Tag that commit and push only that tag (never `--tags`):
-   `git fetch origin; git tag -a v<version> origin/master -m "v<version>"; git push origin v<version>`.
+3. Tag that commit by the SHA the dry run reported (not `origin/master`, which may have moved) and push only
+   that tag (never `--tags`):
+   `git fetch origin; git tag -a v<version> <sha> -m "v<version>"; git push origin v<version>`.
    The workflow fails before building unless the tag equals `ModuleVersion`, the CHANGELOG has the dated section,
    the version is not on the Gallery and the commit is on `master`.
 4. The `publish` job waits for the owner's approval in the `psgallery` environment, which holds the

@@ -117,17 +117,26 @@ if ($Stage -contains 'Build') {
         $env:ModuleVersion = (Import-PowerShellDataFile -Path $ManifestPath).ModuleVersion
         # The PowerShell Gallery sometimes fails a download (HTTP 502). A half-filled RequiredModules folder cannot
         # be repaired, so a failed first-time resolve is repeated from an empty folder.
+        # Only a resolve that left a pinned tool out is repeated: a build fault would fail the same way again.
         $Attempts = if ($Resolve) { 3 } else { 1 }
+        $ExpectedManifest = Join-Path $RepoRoot "output/$ModuleName/$($env:ModuleVersion)/$ModuleName.psd1"
         for ($Attempt = 1; $Attempt -le $Attempts; $Attempt++) {
             $BuildStarted = [DateTime]::UtcNow
             & (Get-Process -Id $PID).Path @BuildArgs
             $BuildExit = $LASTEXITCODE
-            # build.ps1 can exit 0 after an aborted build, so also require a manifest written by this attempt
-            $Built = Get-BuiltManifest
-            $BuildWroteModule = $Built -and $Built.LastWriteTimeUtc -ge $BuildStarted.AddSeconds(-2)
-            if (($BuildExit -eq 0 -and $BuildWroteModule) -or $Attempt -eq $Attempts) { break }
-            Write-Warning "Build attempt $Attempt of $Attempts failed; resolving the build tools again in 20 seconds."
+            # build.ps1 can exit 0 after an aborted build, so also require this version's manifest, written by
+            # this attempt (an older version folder left under output/ does not count)
+            $Built = Get-Item -Path $ExpectedManifest -ErrorAction SilentlyContinue
+            $BuildWroteModule = [bool]($Built -and $Built.LastWriteTimeUtc -ge $BuildStarted.AddSeconds(-2))
+            if ($BuildExit -eq 0 -and $BuildWroteModule) { break }
+            $MissingTools = @($PinnedModules.Keys | Where-Object { $PinnedModules[$_] -is [string] } |
+                    Where-Object { -not (Test-Path (Join-Path $RequiredModulesPath "$_/$($PinnedModules[$_])")) })
+            if (-not $Resolve -or -not $MissingTools) { break }
+            # A half-filled folder is removed even after the last attempt, so the next run resolves again
             Remove-Item -Path $RequiredModulesPath -Recurse -Force -ErrorAction SilentlyContinue
+            if ($Attempt -eq $Attempts) { break }
+            Write-Warning ("Build attempt $Attempt of $Attempts did not resolve $($MissingTools -join ', '); " +
+                'resolving the build tools again in 20 seconds.')
             Start-Sleep -Seconds 20
         }
         if ($BuildExit -ne 0) {

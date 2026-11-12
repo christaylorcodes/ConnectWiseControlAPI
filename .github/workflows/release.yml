@@ -159,14 +159,31 @@ jobs:
               if ($Status -ne 404) { throw "Could not check the PowerShell Gallery (HTTP $Status): $($_.Exception.Message)" }
               $Exists = $false
           }
+          $AlreadyThere = "Already on the Gallery: $($Release.ModuleName) $($Release.Version). Nothing was uploaded in this run."
+          $IsRerun = [int]$env:GITHUB_RUN_ATTEMPT -gt 1
           if ($Exists) {
-              Write-Warning "$($Release.ModuleName) $($Release.Version) is already on the PowerShell Gallery. Nothing was uploaded."
-              "Already on the Gallery: $($Release.ModuleName) $($Release.Version). Nothing was uploaded in this run." |
-                  Add-Content -Path $env:GITHUB_STEP_SUMMARY
+              # On the first attempt nothing in this run can have uploaded it, so it came from somewhere else
+              # and is not the package this run tested
+              if (-not $IsRerun) {
+                  throw "$($Release.ModuleName) $($Release.Version) appeared on the PowerShell Gallery after the build job checked, and this run did not upload it."
+              }
+              Write-Warning $AlreadyThere
+              $AlreadyThere | Add-Content -Path $env:GITHUB_STEP_SUMMARY
               exit 0
           }
 
-          Publish-PSResource -NupkgPath $Package -Repository PSGallery -ApiKey $env:PSGALLERY_API_KEY
+          try {
+              Publish-PSResource -NupkgPath $Package -Repository PSGallery -ApiKey $env:PSGALLERY_API_KEY -ErrorAction Stop
+          } catch {
+              # A version the Gallery is still validating can answer 404 above; a re-run then gets a conflict
+              # here, which means the earlier attempt's upload went through
+              if ($IsRerun -and "$($_.Exception.Message)" -match '409|Conflict|already exists') {
+                  Write-Warning "$AlreadyThere ($($_.Exception.Message))"
+                  $AlreadyThere | Add-Content -Path $env:GITHUB_STEP_SUMMARY
+                  exit 0
+              }
+              throw
+          }
           Write-Host "Published $($Release.ModuleName) $($Release.Version) ($($Release.PackageName), SHA256 $Hash)"
           "Published $($Release.ModuleName) $($Release.Version), SHA256 $Hash" | Add-Content -Path $env:GITHUB_STEP_SUMMARY
 
@@ -185,14 +202,17 @@ jobs:
           name: release
           path: release
 
-      # Safe to re-run: an existing release is left as it is
+      # Safe to re-run: a published release is left as it is, and a draft for the tag is published with the notes
       - name: Create Release
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+          draft=$(gh release view "$GITHUB_REF_NAME" --json isDraft --jq .isDraft 2> /dev/null || echo none)
+          if [ "$draft" = "false" ]; then
             echo "Release $GITHUB_REF_NAME already exists."
+          elif [ "$draft" = "true" ]; then
+            gh release edit "$GITHUB_REF_NAME" --verify-tag --draft=false --title "$GITHUB_REF_NAME" --notes-file release/release-notes.md
           else
             gh release create "$GITHUB_REF_NAME" --verify-tag --title "$GITHUB_REF_NAME" --notes-file release/release-notes.md
           fi

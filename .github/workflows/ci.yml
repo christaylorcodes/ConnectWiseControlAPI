@@ -30,10 +30,10 @@ on:
 permissions:
   contents: read
 
-# A newer push to a pull request cancels the older run. Runs on master are never cancelled, so every merged
-# commit gets a result.
+# A newer push to a pull request cancels the older run. Other runs get a group of their own (the commit), so a
+# run on master is never cancelled or replaced while it waits, and every merged commit gets a result.
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-${{ github.event_name == 'pull_request' && github.ref || github.sha }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
@@ -69,7 +69,7 @@ jobs:
           name: required-modules
           path: output/RequiredModules/
           if-no-files-found: error
-          retention-days: 1
+          retention-days: 7   # as long as module-build: a job re-run later still needs it
 
   test:
     name: Pester (${{ matrix.name }})
