@@ -1,14 +1,14 @@
 ---
 external help file: ConnectWiseControlAPI-help.xml
 Module Name: ConnectWiseControlAPI
-online version:
+online version: https://github.com/christaylorcodes/ConnectWiseControlAPI
 schema: 2.0.0
 ---
 
 # Get-CWCLastContact
 
 ## SYNOPSIS
-Returns the date the machine last connected to the ScreenConnect server.
+Returns when a machine was last connected, or whether it connected recently.
 
 ## SYNTAX
 
@@ -17,27 +17,25 @@ Get-CWCLastContact -GUID <Guid> [-Quiet] [-Seconds <Int32>] [-Group <String[]>] 
 ```
 
 ## DESCRIPTION
-Returns the date the machine last connected to the ScreenConnect server.
+Reads the session's connect/disconnect events.
+Returns the current time if the guest is connected
+now, otherwise the time of its last disconnect.
+With -Quiet, returns $True when the guest is
+connected or was connected within -Seconds, else $False.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
-```powershell
-Get-CWCLastContact -GUID $GUID
+```
+Get-CWCLastContact -GUID $SessionID -Quiet -Seconds 300
 ```
 
-Will return the last contact of the machine with that GUID.
+Returns $True when the machine is connected or was connected in the last 5 minutes.
 
 ## PARAMETERS
 
 ### -GUID
-The GUID/SessionID for the machine you wish to connect to.
-You can retrieve session info with the 'Get-CWCSessions' cmdlets
-
-On Windows clients, the launch parameters are located in the registry at:
-  HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\ScreenConnect Client (xxxxxxxxxxxxxxxx)\ImagePath
-On Linux and Mac clients, it's found in the ClientLaunchParameters.txt file in the client installation folder:
-  /opt/screenconnect-xxxxxxxxxxxxxxxx/ClientLaunchParameters.txt
+Session ID.
 
 ```yaml
 Type: Guid
@@ -52,7 +50,7 @@ Accept wildcard characters: False
 ```
 
 ### -Quiet
-Will output a boolean result, $True for Connected or $False for Offline.
+Return $True or $False instead of a date.
 
 ```yaml
 Type: SwitchParameter
@@ -67,8 +65,9 @@ Accept wildcard characters: False
 ```
 
 ### -Seconds
-Used with the Quiet switch.
-The number of seconds a machine needs to be offline before returning $False.
+Used with -Quiet: how recent the last contact must be to count.
+Defaults to 0, so only a guest that
+is connected now counts.
 
 ```yaml
 Type: Int32
@@ -83,7 +82,9 @@ Accept wildcard characters: False
 ```
 
 ### -Group
-Name of session group to use.
+Session group containing the session: a name, or the path parts of a nested group.
+Defaults to
+'All Machines'.
 
 ```yaml
 Type: String[]
@@ -105,14 +106,13 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### [datetime] -or [boolean]
+### System.Boolean
+### System.DateTime
 ## NOTES
-Version:        1.1
-Author:         Chris Taylor
-Creation Date:  1/20/2016
-Purpose/Change: Initial script development
-
-Update Date:  8/24/2018
-Purpose/Change: Fix TimeSpan Seconds duration
+Requires Connect-CWC -Credentials.
+Author: Chris Taylor
 
 ## RELATED LINKS
+
+[https://github.com/christaylorcodes/ConnectWiseControlAPI](https://github.com/christaylorcodes/ConnectWiseControlAPI)
+

@@ -1,7 +1,7 @@
 ---
 external help file: ConnectWiseControlAPI-help.xml
 Module Name: ConnectWiseControlAPI
-online version:
+online version: https://github.com/christaylorcodes/ConnectWiseControlAPI
 schema: 2.0.0
 ---
 
@@ -19,27 +19,30 @@ New-CWCMFA [[-DisplayName] <Object>] [[-UserAccount] <Object>] [-WhatIf]
 
 ## DESCRIPTION
 Generates a random 16-character Base32 secret.
-Returns it in the form ScreenConnect stores ("ms:\<secret\>") together with a QR code URL to scan with an
-authenticator app.
-Nothing is sent to the ScreenConnect server: pass the OTP value to New-CWCUser or Update-CWCUser to set it on
-an account.
+Returns it in the form ScreenConnect stores ("ms:\<secret\>")
+together with a QR code URL to scan with an authenticator app.
+Nothing is sent to the ScreenConnect
+server: pass the OTP value to New-CWCUser or Update-CWCUser to set it on an account.
 
 The QR code URL is on quickchart.io and contains the secret.
-Open it only if you accept sending the secret to that service.
+Open it only if you accept sending the
+secret to that service.
 
 ## EXAMPLES
 
-### Example 1
-```powershell
-PS C:\> New-CWCMFA -DisplayName 'My ScreenConnect Server' -UserAccount 'CTaylor'
+### EXAMPLE 1
+```
+$Mfa = New-CWCMFA -UserAccount 'jdoe'
+$Mfa.OTP
 ```
 
-Creates an MFA OTP code and QR URL with the provided information.
+Creates a secret for jdoe and shows the value to store on the account.
 
 ## PARAMETERS
 
 ### -DisplayName
 Label the authenticator app shows for the entry.
+Defaults to 'ScreenConnect'.
 
 ```yaml
 Type: Object
@@ -54,7 +57,7 @@ Accept wildcard characters: False
 ```
 
 ### -UserAccount
-User account to display in OTP app.
+Account name the authenticator app shows for the entry.
 
 ```yaml
 Type: Object
@@ -69,7 +72,8 @@ Accept wildcard characters: False
 ```
 
 ### -WhatIf
-Shows what would happen if the cmdlet runs. The cmdlet is not run.
+Shows what would happen if the cmdlet runs.
+The cmdlet is not run.
 
 ```yaml
 Type: SwitchParameter
@@ -104,10 +108,14 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-### None
 ## OUTPUTS
 
-### System.Object
+### PSCustomObject with QR (URL of the QR code image) and OTP ("ms:<secret>").
 ## NOTES
+Works without a connection.
+Author: Chris Taylor
 
 ## RELATED LINKS
+
+[https://github.com/christaylorcodes/ConnectWiseControlAPI](https://github.com/christaylorcodes/ConnectWiseControlAPI)
+

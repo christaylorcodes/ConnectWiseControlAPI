@@ -31,8 +31,12 @@ This function will be removed in v1.0.
 
 ### EXAMPLE 1
 ```
-Get-CWCRemoteWorkforceLaunchURL -GUID $SessionID
+Get-CWCLauncURL -GUID $SessionID
 ```
+
+Warns that the command is deprecated and returns what Get-CWCRemoteWorkforceLaunchURL -GUID $SessionID
+returns.
+Use that command in new scripts.
 
 ## PARAMETERS
 

@@ -413,4 +413,25 @@ Describe 'Generated help' {
         @(Select-String -Path $Files -Pattern 'ProgressAction' | ForEach-Object { "$($_.Filename):$($_.LineNumber)" }) |
             Should -BeNullOrEmpty -Because 'run ./Build/Update-Help.ps1 to regenerate the help'
     }
+
+    # Until 0.5.0 was reviewed the pages kept old text: examples called End-CWWake, Remove-CWCAccessSession and
+    # Get-CWCSessions, none of which exist. Every Verb-CWC name in the help must be a command of the module.
+    It 'names only commands the module has' {
+        $Files = @(Get-ChildItem $DocsPath -Filter '*.md' | ForEach-Object FullName) +
+            (Join-Path $RepoRoot 'source\en-US\ConnectWiseControlAPI-help.xml')
+        $Known = @(Get-Command -Module ConnectWiseControlAPI | ForEach-Object Name)
+        $Unknown = @(Select-String -Path $Files -Pattern '\b[A-Za-z]+-CW[A-Za-z]*\b' -AllMatches | ForEach-Object {
+                $Hit = $_
+                $Hit.Matches | Where-Object { $Known -notcontains $_.Value } |
+                    ForEach-Object { "$($Hit.Filename):$($Hit.LineNumber) $($_.Value)" }
+            })
+        $Unknown | Should -BeNullOrEmpty -Because 'the help names a command that does not exist'
+    }
+
+    It 'has the module version on the module page' {
+        $SourceManifest = Join-Path $RepoRoot 'source\ConnectWiseControlAPI.psd1'
+        $Version = [regex]::Escape((Import-PowerShellDataFile -Path $SourceManifest).ModuleVersion)
+        Join-Path $RepoRoot 'ConnectWiseControlAPI_Functions.md' |
+            Should -FileContentMatch "(?m)^Help Version: $Version\s*$" -Because 'run ./Build/Update-Help.ps1'
+    }
 }

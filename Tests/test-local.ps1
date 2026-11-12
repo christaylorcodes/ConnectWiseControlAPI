@@ -3,14 +3,14 @@
     Runs the same checks as CI: build, PSScriptAnalyzer, manifest, Pester and docs drift.
 
 .DESCRIPTION
-    CI (.github/workflows/ci.yml) calls this script one stage at a time, so a green local run means a
-    green CI run. With no parameters it runs every stage. In PowerShell 7 on Windows the Test stage
-    also re-runs the Pester suite under Windows PowerShell 5.1 (powershell.exe), because the module
-    must work on both.
+    CI (.github/workflows/ci.yml) calls this script with one or two stages per job, and the release workflow
+    with all of them, so a green local run means a green CI run. With no parameters it runs every stage.
+    In PowerShell 7 on Windows the Test stage also re-runs the Pester suite under Windows PowerShell 5.1
+    (powershell.exe), because the module must work on both.
 
     Stages:
-      Build     ./build.ps1 -ResolveDependency -Tasks build (Sampler/ModuleBuilder) -> output/<Name>/<version>/.
-                Needs PowerShell 7.
+      Build     ./build.ps1 -Tasks build (Sampler/ModuleBuilder) -> output/<Name>/<version>/. The first run adds
+                -ResolveDependency to fetch the pinned tools into output/RequiredModules. Needs PowerShell 7.
       Analyze   PSScriptAnalyzer over source/ with .PSScriptAnalyzerSettings.psd1. Errors fail.
       Manifest  Test-ModuleManifest on the source manifest and, if built, the built one.
       Test      Pester over Tests/ against the BUILT module (what gets published). Live tests skip unless
@@ -108,8 +108,8 @@ if ($Stage -contains 'Build') {
         $Failures.Add('Build: needs PowerShell 7 (run ./build.ps1 from pwsh)')
     } else {
         $BuildArgs = @('-NoProfile', '-File', (Join-Path $RepoRoot 'build.ps1'), '-Tasks', 'build')
-        # Resolve dependencies only when output/RequiredModules is missing. Delete that folder to resolve again
-        # (after changing a pin in RequiredModules.psd1).
+        # Resolve dependencies only once: resolving again after a pin changed leaves two versions side by side,
+        # which the Assert_RequiredModule_Versions task rejects. Delete output/RequiredModules to refresh them.
         $Resolve = -not (Test-Path $RequiredModulesPath)
         if ($Resolve) { $BuildArgs += '-ResolveDependency' }
         # Pin the version to the manifest: Sampler would otherwise use GitVersion when it is installed.

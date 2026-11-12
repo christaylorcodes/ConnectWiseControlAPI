@@ -1,14 +1,14 @@
 ---
 external help file: ConnectWiseControlAPI-help.xml
 Module Name: ConnectWiseControlAPI
-online version:
+online version: https://github.com/christaylorcodes/ConnectWiseControlAPI
 schema: 2.0.0
 ---
 
 # Update-CWCUser
 
 ## SYNOPSIS
-Update properties of an internal user.
+Updates an internal user.
 
 ## SYNTAX
 
@@ -19,21 +19,25 @@ Update-CWCUser [-UserToUpdate] <String> [[-NewUserName] <String>] [[-Password] <
 ```
 
 ## DESCRIPTION
-Will update an internal user. Only the properties given will update.
+Reads the user, applies the given changes and saves it (SecurityService.SaveUser).
+Parameters not
+given keep their current values, with one exception: "change password at next login" is switched
+off unless -ForcePassChange is given.
+The password is never written to verbose or debug output.
 
 ## EXAMPLES
 
-### Example 1
-```powershell
-PS C:\> Update-CWCUser -UserToUpdate 'ctaylor' -Password $SecureString -ForcePassChange $True
+### EXAMPLE 1
+```
+Update-CWCUser -UserToUpdate 'jdoe' -Password (Read-Host -AsSecureString) -ForcePassChange $True
 ```
 
-Updates the password for 'ctaylor' and forces a password change at next logon.
+Sets a new password for jdoe and makes them change it at the next login.
 
 ## PARAMETERS
 
 ### -UserToUpdate
-The user account you want to update.
+User name of the account to update.
 
 ```yaml
 Type: String
@@ -48,7 +52,7 @@ Accept wildcard characters: False
 ```
 
 ### -NewUserName
-The new username of the user you are updating.
+New user name.
 
 ```yaml
 Type: String
@@ -63,7 +67,7 @@ Accept wildcard characters: False
 ```
 
 ### -Password
-The wanted password of the user.
+New password.
 
 ```yaml
 Type: SecureString
@@ -78,7 +82,8 @@ Accept wildcard characters: False
 ```
 
 ### -OTP
-The wanted MFA option for the user.
+The OTP key used for MFA.
+Can be generated with New-CWCMFA.
 
 ```yaml
 Type: String
@@ -93,7 +98,7 @@ Accept wildcard characters: False
 ```
 
 ### -DisplayName
-The wanted display name for the user.
+New display name.
 
 ```yaml
 Type: String
@@ -108,7 +113,7 @@ Accept wildcard characters: False
 ```
 
 ### -Email
-The wanted email address for the user.
+New email address.
 
 ```yaml
 Type: String
@@ -123,7 +128,10 @@ Accept wildcard characters: False
 ```
 
 ### -SecurityGroups
-The wanted security groups the user should be a member of.
+Roles the user should be a member of.
+Replaces the current list.
+An empty list is ignored, so this
+cannot remove every role.
 
 ```yaml
 Type: String[]
@@ -138,7 +146,9 @@ Accept wildcard characters: False
 ```
 
 ### -ForcePassChange
-Force the user to change their password at next logon.
+Force the user to change their password at next login.
+Without it the setting is switched off, even
+when it was on before.
 
 ```yaml
 Type: Boolean
@@ -147,7 +157,7 @@ Aliases:
 
 Required: False
 Position: 8
-Default value: None
+Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -189,10 +199,12 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-### None
 ## OUTPUTS
 
-### System.Object
 ## NOTES
+Author: Chris Taylor
 
 ## RELATED LINKS
+
+[https://github.com/christaylorcodes/ConnectWiseControlAPI](https://github.com/christaylorcodes/ConnectWiseControlAPI)
+

@@ -5,7 +5,8 @@ function Update-CWCUser {
 
     .DESCRIPTION
         Reads the user, applies the given changes and saves it (SecurityService.SaveUser). Parameters not
-        given keep their current values. The password is never written to verbose or debug output.
+        given keep their current values, with one exception: "change password at next login" is switched
+        off unless -ForcePassChange is given. The password is never written to verbose or debug output.
 
     .PARAMETER UserToUpdate
         User name of the account to update.
@@ -26,13 +27,17 @@ function Update-CWCUser {
         New email address.
 
     .PARAMETER SecurityGroups
-        Roles the user should be a member of.
+        Roles the user should be a member of. Replaces the current list. An empty list is ignored, so this
+        cannot remove every role.
 
     .PARAMETER ForcePassChange
-        Force the user to change their password at next login.
+        Force the user to change their password at next login. Without it the setting is switched off, even
+        when it was on before.
 
     .EXAMPLE
-        Update-CWCUser -UserToUpdate 'jdoe' -Password (Read-Host -AsSecureString)
+        Update-CWCUser -UserToUpdate 'jdoe' -Password (Read-Host -AsSecureString) -ForcePassChange $True
+
+        Sets a new password for jdoe and makes them change it at the next login.
 
     .NOTES
         Author: Chris Taylor

@@ -1,14 +1,14 @@
 ---
 external help file: ConnectWiseControlAPI-help.xml
 Module Name: ConnectWiseControlAPI
-online version:
+online version: https://github.com/christaylorcodes/ConnectWiseControlAPI
 schema: 2.0.0
 ---
 
 # Remove-CWCSession
 
 ## SYNOPSIS
-Will end a given session.
+Deletes sessions, optionally uninstalling the Access client first.
 
 ## SYNTAX
 
@@ -18,22 +18,20 @@ Remove-CWCSession [-GUID] <Guid[]> [-Group] <String[]> [-Uninstall]
 ```
 
 ## DESCRIPTION
-Will end a given access or support session.
+Queues a DeletedSession event (21) per session, or QueuedUninstallAndDelete (100) with -Uninstall.
+Prompts for each session by default (ConfirmImpact High); use -Confirm:$false in unattended scripts.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
-```powershell
-Remove-CWCAccessSession -GUID $GUID
 ```
-
-Will remove the given access session
+Remove-CWCSession -GUID $SessionID -Group 'All Machines' -Uninstall -Confirm:$false
+```
 
 ## PARAMETERS
 
 ### -GUID
-The GUID identifier for the session you wish to end.
-Accepts an array of GUIDs.
+One or more session IDs.
 
 ```yaml
 Type: Guid[]
@@ -48,7 +46,7 @@ Accept wildcard characters: False
 ```
 
 ### -Group
-Session group containing the session(s). Defaults to 'All Machines' where a default exists.
+Session group containing the sessions: a name, or the path parts of a nested group.
 
 ```yaml
 Type: String[]
@@ -63,7 +61,8 @@ Accept wildcard characters: False
 ```
 
 ### -Uninstall
-Queue an uninstall of the Access client and delete the session (QueuedUninstallAndDelete) instead of only deleting the session record.
+Uninstall the Access client from the machine and delete the session, instead of only deleting the
+session record.
 
 ```yaml
 Type: SwitchParameter
@@ -72,13 +71,14 @@ Aliases:
 
 Required: False
 Position: Named
-Default value: None
+Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
 ### -WhatIf
-Shows what would happen if the cmdlet runs. The cmdlet is not run.
+Shows what would happen if the cmdlet runs.
+The cmdlet is not run.
 
 ```yaml
 Type: SwitchParameter
@@ -116,9 +116,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## OUTPUTS
 
 ## NOTES
-Version:        1.0
-Author:         Chris Taylor
-Creation Date:  10/10/2018
-Purpose/Change: Initial script development
+Author: Chris Taylor
 
 ## RELATED LINKS
+
+[https://github.com/christaylorcodes/ConnectWiseControlAPI](https://github.com/christaylorcodes/ConnectWiseControlAPI)
+

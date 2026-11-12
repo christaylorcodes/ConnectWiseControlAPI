@@ -12,7 +12,7 @@ function New-CWCMFA {
         secret to that service.
 
     .PARAMETER DisplayName
-        Label the authenticator app shows for the entry.
+        Label the authenticator app shows for the entry. Defaults to 'ScreenConnect'.
 
     .PARAMETER UserAccount
         Account name the authenticator app shows for the entry.
@@ -25,6 +25,13 @@ function New-CWCMFA {
 
     .OUTPUTS
         PSCustomObject with QR (URL of the QR code image) and OTP ("ms:<secret>").
+
+    .NOTES
+        Works without a connection.
+        Author: Chris Taylor
+
+    .LINK
+        https://github.com/christaylorcodes/ConnectWiseControlAPI
     #>
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'None')]
     param(

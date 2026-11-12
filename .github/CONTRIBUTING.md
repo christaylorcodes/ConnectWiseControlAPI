@@ -6,14 +6,12 @@ The following is a set of guidelines for contributing. These are mostly guidelin
 
 ## Table Of Contents
 
-[I don't want to read this whole thing, I just have a question!!!](#i-don't-want-to-read-this-whole-thing-i-just-have-a-question)
+[I don't want to read this whole thing, I just have a question!!!](#i-dont-want-to-read-this-whole-thing-i-just-have-a-question)
 
 [How Can I Contribute?](#how-can-i-contribute)
 
 - [Reporting Bugs](#reporting-bugs)
 - [Suggesting Enhancements](#suggesting-enhancements)
-- [Your First Code Contribution](#your-first-code-contribution)
-- [Pull Requests](#pull-requests)
 
 [AI Contributors](#ai-contributors)
 
@@ -49,18 +47,18 @@ Before creating bug reports, please check existing issues as you might find out 
 
 #### Before Submitting A Bug Report
 
-- **Check the Wiki.** You might be able to find the cause of the problem and fix things yourself.
+- **Check the help.** The [README](../README.md), the [function pages](../ConnectWiseControlAPI_Functions.md), `Get-Help about_ConnectWiseControlAPI` and the [changelog](../CHANGELOG.md) (see "Breaking changes") may explain the problem.
 - **Check the [MSPGeek Slack Team](https://join.mspgeek.com/)** for help from the community.
 
 #### How Do I Submit A (Good) Bug Report
 
-Bugs are tracked as [GitHub issues](https://guides.github.com/features/issues/). After you've determined which repository your bug is related to, create an issue on that repository and provide the following information by filling in the template.
+Bugs are tracked as [GitHub issues](https://docs.github.com/en/issues). After you've determined which repository your bug is related to, create an issue on that repository and provide the following information by filling in the template.
 
 Explain the problem and include additional details to help maintainers reproduce the problem:
 
 - **Use a clear and descriptive title** for the issue to identify the problem.
 - **Describe the exact steps which reproduce the problem** in as many details as possible.
-- **Provide specific examples to demonstrate the steps**. Include links to files or GitHub projects, or copy/pasteable snippets, which you use in those examples. If you're providing snippets in the issue, use [Markdown code blocks](https://help.github.com/articles/markdown-basics/#multiple-lines).
+- **Provide specific examples to demonstrate the steps**. Include links to files or GitHub projects, or copy/pasteable snippets, which you use in those examples. If you're providing snippets in the issue, use [Markdown code blocks](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-and-highlighting-code-blocks).
 - **Describe the behavior you observed after following the steps** and point out what exactly is the problem with that behavior.
 - **Explain which behavior you expected to see instead and why.**
 
@@ -77,20 +75,20 @@ Before creating enhancement suggestions, please check existing suggestions as yo
 
 #### How Do I Submit A (Good) Enhancement Suggestion
 
-Enhancement suggestions are tracked as [GitHub issues](https://guides.github.com/features/issues/). Create an issue and provide the following information:
+Enhancement suggestions are tracked as [GitHub issues](https://docs.github.com/en/issues). Create an issue and provide the following information:
 
 - **Use a clear and descriptive title** for the issue to identify the suggestion.
 - **Provide a step-by-step description of the suggested enhancement** in as many details as possible.
-- **Provide specific examples to demonstrate the steps**. Include copy/pasteable snippets which you use in those examples, as [Markdown code blocks](https://help.github.com/articles/markdown-basics/#multiple-lines).
+- **Provide specific examples to demonstrate the steps**. Include copy/pasteable snippets which you use in those examples, as [Markdown code blocks](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-and-highlighting-code-blocks).
 - **Describe the current behavior** and **explain which behavior you expected to see instead** and why.
-- **Explain why this enhancement would be useful** to most users and isn't something that can or should be implemented as a [community package](<>).
+- **Explain why this enhancement would be useful** to most users and isn't something that belongs in your own script.
 - **List some other text examples where this enhancement exists.**
 - **Specify which version of the module you're using.**
 - **Specify the name and version of the OS you're using.**
 
 ## AI Contributors
 
-This project welcomes contributions from AI coding agents. AI agents follow the same quality standards as human contributors. See [CLAUDE.md](../CLAUDE.md) for development instructions and conventions.
+This project welcomes contributions from AI coding agents. AI agents follow the same quality standards as human contributors. See [AGENTS.md](../AGENTS.md) for development instructions and conventions.
 
 ## Styleguides
 
@@ -103,8 +101,6 @@ This project welcomes contributions from AI coding agents. AI agents follow the 
 - Limit the first line to 72 characters or less
 
 - Reference issues and pull requests liberally after the first line
-
-- When only changing documentation, include `[ci skip]` in the commit title
 
 - Consider starting the commit message with an applicable emoji:
     - :art: `:art:` when improving the format/structure of the code
@@ -123,8 +119,10 @@ This project welcomes contributions from AI coding agents. AI agents follow the 
 
 ### PowerShell Styleguide
 
-- Refer to the [unofficial guide](https://github.com/PoshCode/PowerShellPracticeAndStyle).
+- Follow the repo's [PowerShell style guide](PowerShell-StyleGuide.md); read the note at its top first. Code must run on Windows PowerShell 5.1.
+- Run `./Tests/test-local.ps1` before you open a pull request. It runs the same checks as CI.
 
 ### Documentation Styleguide
 
-- Documentation is built with [platyPS](https://github.com/PowerShell/platyPS).
+- Function help is written as comment-based help in the function's file under `source/Public/`.
+- `Docs/`, `ConnectWiseControlAPI_Functions.md` and the help file in `source/en-US/` are generated from it with [platyPS](https://github.com/PowerShell/platyPS). Don't edit them by hand: run `./Build/Update-Help.ps1` and commit the result.

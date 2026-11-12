@@ -19,13 +19,15 @@ function Get-CWCAuditLog {
         Deprecated. The server no longer accepts this option; it is ignored with a warning.
 
     .PARAMETER EventTypes
-        Session event type numbers to include.
+        Session event type numbers to include, for example 44 (QueuedCommand) or 70 (RanCommand).
 
     .PARAMETER SecurityTypes
         Security event type numbers to include.
 
     .EXAMPLE
         Get-CWCAuditLog -StartDate (Get-Date).AddDays(-7) -SessionName 'DESKTOP-01'
+
+        Returns the last 7 days of audit entries for the session named DESKTOP-01.
 
     .NOTES
         Author: Chris Taylor

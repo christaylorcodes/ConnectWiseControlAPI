@@ -82,9 +82,9 @@ Accept wildcard characters: False
 ```
 
 ### -Group
-Session group containing the session.
-Defaults to 'All Machines' for Access, 'All Sessions' for
-Support and 'All Meetings' for Meeting.
+Session group containing the session: a name, or the path parts of a nested group.
+Defaults to
+'All Machines' for Access, 'All Sessions' for Support and 'All Meetings' for Meeting.
 
 ```yaml
 Type: String[]
@@ -99,7 +99,9 @@ Accept wildcard characters: False
 ```
 
 ### -Name
-Session name shown as the client's title. Taken from the pipeline (e.g. from Get-CWCSession);
+Session name shown as the client's title.
+Taken from the pipeline (e.g.
+from Get-CWCSession);
 when given, the session lookup is skipped.
 
 ```yaml

@@ -24,6 +24,8 @@ function Get-CWCSessionDetail {
     .EXAMPLE
         (Get-CWCSessionDetail -GUID $SessionID -Include Events).Events | Where-Object EventType -eq 32
 
+        Returns the notes on the session (event type 32 is AddedNote), without downloading the screenshot.
+
     .NOTES
         Author: Chris Taylor
 

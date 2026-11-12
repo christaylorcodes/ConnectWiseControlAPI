@@ -23,7 +23,10 @@ Queues a QueuedTool session event naming the Toolbox item.
 Credentials connections: PageService.AddSessionEvents; the user needs the RunSharedTool
 permission in -Group.
 
-API secret connections: the RESTful API Manager extension's SendToolboxItemToSession; -Group is ignored.
+API secret connections: the RESTful API Manager extension's SendToolboxItemToSession.
+The event
+is attributed to the extension's RESTfulUserName setting ("RESTful API" unless renamed); -Group
+is ignored.
 
 ## EXAMPLES
 

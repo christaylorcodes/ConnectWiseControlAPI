@@ -36,8 +36,9 @@ assignees: ''
 <!-- Please complete the following information -->
 
 - **OS**: [e.g., Windows 11, Windows Server 2022]
-- **Module Version**: [e.g., 0.3.5.0]
+- **Module Version**: [e.g., 0.5.0]
 - **PowerShell Version**: [e.g., 5.1, 7.4.0]
+- **Connection type**: [`-Credentials`, `-Credentials` with MFA, or `-ApiSecret`]
 - **ScreenConnect Server Version**: [e.g., 24.1]
 
 ## Additional Context

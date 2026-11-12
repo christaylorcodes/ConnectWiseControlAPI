@@ -1,14 +1,14 @@
 ---
 external help file: ConnectWiseControlAPI-help.xml
 Module Name: ConnectWiseControlAPI
-online version:
+online version: https://github.com/christaylorcodes/ConnectWiseControlAPI
 schema: 2.0.0
 ---
 
 # New-CWCUser
 
 ## SYNOPSIS
-Creates a user.
+Creates an internal user.
 
 ## SYNTAX
 
@@ -19,27 +19,20 @@ New-CWCUser [-Credentials] <PSCredential> [[-OTP] <String>] [[-DisplayName] <Str
 ```
 
 ## DESCRIPTION
-Creates a new local user.
+Calls SecurityService.SaveUser.
+The password is never written to verbose or debug output.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
-```powershell
-$NewUserParams = @{
-    Credentials = $PSCredentials
-    OTP = $(New-CWCMFA).OTP
-    DisplayName = 'Chris Taylor'
-    Email = 'dont@bug.me'
-    SecurityGroups = 'MySecurityGroup'
-    ForcePassChange = $true
-}
-New-CWCUser @NewUserParams
+```
+New-CWCUser -Credentials (Get-Credential -UserName 'jdoe') -Email 'jdoe@example.com' -SecurityGroups 'Technicians'
 ```
 
 ## PARAMETERS
 
 ### -Credentials
-PSCredential object for the new user you want to create.
+User name and password of the new user.
 
 ```yaml
 Type: PSCredential
@@ -54,7 +47,8 @@ Accept wildcard characters: False
 ```
 
 ### -OTP
-The OTP key used for MFA. Can be generated with `New-CWCMFA`
+The OTP key used for MFA.
+Can be generated with New-CWCMFA.
 
 ```yaml
 Type: String
@@ -69,7 +63,7 @@ Accept wildcard characters: False
 ```
 
 ### -DisplayName
-The display name of the new user
+Display name.
 
 ```yaml
 Type: String
@@ -84,7 +78,7 @@ Accept wildcard characters: False
 ```
 
 ### -Email
-Email address of the user
+Email address.
 
 ```yaml
 Type: String
@@ -99,7 +93,7 @@ Accept wildcard characters: False
 ```
 
 ### -SecurityGroups
-An array of security groups the user is a part of
+Roles the user is a member of.
 
 ```yaml
 Type: String[]
@@ -108,13 +102,14 @@ Aliases:
 
 Required: False
 Position: 5
-Default value: None
+Default value: @()
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
 ### -ForcePassChange
-Force the user to change their password at next login
+Force the user to change their password at next login.
+Defaults to $true.
 
 ```yaml
 Type: Boolean
@@ -129,7 +124,8 @@ Accept wildcard characters: False
 ```
 
 ### -WhatIf
-Shows what would happen if the cmdlet runs. The cmdlet is not run.
+Shows what would happen if the cmdlet runs.
+The cmdlet is not run.
 
 ```yaml
 Type: SwitchParameter
@@ -167,9 +163,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## OUTPUTS
 
 ## NOTES
-Version:        1.1
-Author:         Chris Taylor
-Creation Date:  4/2/2020
-Purpose/Change: Initial script development
+Author: Chris Taylor
 
 ## RELATED LINKS
+
+[https://github.com/christaylorcodes/ConnectWiseControlAPI](https://github.com/christaylorcodes/ConnectWiseControlAPI)
+

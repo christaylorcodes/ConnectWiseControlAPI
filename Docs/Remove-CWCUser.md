@@ -1,14 +1,14 @@
 ---
 external help file: ConnectWiseControlAPI-help.xml
 Module Name: ConnectWiseControlAPI
-online version:
+online version: https://github.com/christaylorcodes/ConnectWiseControlAPI
 schema: 2.0.0
 ---
 
 # Remove-CWCUser
 
 ## SYNOPSIS
-Removes an internal user.
+Deletes an internal user.
 
 ## SYNTAX
 
@@ -17,21 +17,19 @@ Remove-CWCUser [-User] <String> [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Removes the provided internal user.
+Calls SecurityService.DeleteUser.
 
 ## EXAMPLES
 
-### Example 1
-```powershell
-PS C:\> Remove-CWCUser -User 'ctaylor'
+### EXAMPLE 1
 ```
-
-Removes the 'ctaylor' user from ScreenConnect.
+Remove-CWCUser -User 'jdoe'
+```
 
 ## PARAMETERS
 
 ### -User
-The user to remove.
+User name of the account to delete.
 
 ```yaml
 Type: String
@@ -82,10 +80,12 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-### None
 ## OUTPUTS
 
-### System.Object
 ## NOTES
+Author: Chris Taylor
 
 ## RELATED LINKS
+
+[https://github.com/christaylorcodes/ConnectWiseControlAPI](https://github.com/christaylorcodes/ConnectWiseControlAPI)
+

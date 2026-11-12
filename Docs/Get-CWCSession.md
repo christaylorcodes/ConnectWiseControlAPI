@@ -1,14 +1,14 @@
 ---
 external help file: ConnectWiseControlAPI-help.xml
 Module Name: ConnectWiseControlAPI
-online version:
+online version: https://github.com/christaylorcodes/ConnectWiseControlAPI
 schema: 2.0.0
 ---
 
 # Get-CWCSession
 
 ## SYNOPSIS
-Will return a list of sessions.
+Lists sessions of one type in a session group.
 
 ## SYNTAX
 
@@ -18,21 +18,23 @@ Get-CWCSession [-Type] <Object> [[-Group] <String[]>] [[-Search] <String>] [[-Fi
 ```
 
 ## DESCRIPTION
-Allows you to search for access, service or meeting sessions.
+Calls PageService.GetLiveData, the same query the web UI's session list uses.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Get-CWCSessions -Type 'Access' -Search 'server1' -Limit 10
+Get-CWCSession -Type Access -Search 'DESKTOP-01' -Limit 1
 ```
 
-Will return the first 10 access sessions that match 'server1'.
+Returns the first Access session that matches DESKTOP-01.
+Its SessionID is the -GUID the other
+session commands take.
 
 ## PARAMETERS
 
 ### -Type
-The type of session Support/Access/Meeting
+Session type: Support, Access or Meeting.
 
 ```yaml
 Type: Object
@@ -47,7 +49,11 @@ Accept wildcard characters: False
 ```
 
 ### -Group
-Name of session group to use.
+Session group: a name, or the path parts of a nested group (e.g.
+'Clients','Acme').
+Defaults to
+the built-in group for -Type: 'All Machines' (Access), 'All Sessions' (Support) or
+'All Meetings' (Meeting).
 
 ```yaml
 Type: String[]
@@ -56,13 +62,13 @@ Aliases:
 
 Required: False
 Position: 2
-Default value: All Machines
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
 ### -Search
-Limit results with search pattern.
+Filter text, as typed in the web UI's search box.
 
 ```yaml
 Type: String
@@ -77,7 +83,7 @@ Accept wildcard characters: False
 ```
 
 ### -FindSessionID
-Session ID to locate in the results, so the session is included even when -Limit would cut it off.
+Session ID to locate, so it is included even when -Limit would cut it off.
 
 ```yaml
 Type: String
@@ -92,7 +98,7 @@ Accept wildcard characters: False
 ```
 
 ### -Limit
-Limit the number of results returned.
+Maximum number of sessions to return.
 
 ```yaml
 Type: Int32
@@ -114,11 +120,11 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### ConnectWise ScreenConnect session objects
 ## NOTES
-Version:        1.0
-Author:         Chris Taylor
-Creation Date:  10/10/2018
-Purpose/Change: Initial script development
+Requires Connect-CWC -Credentials.
+Author: Chris Taylor
 
 ## RELATED LINKS
+
+[https://github.com/christaylorcodes/ConnectWiseControlAPI](https://github.com/christaylorcodes/ConnectWiseControlAPI)
+

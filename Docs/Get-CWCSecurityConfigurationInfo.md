@@ -1,14 +1,14 @@
 ---
 external help file: ConnectWiseControlAPI-help.xml
 Module Name: ConnectWiseControlAPI
-online version:
+online version: https://github.com/christaylorcodes/ConnectWiseControlAPI
 schema: 2.0.0
 ---
 
 # Get-CWCSecurityConfigurationInfo
 
 ## SYNOPSIS
-Will return security configuration information.
+Returns the server's security configuration (user sources, roles, users).
 
 ## SYNTAX
 
@@ -17,16 +17,14 @@ Get-CWCSecurityConfigurationInfo [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Will return security configuration information.
+Calls SecurityService.GetSecurityConfigurationInfo.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Get-CWCSecurityConfigurationInfo
+(Get-CWCSecurityConfigurationInfo).UserSources
 ```
-
-Returns security configuration
 
 ## PARAMETERS
 
@@ -39,9 +37,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## OUTPUTS
 
 ## NOTES
-Version:        1.0
-Author:         Chris Taylor
-Creation Date:  1/15/2019
-Purpose/Change: Initial script development
+Author: Chris Taylor
 
 ## RELATED LINKS
+
+[https://github.com/christaylorcodes/ConnectWiseControlAPI](https://github.com/christaylorcodes/ConnectWiseControlAPI)
+

@@ -1,14 +1,14 @@
 ---
 external help file: ConnectWiseControlAPI-help.xml
 Module Name: ConnectWiseControlAPI
-online version:
+online version: https://github.com/christaylorcodes/ConnectWiseControlAPI
 schema: 2.0.0
 ---
 
 # New-CWCRemoteWorkforceAssignment
 
 ## SYNOPSIS
-Assign a user to machines.
+Assigns machines to a Remote Workforce user.
 
 ## SYNTAX
 
@@ -18,19 +18,21 @@ New-CWCRemoteWorkforceAssignment [-GUID] <Guid[]> [-Username] <String> [[-Displa
 ```
 
 ## DESCRIPTION
-Uses the remote workforce extension to assign a user to machines
+Calls the Remote Workforce extension's AddAssignmentNoteToSession, which adds an assignment note
+(AddedNote) to each session.
+The user can then launch the machine from the Remote Workforce page.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
-```powershell
-PS C:\> New-CWCRemoteWorkforceAssignment -GUID $GUID -Username 'CTaylor' -DisplayName 'Chris Taylor'
+```
+New-CWCRemoteWorkforceAssignment -GUID $SessionID -Username 'jdoe' -DisplayName 'Jane Doe'
 ```
 
 ## PARAMETERS
 
 ### -GUID
-GUID of the session you want to assign the user access to.
+One or more session IDs.
 
 ```yaml
 Type: Guid[]
@@ -45,7 +47,7 @@ Accept wildcard characters: False
 ```
 
 ### -Username
-Username of the account you want to assign remote workforce access to.
+ScreenConnect user name of the assignee.
 
 ```yaml
 Type: String
@@ -60,7 +62,7 @@ Accept wildcard characters: False
 ```
 
 ### -DisplayName
-Name that is displayed when user is connected to a session.
+Display name of the assignee.
 
 ```yaml
 Type: String
@@ -75,7 +77,9 @@ Accept wildcard characters: False
 ```
 
 ### -Group
-Session group containing the session(s). Defaults to 'All Machines' where a default exists.
+Session group containing the sessions: a name, or the path parts of a nested group.
+Defaults to
+'All Machines'.
 
 ```yaml
 Type: String[]
@@ -84,13 +88,14 @@ Aliases:
 
 Required: False
 Position: 4
-Default value: None
+Default value: All Machines
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
 ### -WhatIf
-Shows what would happen if the cmdlet runs. The cmdlet is not run.
+Shows what would happen if the cmdlet runs.
+The cmdlet is not run.
 
 ```yaml
 Type: SwitchParameter
@@ -128,12 +133,10 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## OUTPUTS
 
 ## NOTES
-Version:        1.1
-
-Author:         Chris Taylor
-
-Creation Date:  10/25/2018
-
-Purpose/Change: Initial script development
+Requires Connect-CWC -Credentials and the Remote Workforce extension.
+Author: Chris Taylor
 
 ## RELATED LINKS
+
+[https://github.com/christaylorcodes/ConnectWiseControlAPI](https://github.com/christaylorcodes/ConnectWiseControlAPI)
+

@@ -1,14 +1,14 @@
 ---
 external help file: ConnectWiseControlAPI-help.xml
 Module Name: ConnectWiseControlAPI
-online version:
+online version: https://github.com/christaylorcodes/ConnectWiseControlAPI
 schema: 2.0.0
 ---
 
 # Get-CWCSessionDetail
 
 ## SYNOPSIS
-Will return information about a session.
+Returns the details of a session: session info, events, connections and guest screenshot.
 
 ## SYNTAX
 
@@ -17,21 +17,29 @@ Get-CWCSessionDetail [[-Group] <String[]>] [-GUID] <Guid> [[-Include] <String[]>
 ```
 
 ## DESCRIPTION
-Displays more information about a session.
+Credentials connections: PageService.GetSessionDetails.
+Event Time values are milliseconds elapsed
+since the event, relative to the response's BaseTime.
+The call is rate limited by the server.
+
+API secret connections: the RESTful API Manager extension's GetSessionDetailsBySessionID, which
+returns the server's raw session details; -Group and -Include are ignored.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Get-CWCSessionDetail -Group 'All Sessions' -GUID $Session.SessionID
+(Get-CWCSessionDetail -GUID $SessionID -Include Events).Events | Where-Object EventType -eq 32
 ```
 
-Will return details of the requested session.
+Returns the notes on the session (event type 32 is AddedNote), without downloading the screenshot.
 
 ## PARAMETERS
 
 ### -Group
-Name of session group to use.
+Session group containing the session: a name, or the path parts of a nested group.
+Defaults to
+'All Machines'.
 
 ```yaml
 Type: String[]
@@ -46,7 +54,7 @@ Accept wildcard characters: False
 ```
 
 ### -GUID
-GUID of the machine to retrieve session details.
+Session ID.
 
 ```yaml
 Type: Guid
@@ -61,7 +69,10 @@ Accept wildcard characters: False
 ```
 
 ### -Include
-Parts of the session details to return: SessionInfo, GuestScreenshotContent, Events, Connections. Omit to return everything, including the guest screenshot. Ignored on -ApiSecret connections.
+Parts to return: SessionInfo, GuestScreenshotContent, Events, Connections.
+Omit for everything,
+including the guest screenshot.
+Request only what you need when polling.
 
 ```yaml
 Type: String[]
@@ -83,11 +94,10 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### ConnectWise ScreenConnect session objects
 ## NOTES
-Version:        1.0
-Author:         Chris Taylor
-Creation Date:  1/15/2019
-Purpose/Change: Initial script development
+Author: Chris Taylor
 
 ## RELATED LINKS
+
+[https://github.com/christaylorcodes/ConnectWiseControlAPI](https://github.com/christaylorcodes/ConnectWiseControlAPI)
+
