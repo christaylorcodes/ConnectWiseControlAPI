@@ -27,6 +27,10 @@ Items that an extension adds
 (for example Command Toolbox commands) are refused by the server with "Cannot edit virtual toolbox
 item".
 
+After the delete the command lists the Toolbox and returns CWC.ToolboxItemNotRemoved when the item,
+or something inside a deleted folder, is still there: the server can answer success and leave a file
+it has open, for example one that is queued to run.
+
 ## EXAMPLES
 
 ### EXAMPLE 1

@@ -4302,6 +4302,7 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
     <maml:description>
       <maml:para>Calls ToolboxService.ProcessToolboxOperation with the Delete operation. The user needs the ManageSharedToolbox permission.</maml:para>
       <maml:para>Only items stored in the server's Toolbox folder can be deleted. Items that an extension adds (for example Command Toolbox commands) are refused by the server with "Cannot edit virtual toolbox item".</maml:para>
+      <maml:para>After the delete the command lists the Toolbox and returns CWC.ToolboxItemNotRemoved when the item, or something inside a deleted folder, is still there: the server can answer success and leave a file it has open, for example one that is queued to run.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -4720,6 +4721,7 @@ $Notes | Where-Object Data -like 'Rebooted*' | ForEach-Object {
     <maml:description>
       <maml:para>Queues a QueuedTool session event naming the Toolbox item. -Elevated queues a QueuedElevatedTool event instead, which runs the item with administrative privileges; -Silent queues a QueuedSilentElevatedTool event, which runs it elevated and silently.</maml:para>
       <maml:para>-Elevated and -Silent ask for confirmation, like the Remove-* commands: the item runs with administrative rights, and with -Silent nobody at the machine sees it. Pass -Confirm:$false in unattended scripts.</maml:para>
+      <maml:para>For an unattended run use -Silent. With -Elevated the server queued the event, but the item did not start on a machine that had no host connected (seen live, 2026-11-12).</maml:para>
       <maml:para>The machine opens the item the way Windows opens a file, so use a file type that runs when opened (.exe, .msi, .cmd, .bat): a .ps1 opens in its default program instead of running.</maml:para>
       <maml:para>Credentials connections: PageService.AddSessionEvents; the user needs the RunSharedTool permission in -Group.</maml:para>
       <maml:para>API secret connections: the RESTful API Manager extension's SendToolboxItemToSession. The event is attributed to the extension's RESTfulUserName setting ("RESTful API" unless renamed); -Group is ignored. -Elevated and -Silent are not available: the extension only queues the standard event.</maml:para>

@@ -2869,7 +2869,49 @@ Describe 'Add-CWCToolboxItem' {
 
 Describe 'Remove-CWCToolboxItem' {
 
-    BeforeEach { Set-CWCTestConnection }
+    BeforeEach {
+        Set-CWCTestConnection
+        # The check after the delete: nothing left
+        Mock -ModuleName ConnectWiseControlAPI Get-CWCToolbox {}
+    }
+
+    It 'returns CWC.ToolboxItemNotRemoved when <Case>' -ForEach @(
+        @{ Case = 'the item is still listed'; Path = 'Scripts/Cleanup.cmd'; Left = 'scripts/cleanup.cmd' }
+        @{ Case = 'a deleted folder still holds a file'; Path = 'Scripts'; Left = 'Scripts/Open.cmd' }
+    ) {
+        InModuleScope 'ConnectWiseControlAPI' -Parameters @{ Path = $Path; Left = $Left } {
+            param($Path, $Left)
+            Mock Invoke-CWCWebRequest {}
+            Mock Get-CWCToolbox {
+                [PSCustomObject]@{ Path = 'Scripts2/Other.cmd' }
+                [PSCustomObject]@{ Path = $Left }
+            }
+            Remove-CWCToolboxItem -Path $Path -Confirm:$false -ErrorVariable err -ErrorAction SilentlyContinue
+            $err.Count | Should -Be 1
+            $err[0].FullyQualifiedErrorId | Should -BeLike 'CWC.ToolboxItemNotRemoved*'
+            $err[0].TargetObject | Should -Be $Path
+        }
+    }
+
+    It 'does not mistake a neighbour with the same prefix for a leftover' {
+        InModuleScope 'ConnectWiseControlAPI' {
+            Mock Invoke-CWCWebRequest {}
+            Mock Get-CWCToolbox { [PSCustomObject]@{ Path = 'Scripts2/Other.cmd' }; [PSCustomObject]@{ Path = 'Scripts.cmd' } }
+            Remove-CWCToolboxItem -Path 'Scripts' -Confirm:$false -ErrorVariable err -ErrorAction SilentlyContinue
+            $err.Count | Should -Be 0
+            Should -Invoke Get-CWCToolbox -Times 1
+        }
+    }
+
+    It 'does not check the Toolbox when the delete itself fails' {
+        InModuleScope 'ConnectWiseControlAPI' {
+            Mock Invoke-CWCWebRequest { Write-Error 'HTTP 500' -ErrorId 'CWC.Http500' }
+            Mock Get-CWCToolbox {}
+            Remove-CWCToolboxItem -Path 'Cleanup.cmd' -Confirm:$false -ErrorVariable err -ErrorAction SilentlyContinue
+            $err[0].FullyQualifiedErrorId | Should -BeLike 'CWC.Http500*'
+            Should -Invoke Get-CWCToolbox -Times 0
+        }
+    }
 
     It 'sends the Delete operation (3) with the path and a null originalPath, without retry' {
         InModuleScope 'ConnectWiseControlAPI' {

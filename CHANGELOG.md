@@ -83,10 +83,13 @@ Details are in the sections below.
   connections only). Accepts files from the pipeline. It replaces an item of the same name. If the upload
   fails or is stopped part way, the incomplete item is deleted so it cannot be run
 - `Remove-CWCToolboxItem` deletes a Toolbox file or folder (`ToolboxService.ProcessToolboxOperation`, Delete);
-  asks for confirmation by default. Credentials connections only
+  asks for confirmation by default. Credentials connections only. It checks the Toolbox afterwards and
+  returns `CWC.ToolboxItemNotRemoved` when the item is still there: the server answers success even when it
+  could not delete a file it has open
 - `Send-CWCToolboxItem -Elevated` runs the item with administrative privileges (QueuedElevatedTool 101) and
   `-Silent` runs it elevated and silently (QueuedSilentElevatedTool 117). Both ask for confirmation unless
-  `-Confirm:$false` is passed; credentials connections only
+  `-Confirm:$false` is passed; credentials connections only. Use `-Silent` for unattended runs: an
+  `-Elevated` item did not start on a machine with no host connected
 
 ### Deprecated
 

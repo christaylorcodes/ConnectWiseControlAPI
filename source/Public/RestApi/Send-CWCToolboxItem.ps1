@@ -12,6 +12,9 @@ function Send-CWCToolboxItem {
         administrative rights, and with -Silent nobody at the machine sees it. Pass -Confirm:$false in
         unattended scripts.
 
+        For an unattended run use -Silent. With -Elevated the server queued the event, but the item did not
+        start on a machine that had no host connected (seen live, 2026-11-12).
+
         The machine opens the item the way Windows opens a file, so use a file type that runs when opened
         (.exe, .msi, .cmd, .bat): a .ps1 opens in its default program instead of running.
 

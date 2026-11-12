@@ -11,6 +11,10 @@ function Remove-CWCToolboxItem {
         (for example Command Toolbox commands) are refused by the server with "Cannot edit virtual toolbox
         item".
 
+        After the delete the command lists the Toolbox and returns CWC.ToolboxItemNotRemoved when the item,
+        or something inside a deleted folder, is still there: the server can answer success and leave a file
+        it has open, for example one that is queued to run.
+
     .PARAMETER Path
         Path of the item inside the Toolbox, e.g. 'Cleanup.cmd' or 'Scripts/Cleanup.cmd': the Path that
         Get-CWCToolbox returns.
@@ -55,6 +59,24 @@ function Remove-CWCToolboxItem {
         # ProcessToolboxOperation(ToolboxOperation operation, string path, string originalPath);
         # originalPath is only used by Move. Never retried.
         $Delete = @($script:CWCToolboxOperation.Delete, $ItemPath, $null)
-        $null = Invoke-CWCServiceMethod -Service ToolboxService -Method ProcessToolboxOperation -Arguments $Delete
+        $DeleteError = $null
+        $null = Invoke-CWCServiceMethod -Service ToolboxService -Method ProcessToolboxOperation `
+            -Arguments $Delete -ErrorVariable DeleteError
+        if ($DeleteError) { return }
+
+        # The server can answer success and delete nothing or only part of a folder (seen live, 2026-11-12:
+        # a folder kept a file the server had open after it was queued to run), so the result is checked
+        $Left = @(Get-CWCToolbox | Where-Object {
+                $_.Path -eq $ItemPath -or
+                "$($_.Path)".StartsWith("$ItemPath/", [System.StringComparison]::OrdinalIgnoreCase)
+            })
+        if ($Left.Count -gt 0) {
+            $Message = @(
+                "The server reported success, but '$ItemPath' is still in the Toolbox"
+                "($($Left.Count) item(s) left, for example '$($Left[-1].Path)')."
+                'The server cannot delete a file it has open, for example one queued to run. Try again later.'
+            ) -join ' '
+            Write-Error $Message -ErrorId 'CWC.ToolboxItemNotRemoved' -Category ResourceBusy -TargetObject $ItemPath
+        }
     }
 }
