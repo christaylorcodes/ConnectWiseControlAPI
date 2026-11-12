@@ -52,9 +52,10 @@ Install-Module 'ConnectWiseControlAPI'
 
 0.5.0 changes some behaviour. Check your scripts before you update:
 
-* `Remove-CWCSession`, `Remove-CWCSessionNote` and `Remove-CWCHostFromSession` ask for confirmation by default.
+* `Remove-CWCSession`, `Remove-CWCSessionNote`, `Remove-CWCHostFromSession` and `Remove-CWCToolboxItem` ask for
+  confirmation by default, and so does `Send-CWCToolboxItem` with `-Elevated` or `-Silent`.
   Unattended scripts must add `-Confirm:$false`. Without it, a session started with `-NonInteractive` fails at the
-  prompt and removes nothing; other unattended hosts may wait at the prompt or take its default answer (Yes).
+  prompt and does nothing; other unattended hosts may wait at the prompt or take its default answer (Yes).
 * `Connect-CWC` without `-Force` now switches to a different server, sign-in method or user. Before, it kept the
   old connection.
 * `Get-CWCLastContact` returns an error when it finds no connection event. Before, it returned the current time.

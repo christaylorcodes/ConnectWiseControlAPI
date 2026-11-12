@@ -78,9 +78,11 @@ ERRORS
         }
 
 REMOVING THINGS
-    Remove-CWCSession, Remove-CWCSessionNote and Remove-CWCHostFromSession ask
-    for confirmation. In an unattended script add -Confirm:$false. Without it,
-    a session started with -NonInteractive fails at the prompt and removes
+    Remove-CWCSession, Remove-CWCSessionNote, Remove-CWCHostFromSession and
+    Remove-CWCToolboxItem ask for confirmation. So does Send-CWCToolboxItem
+    with -Elevated or -Silent, which runs a Toolbox item with administrative
+    rights. In an unattended script add -Confirm:$false. Without it, a
+    session started with -NonInteractive fails at the prompt and does
     nothing. Other unattended hosts may wait at the prompt, or take its
     default answer (Yes) when they read answers from redirected input.
 

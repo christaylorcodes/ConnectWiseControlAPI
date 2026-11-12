@@ -22,7 +22,7 @@ $script:CWCProcessType = @{ Host = 1; Guest = 2 }
 $script:CWCAllSessionPermissions = 268435455
 
 # ScreenConnect.SessionEventType values used by this module (verified live from the web client's
-# SC.types.SessionEventType, 2026-11-10)
+# SC.types.SessionEventType, 2026-11-10; the tool events above 100 2026-11-11)
 $script:CWCSessionEventType = @{
     DeletedEvent             = 1
     Connected                = 10
@@ -36,7 +36,14 @@ $script:CWCSessionEventType = @{
     QueuedForceDisconnect    = 48
     RanCommand               = 70
     QueuedUninstallAndDelete = 100
+    QueuedElevatedTool       = 101
+    QueuedSilentElevatedTool = 117
 }
+
+# ScreenConnect.ToolboxOperation value used by this module, for ToolboxService.ProcessToolboxOperation
+# (verified live from the web client's SC.types.ToolboxOperation, 2026-11-11). The full enum: RunTool 0,
+# CreateDirectory 1, Move 2, Delete 3, RunToolElevated 4, RunToolSilentElevated 5.
+$script:CWCToolboxOperation = @{ Delete = 3 }
 
 # Remote Workforce extension ID (App_Extensions/<ID>/Service.ashx)
 $script:CWCRemoteWorkforceExtensionID = '2c4f522f-b39a-413a-8807-dc52a2fce13e'

@@ -20,12 +20,14 @@ function Invoke-CWCServiceMethod {
         wake or delete).
 
     .PARAMETER Sensitive
-        The arguments contain a secret (password). The body is left out of verbose and debug output.
+        The body must not be logged or kept: it holds a secret (password) or bulk content (an uploaded
+        file). It is left out of verbose and debug output.
     #>
     [CmdletBinding(DefaultParameterSetName = 'Service')]
     param(
         [Parameter(Mandatory = $True, ParameterSetName = 'Service')]
-        [ValidateSet('PageService', 'SecurityService', 'AuditService', 'SessionGroupService', 'AuthenticationService')]
+        [ValidateSet('PageService', 'SecurityService', 'AuditService', 'SessionGroupService', 'AuthenticationService',
+            'ToolboxService')]
         [string]$Service,
 
         [Parameter(Mandatory = $True, ParameterSetName = 'RestApi')]
