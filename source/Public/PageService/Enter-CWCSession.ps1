@@ -144,14 +144,15 @@ function Enter-CWCSession {
         if (-not $Token) {
             try { $Token = New-CWCAccessToken -Group $SessionGroup -GUID $GUID -ErrorAction Stop }
             catch {
-                # Keep the transport's ErrorId (CWC.Http403, CWC.NoResponse, ...) on the re-reported error
-                $TokenError = @{
-                    Message = "Could not get an access token for session $GUID (JoinSession permission in " +
-                    "'$GroupText' is required): $($_.Exception.Message)"
-                }
+                $TokenMessage = "Could not get an access token for session $GUID (the JoinSession permission in " +
+                "'$GroupText' is needed): $($_.Exception.Message)"
                 $TokenErrorId = "$($_.FullyQualifiedErrorId)".Split(',')[0]
-                if ($TokenErrorId -like 'CWC.*') { $TokenError.ErrorId = $TokenErrorId }
-                return Write-Error @TokenError
+                if ($TokenErrorId -notlike 'CWC.*') { return Write-Error $TokenMessage }
+                # Keep the transport's ErrorId (CWC.Http403, CWC.NoResponse, ...), category and exception
+                $TokenException = New-Object System.Exception($TokenMessage, $_.Exception)
+                $TokenRecord = New-Object System.Management.Automation.ErrorRecord(
+                    $TokenException, $TokenErrorId, $_.CategoryInfo.Category, $GUID)
+                return $PSCmdlet.WriteError($TokenRecord)
             }
         }
         if (-not $Token) { return Write-Error "The server returned no access token for session $GUID." }

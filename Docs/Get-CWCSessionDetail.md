@@ -32,7 +32,10 @@ returns the server's raw session details; -Group and -Include are ignored.
 (Get-CWCSessionDetail -GUID $SessionID -Include Events).Events | Where-Object EventType -eq 32
 ```
 
-Returns the notes on the session (event type 32 is AddedNote), without downloading the screenshot.
+Returns the note events of the session (event type 32 is AddedNote), without downloading the
+screenshot.
+A deleted note stays in the list; a later event whose CorrelationEventID is the note's
+EventID marks it as deleted.
 
 ## PARAMETERS
 
@@ -73,6 +76,8 @@ Parts to return: SessionInfo, GuestScreenshotContent, Events, Connections.
 Omit for everything,
 including the guest screenshot.
 Request only what you need when polling.
+Ignored on API secret
+connections.
 
 ```yaml
 Type: String[]
@@ -94,6 +99,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
+### The session details object the server returns.
 ## NOTES
 Author: Chris Taylor
 

@@ -35,6 +35,7 @@ Returns the last 7 days of audit entries for the session named DESKTOP-01.
 ### -StartDate
 Start of the time range.
 Defaults to 24 hours ago.
+Local times are converted to UTC.
 
 ```yaml
 Type: DateTime
@@ -51,6 +52,7 @@ Accept wildcard characters: False
 ### -EndDate
 End of the time range.
 Defaults to now.
+Local times are converted to UTC.
 
 ```yaml
 Type: DateTime

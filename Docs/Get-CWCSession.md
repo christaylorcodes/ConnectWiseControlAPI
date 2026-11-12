@@ -120,6 +120,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
+### ScreenConnect session objects.
 ## NOTES
 Requires Connect-CWC -Credentials.
 Author: Chris Taylor

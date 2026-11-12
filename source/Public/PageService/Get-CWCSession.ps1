@@ -29,6 +29,9 @@ function Get-CWCSession {
         Returns the first Access session that matches DESKTOP-01. Its SessionID is the -GUID the other
         session commands take.
 
+    .OUTPUTS
+        ScreenConnect session objects.
+
     .NOTES
         Requires Connect-CWC -Credentials.
         Author: Chris Taylor

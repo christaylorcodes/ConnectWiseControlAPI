@@ -26,8 +26,20 @@ The password is never written to verbose or debug output.
 
 ### EXAMPLE 1
 ```
-New-CWCUser -Credentials (Get-Credential -UserName 'jdoe') -Email 'jdoe@example.com' -SecurityGroups 'Technicians'
+$Credentials = Get-Credential -UserName 'jdoe' -Message 'Password for the new user'
+New-CWCUser -Credentials $Credentials -Email 'jdoe@example.com' -SecurityGroups 'Technicians'
 ```
+
+Creates the user jdoe in the Technicians role.
+The user must change the password at first login.
+
+### EXAMPLE 2
+```
+$Mfa = New-CWCMFA -UserAccount 'jdoe'
+New-CWCUser -Credentials $Credentials -OTP $Mfa.OTP -SecurityGroups 'Technicians' -ForcePassChange $false
+```
+
+Creates the user with an authenticator-app secret and without a forced password change.
 
 ## PARAMETERS
 

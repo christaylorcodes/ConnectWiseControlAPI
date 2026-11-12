@@ -159,6 +159,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
+### The output of the command, as text. Nothing with -NoWait or on an API secret connection.
 ## NOTES
 Author: Chris Taylor
 

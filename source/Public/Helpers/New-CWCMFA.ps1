@@ -24,7 +24,7 @@ function New-CWCMFA {
         Creates a secret for jdoe and shows the value to store on the account.
 
     .OUTPUTS
-        PSCustomObject with QR (URL of the QR code image) and OTP ("ms:<secret>").
+        PSCustomObject with QR (URL of the QR code image) and OTP ("ms:" followed by the secret).
 
     .NOTES
         Works without a connection.

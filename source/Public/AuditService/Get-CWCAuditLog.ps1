@@ -7,10 +7,10 @@ function Get-CWCAuditLog {
         Calls AuditService.QueryAuditLog. Times are converted to UTC.
 
     .PARAMETER StartDate
-        Start of the time range. Defaults to 24 hours ago.
+        Start of the time range. Defaults to 24 hours ago. Local times are converted to UTC.
 
     .PARAMETER EndDate
-        End of the time range. Defaults to now.
+        End of the time range. Defaults to now. Local times are converted to UTC.
 
     .PARAMETER SessionName
         Only return entries for sessions with this name.

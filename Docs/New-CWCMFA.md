@@ -110,7 +110,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### PSCustomObject with QR (URL of the QR code image) and OTP ("ms:<secret>").
+### PSCustomObject with QR (URL of the QR code image) and OTP ("ms:" followed by the secret).
 ## NOTES
 Works without a connection.
 Author: Chris Taylor

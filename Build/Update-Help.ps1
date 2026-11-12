@@ -43,12 +43,29 @@ try {
 } finally {
     $env:PSModulePath = $SavedModulePath
 }
-$Module = Import-Module (Join-Path $RepoRoot 'source\ConnectWiseControlAPI.psd1') -Force -PassThru
+$SourceManifest = Join-Path $RepoRoot 'source\ConnectWiseControlAPI.psd1'
+# New-MarkdownHelp finds commands by module name, so another loaded copy (an installed Gallery version, the
+# built module) would be documented too. Only the source module may be loaded while the pages are written.
+$LoadedBefore = @(Get-Module ConnectWiseControlAPI)
+$SourceWasLoaded = [bool]($LoadedBefore | Where-Object { $_.Path -like (Join-Path $RepoRoot 'source\*') })
+foreach ($Other in $LoadedBefore) {
+    if ($Other.Path -notlike (Join-Path $RepoRoot 'source\*')) {
+        Write-Warning "Removing ConnectWiseControlAPI $($Other.Version) loaded from $($Other.ModuleBase)."
+    }
+    Remove-Module $Other -Force
+}
+$Module = Import-Module $SourceManifest -Force -PassThru
 $Commands = @($Module.ExportedFunctions.Keys | Sort-Object)
 
 # Update-MarkdownHelp keeps the synopsis, description, examples and parameter text of an existing page, so
 # changed comment-based help never reached the pages. New-MarkdownHelp -Force writes them from the help.
-Get-ChildItem $DocsPath -Filter '*.md' | Where-Object { $Commands -notcontains $_.BaseName } | Remove-Item
+# Pages of functions that no longer exist are deleted: only platyPS command pages, never other markdown.
+foreach ($Stale in Get-ChildItem $DocsPath -Filter '*.md' | Where-Object { $Commands -notcontains $_.BaseName }) {
+    if ((Get-Content $Stale.FullName -TotalCount 5) -match '^external help file:') {
+        Write-Warning "Deleting $($Stale.Name): the module has no command of that name."
+        Remove-Item $Stale.FullName
+    }
+}
 $null = New-MarkdownHelp -Module $Module.Name -OutputFolder $DocsPath -Force
 $null = Update-MarkdownHelpModule -Path $DocsPath -ModulePagePath $ModulePagePath -RefreshModulePage -Force
 
@@ -67,8 +84,9 @@ $Text = [regex]::Replace($Text, '(?m)^Help Version: [^\r\n]*', "Help Version: $(
 
 $null = New-ExternalHelp -Path $DocsPath -OutputPath (Join-Path $RepoRoot 'source\en-US') -Force
 
-# Don't leave the source module loaded: tests run later in this session would find two copies of the module
-Remove-Module $Module -Force
+# Don't leave the source module loaded when this script loaded it: tests run later in this session would find
+# two copies of the module. A source module the caller had loaded stays (reloaded, so its connection is gone).
+if (-not $SourceWasLoaded) { Remove-Module $Module -Force }
 
 $Placeholders = Select-String -Path (Join-Path $DocsPath '*.md'), $ModulePagePath -Pattern '\{\{'
 foreach ($Hit in $Placeholders) { Write-Warning "Placeholder left to fill: $($Hit.Filename):$($Hit.LineNumber)" }

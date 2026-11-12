@@ -42,6 +42,9 @@ function Invoke-CWCCommand {
 
         Runs a PowerShell command and waits up to 30 seconds for its output.
 
+    .OUTPUTS
+        The output of the command, as text. Nothing with -NoWait or on an API secret connection.
+
     .NOTES
         Author: Chris Taylor
 

@@ -52,6 +52,7 @@ Instances of abusive, harassing, or otherwise unacceptable behavior may be repor
 
 - **Email:** conduct@christaylor.codes
 - **Slack:** @CTaylor on [MSPGeek Slack](https://join.mspgeek.com/)
+
 All complaints will be reviewed and investigated promptly and fairly.
 
 All community leaders are obligated to respect the privacy and security of the reporter of any incident.

@@ -109,6 +109,8 @@ $Secret = Read-Host -AsSecureString -Prompt 'RESTful API secret'
 Connect-CWC -Server 'screenconnect.example.com' -ApiSecret $Secret
 ```
 
+Connects with the RESTful API Manager extension's secret.
+
 ## PARAMETERS
 
 ### -Server

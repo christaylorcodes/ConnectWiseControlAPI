@@ -651,7 +651,7 @@ Connect-CWC -Server 'screenconnect.example.com' -Credentials $Credential -TotpSe
         <dev:code>$Secret = Read-Host -AsSecureString -Prompt 'RESTful API secret'
 Connect-CWC -Server 'screenconnect.example.com' -ApiSecret $Secret</dev:code>
         <dev:remarks>
-          <maml:para></maml:para>
+          <maml:para>Connects with the RESTful API Manager extension's secret.</maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -1037,7 +1037,7 @@ open $Url   # macOS</dev:code>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
           <maml:name>StartDate</maml:name>
           <maml:description>
-            <maml:para>Start of the time range. Defaults to 24 hours ago.</maml:para>
+            <maml:para>Start of the time range. Defaults to 24 hours ago. Local times are converted to UTC.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">DateTime</command:parameterValue>
           <dev:type>
@@ -1049,7 +1049,7 @@ open $Url   # macOS</dev:code>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
           <maml:name>EndDate</maml:name>
           <maml:description>
-            <maml:para>End of the time range. Defaults to now.</maml:para>
+            <maml:para>End of the time range. Defaults to now. Local times are converted to UTC.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">DateTime</command:parameterValue>
           <dev:type>
@@ -1111,7 +1111,7 @@ open $Url   # macOS</dev:code>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
         <maml:name>StartDate</maml:name>
         <maml:description>
-          <maml:para>Start of the time range. Defaults to 24 hours ago.</maml:para>
+          <maml:para>Start of the time range. Defaults to 24 hours ago. Local times are converted to UTC.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">DateTime</command:parameterValue>
         <dev:type>
@@ -1123,7 +1123,7 @@ open $Url   # macOS</dev:code>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
         <maml:name>EndDate</maml:name>
         <maml:description>
-          <maml:para>End of the time range. Defaults to now.</maml:para>
+          <maml:para>End of the time range. Defaults to now. Local times are converted to UTC.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">DateTime</command:parameterValue>
         <dev:type>
@@ -1927,7 +1927,16 @@ open $Url   # macOS</dev:code>
       </command:parameter>
     </command:parameters>
     <command:inputTypes />
-    <command:returnValues />
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>ScreenConnect session objects.</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
     <maml:alertSet>
       <maml:alert>
         <maml:para>Requires Connect-CWC -Credentials. Author: Chris Taylor</maml:para>
@@ -1992,7 +2001,7 @@ open $Url   # macOS</dev:code>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none">
           <maml:name>Include</maml:name>
           <maml:description>
-            <maml:para>Parts to return: SessionInfo, GuestScreenshotContent, Events, Connections. Omit for everything, including the guest screenshot. Request only what you need when polling.</maml:para>
+            <maml:para>Parts to return: SessionInfo, GuestScreenshotContent, Events, Connections. Omit for everything, including the guest screenshot. Request only what you need when polling. Ignored on API secret connections.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
           <dev:type>
@@ -2031,7 +2040,7 @@ open $Url   # macOS</dev:code>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none">
         <maml:name>Include</maml:name>
         <maml:description>
-          <maml:para>Parts to return: SessionInfo, GuestScreenshotContent, Events, Connections. Omit for everything, including the guest screenshot. Request only what you need when polling.</maml:para>
+          <maml:para>Parts to return: SessionInfo, GuestScreenshotContent, Events, Connections. Omit for everything, including the guest screenshot. Request only what you need when polling. Ignored on API secret connections.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
         <dev:type>
@@ -2042,7 +2051,16 @@ open $Url   # macOS</dev:code>
       </command:parameter>
     </command:parameters>
     <command:inputTypes />
-    <command:returnValues />
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>The session details object the server returns.</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
     <maml:alertSet>
       <maml:alert>
         <maml:para>Author: Chris Taylor</maml:para>
@@ -2053,7 +2071,7 @@ open $Url   # macOS</dev:code>
         <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
         <dev:code>(Get-CWCSessionDetail -GUID $SessionID -Include Events).Events | Where-Object EventType -eq 32</dev:code>
         <dev:remarks>
-          <maml:para>Returns the notes on the session (event type 32 is AddedNote), without downloading the screenshot.</maml:para>
+          <maml:para>Returns the note events of the session (event type 32 is AddedNote), without downloading the screenshot. A deleted note stays in the list; a later event whose CorrelationEventID is the note's EventID marks it as deleted.</maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -2381,7 +2399,16 @@ open $Url   # macOS</dev:code>
       </command:parameter>
     </command:parameters>
     <command:inputTypes />
-    <command:returnValues />
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>The output of the command, as text. Nothing with -NoWait or on an API secret connection.</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
     <maml:alertSet>
       <maml:alert>
         <maml:para>Author: Chris Taylor</maml:para>
@@ -2708,7 +2735,7 @@ open $Url   # macOS</dev:code>
     <command:returnValues>
       <command:returnValue>
         <dev:type>
-          <maml:name>PSCustomObject with QR (URL of the QR code image) and OTP ("ms:&lt;secret&gt;").</maml:name>
+          <maml:name>PSCustomObject with QR (URL of the QR code image) and OTP ("ms:" followed by the secret).</maml:name>
         </dev:type>
         <maml:description>
           <maml:para></maml:para>
@@ -3358,9 +3385,18 @@ $Mfa.OTP</dev:code>
     <command:examples>
       <command:example>
         <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
-        <dev:code>New-CWCUser -Credentials (Get-Credential -UserName 'jdoe') -Email 'jdoe@example.com' -SecurityGroups 'Technicians'</dev:code>
+        <dev:code>$Credentials = Get-Credential -UserName 'jdoe' -Message 'Password for the new user'
+New-CWCUser -Credentials $Credentials -Email 'jdoe@example.com' -SecurityGroups 'Technicians'</dev:code>
         <dev:remarks>
-          <maml:para></maml:para>
+          <maml:para>Creates the user jdoe in the Technicians role. The user must change the password at first login.</maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>-------------------------- EXAMPLE 2 --------------------------</maml:title>
+        <dev:code>$Mfa = New-CWCMFA -UserAccount 'jdoe'
+New-CWCUser -Credentials $Credentials -OTP $Mfa.OTP -SecurityGroups 'Technicians' -ForcePassChange $false</dev:code>
+        <dev:remarks>
+          <maml:para>Creates the user with an authenticator-app secret and without a forced password change.</maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
