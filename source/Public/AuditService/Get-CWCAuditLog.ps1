@@ -7,10 +7,10 @@ function Get-CWCAuditLog {
         Calls AuditService.QueryAuditLog. Times are converted to UTC.
 
     .PARAMETER StartDate
-        Start of the time range. Defaults to 24 hours ago.
+        Start of the time range. Defaults to 24 hours ago. Local times are converted to UTC.
 
     .PARAMETER EndDate
-        End of the time range. Defaults to now.
+        End of the time range. Defaults to now. Local times are converted to UTC.
 
     .PARAMETER SessionName
         Only return entries for sessions with this name.
@@ -19,13 +19,15 @@ function Get-CWCAuditLog {
         Deprecated. The server no longer accepts this option; it is ignored with a warning.
 
     .PARAMETER EventTypes
-        Session event type numbers to include.
+        Session event type numbers to include, for example 44 (QueuedCommand) or 70 (RanCommand).
 
     .PARAMETER SecurityTypes
         Security event type numbers to include.
 
     .EXAMPLE
         Get-CWCAuditLog -StartDate (Get-Date).AddDays(-7) -SessionName 'DESKTOP-01'
+
+        Returns the last 7 days of audit entries for the session named DESKTOP-01.
 
     .NOTES
         Author: Chris Taylor

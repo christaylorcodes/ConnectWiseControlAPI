@@ -33,7 +33,17 @@ function Invoke-CWCCommand {
         Queue the command and return without waiting for output.
 
     .EXAMPLE
+        Invoke-CWCCommand -GUID $SessionID -Command 'hostname'
+
+        Runs hostname in cmd.exe on the machine and returns its output.
+
+    .EXAMPLE
         Invoke-CWCCommand -GUID $SessionID -Command 'Get-Service Spooler' -PowerShell -TimeOut 30000
+
+        Runs a PowerShell command and waits up to 30 seconds for its output.
+
+    .OUTPUTS
+        The output of the command, as text. Nothing with -NoWait or on an API secret connection.
 
     .NOTES
         Author: Chris Taylor

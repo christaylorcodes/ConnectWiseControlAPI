@@ -27,6 +27,8 @@ function Remove-CWCSession
     .LINK
         https://github.com/christaylorcodes/ConnectWiseControlAPI
     #>
+
+  # (Blank line above: a comment directly after the help block becomes part of the help.)
   # ConfirmImpact High: deleting (or uninstalling) sessions is irreversible, and -GUID accepts
   # many IDs at once, so prompt by default.
   [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]

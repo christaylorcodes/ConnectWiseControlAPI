@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  <img src=".\Media\control-horiz-master.webp" alt="logo" width = 75% ></a>
+  <img src="./Media/control-horiz-master.webp" alt="logo" width="75%">
   <br>
   ConnectWiseControlAPI
   <br>
@@ -116,8 +116,6 @@ In-depth tutorials on [christaylor.codes](https://christaylor.codes):
 ## [Contributing](.github/CONTRIBUTING.md)
 
 If you use this project please give it a star and follow so you can get updated when new features are released. This also lets me know what projects are getting used and what ones I should dedicate more time to. If you want to get more involved please see the [contributing page](.github/CONTRIBUTING.md). Projects need all kinds of help even if you don't know how to code.
-
-Want to share something you created using the module? Submit it to be featured as a Community Package.
 
 ## Donating
 

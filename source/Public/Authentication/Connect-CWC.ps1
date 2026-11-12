@@ -89,6 +89,8 @@ function Connect-CWC {
         $Secret = Read-Host -AsSecureString -Prompt 'RESTful API secret'
         Connect-CWC -Server 'screenconnect.example.com' -ApiSecret $Secret
 
+        Connects with the RESTful API Manager extension's secret.
+
     .NOTES
         Functions available with -ApiSecret: Get-CWCSessionDetail, Update-CWCSessionName,
         Invoke-CWCCommand (queues the command; output is not retrieved), Find-CWCSession,

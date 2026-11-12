@@ -120,6 +120,12 @@ Details are in the sections below.
 - `Get-CWCSession -Type Support` and `-Type Meeting` without `-Group` read `All Machines`, the Access group;
   they now read `All Sessions` and `All Meetings`
 - Failed requests no longer keep the login cookie on the request object stored in `$Error`
+- `Get-Help` and the pages in `Docs/` describe the current commands. They had kept text from earlier versions:
+  examples called commands that do not exist (`End-CWWake`, `Remove-CWCAccessSession`, `Get-CWCSessions`), and
+  18 synopses were out of date. `Get-Help Remove-CWCSession` and `Get-Help Remove-CWCSessionNote` no
+  longer show a code comment as a related link
+- `Examples/CreateNewUser.ps1` passed parameters `New-CWCUser` does not have and used the MFA secret as the
+  password; it now creates the user from a credential
 
 Endpoint calls audited against the ScreenConnect server's `Services/*.ashx` source:
 
@@ -174,7 +180,8 @@ Changes to the repository. They do not change the published module.
   was the Remote Workforce extension) and `./build.ps1` builds the published module into
   `output/<ModuleName>/<version>/`. Module-level setup moved from the `.psm1` to `source/prefix.ps1`. The build
   adds the tags the Gallery lists and finds commands by. CI and `Tests/test-local.ps1` test the built module
-- `Build/Update-Help.ps1` regenerates `Docs/` and the MAML help in one step
+- `Build/Update-Help.ps1` regenerates `Docs/` and the MAML help in one step. It writes every page from the
+  comment-based help (an update kept the old text of existing pages), with the pinned platyPS
 - Repo files aligned with the GitHub-Template: `AGENTS.md` (agent guide; `CLAUDE.md` points to it), community
   files (CONTRIBUTING, CODE_OF_CONDUCT, SECURITY, issue and PR templates), `pr-validation.yml`, `dependabot.yml`,
   `copilot-instructions.md`, `.vscode/` settings, `.editorconfig`, `.gitattributes`, an expanded `.gitignore`,

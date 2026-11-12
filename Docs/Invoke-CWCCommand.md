@@ -1,14 +1,14 @@
 ---
 external help file: ConnectWiseControlAPI-help.xml
 Module Name: ConnectWiseControlAPI
-online version:
+online version: https://github.com/christaylorcodes/ConnectWiseControlAPI
 schema: 2.0.0
 ---
 
 # Invoke-CWCCommand
 
 ## SYNOPSIS
-Will issue a command against a given machine and return the results.
+Runs a command on a session's machine and returns its output.
 
 ## SYNTAX
 
@@ -18,29 +18,32 @@ Invoke-CWCCommand [-GUID] <Guid> [[-Command] <String>] [[-TimeOut] <Int32>] [[-M
 ```
 
 ## DESCRIPTION
-Will issue a command against a given machine and return the results.
+Queues a QueuedCommand event (44) and polls the session's events until the matching RanCommand
+output (70) arrives or -TimeOut passes.
+
+API secret connections queue the command through the RESTful API Manager extension; the output is
+not retrieved (a warning says so unless -NoWait is used).
 
 ## EXAMPLES
 
 ### EXAMPLE 1
-```powershell
-Invoke-CWCCommand -GUID $GUID -Command 'hostname'
+```
+Invoke-CWCCommand -GUID $SessionID -Command 'hostname'
 ```
 
-Will return the hostname of the machine.
+Runs hostname in cmd.exe on the machine and returns its output.
 
 ### EXAMPLE 2
-```powershell
-Invoke-CWCCommand -GUID $GUID  -TimeOut 120000 -Command 'iwr -UseBasicParsing "https://bit.ly/ltposh" | iex; Restart-LTService' -PowerShell
+```
+Invoke-CWCCommand -GUID $SessionID -Command 'Get-Service Spooler' -PowerShell -TimeOut 30000
 ```
 
-Will restart the Automate agent on the target machine.
+Runs a PowerShell command and waits up to 30 seconds for its output.
 
 ## PARAMETERS
 
 ### -GUID
-The GUID identifier for the machine you wish to connect to.
-You can retrieve session info with the 'Get-CWCSessions' cmdlets
+Session ID.
 
 ```yaml
 Type: Guid
@@ -55,7 +58,7 @@ Accept wildcard characters: False
 ```
 
 ### -Command
-The command you wish to issue to the machine.
+Command line to run (cmd.exe unless -PowerShell is used).
 
 ```yaml
 Type: String
@@ -70,8 +73,8 @@ Accept wildcard characters: False
 ```
 
 ### -TimeOut
-The amount of time in milliseconds that a command can execute.
-The default is 10000 milliseconds.
+Milliseconds the command may run, and how long to wait for its output.
+Defaults to 10000.
 
 ```yaml
 Type: Int32
@@ -86,7 +89,8 @@ Accept wildcard characters: False
 ```
 
 ### -MaxLength
-Maximum number of characters of command output to return. Defaults to 10000.
+Maximum number of characters of output to return.
+Defaults to 10000.
 
 ```yaml
 Type: Int32
@@ -95,13 +99,13 @@ Aliases:
 
 Required: False
 Position: 4
-Default value: None
+Default value: 10000
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
 ### -PowerShell
-Issues the command in a powershell session.
+Run the command in PowerShell.
 
 ```yaml
 Type: SwitchParameter
@@ -116,7 +120,9 @@ Accept wildcard characters: False
 ```
 
 ### -Group
-Name of session group to use.
+Session group containing the session: a name, or the path parts of a nested group.
+Defaults to
+'All Machines'.
 
 ```yaml
 Type: String[]
@@ -131,7 +137,7 @@ Accept wildcard characters: False
 ```
 
 ### -NoWait
-Will not wait for the output of the command.
+Queue the command and return without waiting for output.
 
 ```yaml
 Type: SwitchParameter
@@ -140,7 +146,7 @@ Aliases:
 
 Required: False
 Position: Named
-Default value: None
+Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -153,14 +159,11 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### The output of the Command provided.
+### The output of the command, as text. Nothing with -NoWait or on an API secret connection.
 ## NOTES
-Version:        1.0
-
-Author:         Chris Taylor
-
-Creation Date:  1/20/2016
-
-Purpose/Change: Initial script development
+Author: Chris Taylor
 
 ## RELATED LINKS
+
+[https://github.com/christaylorcodes/ConnectWiseControlAPI](https://github.com/christaylorcodes/ConnectWiseControlAPI)
+

@@ -28,7 +28,10 @@ function Get-CWCLauncURL {
         Ignored. Not accepted by the server.
 
     .EXAMPLE
-        Get-CWCRemoteWorkforceLaunchURL -GUID $SessionID
+        Get-CWCLauncURL -GUID $SessionID
+
+        Warns that the command is deprecated and returns what Get-CWCRemoteWorkforceLaunchURL -GUID $SessionID
+        returns. Use that command in new scripts.
 
     .NOTES
         Deprecated in favor of Get-CWCRemoteWorkforceLaunchURL.

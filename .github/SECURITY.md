@@ -2,12 +2,12 @@
 
 ## Supported Versions
 
-We actively support the following versions of this project with security updates:
+Security fixes go into the latest release on the PowerShell Gallery:
 
 | Version | Supported          |
 | ------- | ------------------ |
-| Latest  | :white_check_mark: |
-| < 1.0   | :x:                |
+| Latest release (0.5.x) | :white_check_mark: |
+| Older releases         | :x:                |
 
 ## Reporting a Vulnerability
 
@@ -19,16 +19,11 @@ We take the security of ConnectWiseControlAPI seriously. If you believe you have
 
 Instead, please report them via one of the following methods:
 
-1. **GitHub Security Advisories** (Preferred)
-   - Navigate to the repository's Security tab
-   - Click "Report a vulnerability"
-   - Fill out the security advisory form with details
-
-2. **Direct Email**
+1. **Direct Email** (Preferred)
    - Send an email to: **security@christaylor.codes**
    - Use the subject line: `[SECURITY] ConnectWiseControlAPI - Brief Description`
 
-3. **Private Message on Slack**
+2. **Private Message on Slack**
    - Contact **@CTaylor** on [MSPGeek Slack](https://join.mspgeek.com/)
    - Clearly mark the message as security-related
 
@@ -78,7 +73,7 @@ When using this module, please:
 
 2. **Use HTTPS**
    - The module requires your ScreenConnect server to use HTTPS
-   - TLS 1.2 is enforced by the module
+   - The module turns TLS 1.2 on for the PowerShell session; it does not turn older versions off
 
 3. **Keep Updated**
    - Regularly update the module from the PowerShell Gallery

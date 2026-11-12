@@ -2,7 +2,7 @@
 name: AI Task
 about: Create a structured task for AI coding agents
 title: '[AI] '
-labels: 'ai-task, ai-ready'
+labels: ''
 assignees: ''
 ---
 
@@ -27,8 +27,7 @@ assignees: ''
 
 <!-- How to verify the task is complete. Be explicit. -->
 
-- [ ] All existing tests pass (`Invoke-Pester`)
-- [ ] PSScriptAnalyzer reports zero errors
+- [ ] `./Tests/test-local.ps1` passes (build, analyzer, Pester on both editions, docs drift)
 - [ ] New/changed functionality has test coverage
 - [ ]
 
@@ -49,7 +48,7 @@ assignees: ''
 ## Technical Notes
 
 <!-- Optional: implementation hints, constraints, or design decisions -->
-<!-- See CLAUDE.md for architecture and conventions -->
+<!-- See AGENTS.md for architecture and conventions -->
 
 ## Related Issues
 

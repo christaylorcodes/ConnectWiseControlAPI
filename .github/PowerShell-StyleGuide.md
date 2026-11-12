@@ -7,6 +7,17 @@
 > `Tests/test-local.ps1` and `Build/Update-Help.ps1`), and test runners must not set a global
 > `$ErrorActionPreference = 'Stop'` (it breaks the module's error-path tests). Where this guide disagrees, follow
 > [AGENTS.md](../AGENTS.md); everything else applies as written.
+>
+> Parts of this guide that name things this repo does not have:
+>
+> | This guide says | In this repo |
+> | --- | --- |
+> | `Templates/Function.ps1`, `Scripts/New-Function.ps1` | Copy `source/Public/PageService/Get-CWCSession.ps1` |
+> | No MAML/XML help is generated | `Build/Update-Help.ps1` writes `Docs/` and the MAML in `source/en-US/` |
+> | `./build.ps1 -Tasks docs`, `Scripts/Update-MarkdownHelp.ps1` | `./Build/Update-Help.ps1` |
+> | One test file per exported function | Four suite files under `Tests/` |
+> | `-IncludeAnalyzer`, `Invoke-QuickTest.ps1` | `./Tests/test-local.ps1 -Stage Analyze` (or `Test`) |
+> | Set `$ErrorActionPreference = 'Stop'`, use `ThrowTerminatingError` | Module functions report with non-terminating `Write-Error` |
 
 This is the authoritative style guide for all PowerShell projects. It applies to both formal modules (built with Sampler/ModuleBuilder, using InvokeBuild as the task runner) and standalone script collections. All projects should reference this file rather than duplicating conventions.
 

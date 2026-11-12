@@ -34,7 +34,9 @@ $Token = New-CWCAccessToken -GUID $SessionID
 ## PARAMETERS
 
 ### -Group
-Session group containing the session.
+Session group containing the session: a name, or the path parts of a nested group
+(e.g.
+'Clients','Acme').
 Defaults to 'All Machines'.
 
 ```yaml

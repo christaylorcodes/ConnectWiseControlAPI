@@ -1,14 +1,14 @@
 ---
 external help file: ConnectWiseControlAPI-help.xml
 Module Name: ConnectWiseControlAPI
-online version:
+online version: https://github.com/christaylorcodes/ConnectWiseControlAPI
 schema: 2.0.0
 ---
 
 # Invoke-CWCWake
 
 ## SYNOPSIS
-Will issue a wake command to a given session.
+Sends a wake (Wake-on-LAN) request to sessions.
 
 ## SYNTAX
 
@@ -17,22 +17,19 @@ Invoke-CWCWake [-GUID] <Guid[]> [-Type] <String> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Will issue a wake command to a given access or support session.
+Queues a QueuedWake event (43) for each session, in the built-in group for -Type.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-End-CWWake -GUID $GUID
+Invoke-CWCWake -GUID $SessionID -Type Access
 ```
-
-Will issue a wake command to a given session.
 
 ## PARAMETERS
 
 ### -GUID
-The GUID identifier for the session you wish to end.
-Accepts an array of GUIDs
+One or more session IDs.
 
 ```yaml
 Type: Guid[]
@@ -47,7 +44,7 @@ Accept wildcard characters: False
 ```
 
 ### -Type
-The type of session Support/Access
+Session type: Support or Access.
 
 ```yaml
 Type: String
@@ -70,9 +67,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## OUTPUTS
 
 ## NOTES
-Version:        1.0
-Author:         Chris Taylor
-Creation Date:  12/7/2018
-Purpose/Change: Initial script development
+Author: Chris Taylor
 
 ## RELATED LINKS
+
+[https://github.com/christaylorcodes/ConnectWiseControlAPI](https://github.com/christaylorcodes/ConnectWiseControlAPI)
+

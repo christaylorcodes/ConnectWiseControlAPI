@@ -15,7 +15,8 @@ function Get-CWCLastContact {
         Return $True or $False instead of a date.
 
     .PARAMETER Seconds
-        Used with -Quiet: how recent the last contact must be to count.
+        Used with -Quiet: how recent the last contact must be to count. Defaults to 0, so only a guest that
+        is connected now counts.
 
     .PARAMETER Group
         Session group containing the session: a name, or the path parts of a nested group. Defaults to
@@ -24,7 +25,10 @@ function Get-CWCLastContact {
     .EXAMPLE
         Get-CWCLastContact -GUID $SessionID -Quiet -Seconds 300
 
+        Returns $True when the machine is connected or was connected in the last 5 minutes.
+
     .NOTES
+        Requires Connect-CWC -Credentials.
         Author: Chris Taylor
 
     .LINK

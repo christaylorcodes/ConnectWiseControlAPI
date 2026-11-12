@@ -1,14 +1,14 @@
 ---
 external help file: ConnectWiseControlAPI-help.xml
 Module Name: ConnectWiseControlAPI
-online version:
+online version: https://github.com/christaylorcodes/ConnectWiseControlAPI
 schema: 2.0.0
 ---
 
 # Update-CWCSessionName
 
 ## SYNOPSIS
-Updates the name of a session.
+Renames a session.
 
 ## SYNTAX
 
@@ -17,27 +17,21 @@ Update-CWCSessionName [-GUID] <Guid> [-NewName] <String> [[-Group] <String[]>] [
 ```
 
 ## DESCRIPTION
-Updates the name of a session on the ScreenConnect server.
+Credentials connections: PageService.UpdateSessionName.
+API secret connections: the RESTful API
+Manager extension's UpdateSessionName (-Group is ignored).
 
 ## EXAMPLES
 
 ### EXAMPLE 1
-```powershell
-Update-CWCSessionName -GUID $GUID -NewName 'Session1'
 ```
-
-Will rename the session to Session1
+Update-CWCSessionName -GUID $SessionID -NewName 'ACME-FrontDesk'
+```
 
 ## PARAMETERS
 
 ### -GUID
-The GUID/SessionID for the machine you wish to connect to.
-You can retrieve session info with the 'Get-CWCSessions' cmdlets
-
-On Windows clients, the launch parameters are located in the registry at:
-    HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\ScreenConnect Client (xxxxxxxxxxxxxxxx)\ImagePath
-On Linux and Mac clients, it's found in the ClientLaunchParameters.txt file in the client installation folder:
-    /opt/screenconnect-xxxxxxxxxxxxxxxx/ClientLaunchParameters.txt
+Session ID.
 
 ```yaml
 Type: Guid
@@ -52,7 +46,7 @@ Accept wildcard characters: False
 ```
 
 ### -NewName
-The new name for the session.
+New session name.
 
 ```yaml
 Type: String
@@ -67,7 +61,9 @@ Accept wildcard characters: False
 ```
 
 ### -Group
-Group to look for the session in.
+Session group containing the session: a name, or the path parts of a nested group.
+Defaults to
+'All Machines'.
 
 ```yaml
 Type: String[]
@@ -82,7 +78,8 @@ Accept wildcard characters: False
 ```
 
 ### -WhatIf
-Shows what would happen if the cmdlet runs. The cmdlet is not run.
+Shows what would happen if the cmdlet runs.
+The cmdlet is not run.
 
 ```yaml
 Type: SwitchParameter
@@ -120,9 +117,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## OUTPUTS
 
 ## NOTES
-Version:        1.1
-Author:         Chris Taylor
-Creation Date:  10/25/2018
-Purpose/Change: Initial script development
+Author: Chris Taylor
 
 ## RELATED LINKS
+
+[https://github.com/christaylorcodes/ConnectWiseControlAPI](https://github.com/christaylorcodes/ConnectWiseControlAPI)
+

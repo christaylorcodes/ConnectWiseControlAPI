@@ -1,14 +1,14 @@
 ---
 external help file: ConnectWiseControlAPI-help.xml
 Module Name: ConnectWiseControlAPI
-online version:
+online version: https://github.com/christaylorcodes/ConnectWiseControlAPI
 schema: 2.0.0
 ---
 
 # Get-CWCAuditLog
 
 ## SYNOPSIS
-Pull audit log information
+Returns audit log entries for a time range.
 
 ## SYNTAX
 
@@ -18,21 +18,24 @@ Get-CWCAuditLog [[-StartDate] <DateTime>] [[-EndDate] <DateTime>] [[-SessionName
 ```
 
 ## DESCRIPTION
-Returns the same information as the audit search in web
+Calls AuditService.QueryAuditLog.
+Times are converted to UTC.
 
 ## EXAMPLES
 
-### Example 1
-```powershell
-PS C:\> Get-CWCAuditLog -StartDate $(Get-Date).AddDays(-1) -EndDate $(Get-Date) -SessionName 'Computer1'
+### EXAMPLE 1
+```
+Get-CWCAuditLog -StartDate (Get-Date).AddDays(-7) -SessionName 'DESKTOP-01'
 ```
 
-Get the audit logs for Computer1 for the last day.
+Returns the last 7 days of audit entries for the session named DESKTOP-01.
 
 ## PARAMETERS
 
 ### -StartDate
-Start of the time range. Defaults to 24 hours ago. Local times are converted to UTC.
+Start of the time range.
+Defaults to 24 hours ago.
+Local times are converted to UTC.
 
 ```yaml
 Type: DateTime
@@ -41,13 +44,15 @@ Aliases:
 
 Required: False
 Position: 1
-Default value: None
+Default value: (Get-Date).AddDays(-1)
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
 ### -EndDate
-End of the time range. Defaults to now. Local times are converted to UTC.
+End of the time range.
+Defaults to now.
+Local times are converted to UTC.
 
 ```yaml
 Type: DateTime
@@ -56,7 +61,7 @@ Aliases:
 
 Required: False
 Position: 2
-Default value: None
+Default value: (Get-Date)
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -77,7 +82,8 @@ Accept wildcard characters: False
 ```
 
 ### -IncludeSessionCaptures
-Deprecated. The server no longer accepts this option; it is ignored with a warning.
+Deprecated.
+The server no longer accepts this option; it is ignored with a warning.
 
 ```yaml
 Type: SwitchParameter
@@ -86,13 +92,13 @@ Aliases:
 
 Required: False
 Position: Named
-Default value: None
+Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
 ### -EventTypes
-Session event type numbers to include (for example 44 for QueuedCommand, 70 for RanCommand).
+Session event type numbers to include, for example 44 (QueuedCommand) or 70 (RanCommand).
 
 ```yaml
 Type: Int32[]
@@ -127,10 +133,12 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-### None
 ## OUTPUTS
 
-### System.Object
 ## NOTES
+Author: Chris Taylor
 
 ## RELATED LINKS
+
+[https://github.com/christaylorcodes/ConnectWiseControlAPI](https://github.com/christaylorcodes/ConnectWiseControlAPI)
+

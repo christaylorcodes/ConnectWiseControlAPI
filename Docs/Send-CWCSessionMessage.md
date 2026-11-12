@@ -69,6 +69,10 @@ Accept wildcard characters: False
 
 ### -From
 Sender name shown to the guest (API secret connections only).
+Defaults to 'RESTful API', the
+extension's default RESTfulUserName.
+The extension uses this value, not its RESTfulUserName
+setting, so pass -From to match a renamed setting (or any name you want the guest to see).
 
 ```yaml
 Type: String

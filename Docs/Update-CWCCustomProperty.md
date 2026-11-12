@@ -1,14 +1,14 @@
 ---
 external help file: ConnectWiseControlAPI-help.xml
 Module Name: ConnectWiseControlAPI
-online version:
+online version: https://github.com/christaylorcodes/ConnectWiseControlAPI
 schema: 2.0.0
 ---
 
 # Update-CWCCustomProperty
 
 ## SYNOPSIS
-Will update a custom property for a session.
+Sets one custom property of a session.
 
 ## SYNTAX
 
@@ -17,27 +17,19 @@ Update-CWCCustomProperty [-GUID] <Guid> [-Property] <Int32> [[-Value] <String>] 
 ```
 
 ## DESCRIPTION
-Will update a custom property for a session.
+Calls PageService.UpdateSessionCustomPropertyValue.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Update-CWCCustomProperty -GUID $GUID -Property 2 -Value 'New Department'
+Update-CWCCustomProperty -GUID $SessionID -Property 1 -Value 'Acme'
 ```
-
-Will update the sessions department to 'New Department'
 
 ## PARAMETERS
 
 ### -GUID
-The GUID/SessionID for the machine you wish to connect to.
-You can retrieve session info with the 'Get-CWCSessions' cmdlets
-
-On Windows clients, the launch parameters are located in the registry at:
-    HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\ScreenConnect Client (xxxxxxxxxxxxxxxx)\ImagePath
-On Linux and Mac clients, it's found in the ClientLaunchParameters.txt file in the client installation folder:
-    /opt/screenconnect-xxxxxxxxxxxxxxxx/ClientLaunchParameters.txt
+Session ID.
 
 ```yaml
 Type: Guid
@@ -52,7 +44,7 @@ Accept wildcard characters: False
 ```
 
 ### -Property
-The property number of the property you want to change.
+The property number of the property to change.
 
 ```yaml
 Type: Int32
@@ -61,13 +53,13 @@ Aliases:
 
 Required: True
 Position: 2
-Default value: None
+Default value: 0
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
 ### -Value
-The value you want to set the property to.
+New value.
 
 ```yaml
 Type: String
@@ -82,7 +74,9 @@ Accept wildcard characters: False
 ```
 
 ### -Group
-Look for the session in these groups.
+Session group containing the session: a name, or the path parts of a nested group.
+Defaults to
+'All Machines'.
 
 ```yaml
 Type: String[]
@@ -97,7 +91,8 @@ Accept wildcard characters: False
 ```
 
 ### -WhatIf
-Shows what would happen if the cmdlet runs. The cmdlet is not run.
+Shows what would happen if the cmdlet runs.
+The cmdlet is not run.
 
 ```yaml
 Type: SwitchParameter
@@ -135,12 +130,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## OUTPUTS
 
 ## NOTES
-Version:        1.1
-
-Author:         Chris Taylor
-
-Creation Date:  10/25/2018
-
-Purpose/Change: Initial script development
+Author: Chris Taylor
 
 ## RELATED LINKS
+
+[https://github.com/christaylorcodes/ConnectWiseControlAPI](https://github.com/christaylorcodes/ConnectWiseControlAPI)
+

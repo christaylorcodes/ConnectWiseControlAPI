@@ -336,6 +336,10 @@ Describe 'ErrorId survives a failed read' {
                 param($ID) Invoke-CWCCommand -GUID $ID -Command 'hostname' -ErrorAction Ignore
             }
         }
+        @{ Name = 'Remove-CWCSessionNote'; Call = {
+                param($ID) Remove-CWCSessionNote -GUID $ID -All -Confirm:$false -ErrorAction Ignore
+            }
+        }
     ) {
         { & $Call $SessionID } | Should -Not -Throw
     }
@@ -2487,6 +2491,23 @@ Describe 'Enter-CWCSession pipeline binding' {
             $Url = [PSCustomObject]@{ SessionID = [guid]::NewGuid(); Name = 'Ticket 1'; SessionType = 0 } | Enter-CWCSession -UrlOnly -WarningAction SilentlyContinue
             $Url | Should -Match '/Support/'
             Should -Invoke New-CWCAccessToken -Times 1 -ParameterFilter { $Group -eq 'All Sessions' }
+        }
+    }
+}
+
+Describe 'Enter-CWCSession error reporting' {
+    It 'keeps the CWC ErrorId when the access token request fails' {
+        InModuleScope 'ConnectWiseControlAPI' {
+            $script:CWCServerConnection = @{ Server = 'test.example.com'; AuthType = 'Credentials'; Headers = @{} }
+            Mock Get-CWCHostLaunchContext { [PSCustomObject]@{ Scheme = 'sc-test'; RelayHost = 'relay'; RelayPort = 443; PublicKey = 'k' } }
+            Mock New-CWCAccessToken { Write-Error 'Needs permission' -ErrorId 'CWC.Http403' }
+            Mock Invoke-CWCServiceMethod {}
+            $Reported = New-Object System.Collections.ArrayList
+            $Quiet = @{ WarningAction = 'SilentlyContinue'; ErrorAction = 'SilentlyContinue'; ErrorVariable = '+Reported' }
+            [PSCustomObject]@{ SessionID = [guid]::NewGuid(); Name = 'Ticket 1'; SessionType = 0 } |
+                Enter-CWCSession -UrlOnly @Quiet | Should -BeNullOrEmpty
+            $Reported[-1].FullyQualifiedErrorId | Should -Be 'CWC.Http403,Enter-CWCSession'
+            "$($Reported[-1])" | Should -Match 'JoinSession'
         }
     }
 }

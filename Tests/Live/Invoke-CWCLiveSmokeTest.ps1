@@ -5,6 +5,7 @@
 .DESCRIPTION
     Read-only by default. -AllowWrites adds actions on ONE test session you choose (a command, a note,
     a message, an optional toolbox item, a wake) and creates + deletes one throwaway Support session.
+    -CleanupOnly is the other exception: it deletes the notes earlier runs left on the test session.
 
     Records results (no secrets, no headers) to a JSON file. Run once on PS 7 and once on PS 5.1.
 

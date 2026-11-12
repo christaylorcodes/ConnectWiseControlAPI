@@ -1,14 +1,14 @@
 ---
 external help file: ConnectWiseControlAPI-help.xml
 Module Name: ConnectWiseControlAPI
-online version:
+online version: https://github.com/christaylorcodes/ConnectWiseControlAPI
 schema: 2.0.0
 ---
 
 # Get-CWCAuditInfo
 
 ## SYNOPSIS
-Shows current audit settings
+Shows the current audit settings.
 
 ## SYNTAX
 
@@ -17,16 +17,14 @@ Get-CWCAuditInfo [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Shows current audit settings
+Calls AuditService.GetAuditInfo.
 
 ## EXAMPLES
 
-### Example 1
-```powershell
-PS C:\> Get-CWCAuditInfo
+### EXAMPLE 1
 ```
-
-Displays the current audit settings
+Get-CWCAuditInfo
+```
 
 ## PARAMETERS
 
@@ -36,10 +34,12 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-### None
 ## OUTPUTS
 
-### System.Object
 ## NOTES
+Author: Chris Taylor
 
 ## RELATED LINKS
+
+[https://github.com/christaylorcodes/ConnectWiseControlAPI](https://github.com/christaylorcodes/ConnectWiseControlAPI)
+

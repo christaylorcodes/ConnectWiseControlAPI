@@ -8,8 +8,8 @@ SHORT DESCRIPTION
 LONG DESCRIPTION
     The module wraps the ScreenConnect web API: sessions, session groups,
     commands, notes, messages, users, the audit log and the Remote Workforce
-    extension. It runs on Windows PowerShell 5.1 and PowerShell 7. The server
-    must use https.
+    extension. It is tested on Windows PowerShell 5.1 and PowerShell 7. The
+    server must use https.
 
     ConnectWise renamed Control back to ScreenConnect. The module keeps the
     name ConnectWiseControlAPI and the CWC prefix on its commands.
